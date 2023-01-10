@@ -199,3 +199,5 @@ fabric.properties
 
 .DS_Store
 .vscode/
+
+p_scripts/*
