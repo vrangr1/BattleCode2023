@@ -131,6 +131,10 @@ public class Comms extends Utils{
         return i - 1;
     }
 
+    private static void updateHead(COMM_TYPE type, int newHead) throws GameActionException{
+        writeSHAFlagMessage(newHead, SHAFlag.ARRAY_HEAD, type.channelHeadArrayLocationIndex);
+    }
+
     /**
      * Gets the first empty channel it can find. If none found, gets the last used channel.
      * @param type Communication type: WELLS, COMBAT only
@@ -311,9 +315,10 @@ public class Comms extends Utils{
      * </pre>
      * @throws GameActionException
      * **/
-    public static int writeCommMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
+    public static int writeMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
         int channel = getWriteChannel(type);
         writeSHAFlagMessage(message, flag, channel);
+        updateHead(type, incrementHead(channel, type));
         return channel;
     }
 
@@ -328,9 +333,9 @@ public class Comms extends Utils{
      *When commType is COMBAT : ~200 at max
      * </pre>
      * **/
-    public static int writeCommMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
+    public static int writeMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
         int message = intFromMapLocation(loc);
-        return writeCommMessage(type, message, flag);
+        return writeMessage(type, message, flag);
     }
 
     /** Writes to the communication channel. This directly searches for a channel whose information holds less or <strong>EQUAL</strong> priority than the current message (priority decided by SHAFlag).
@@ -344,9 +349,10 @@ public class Comms extends Utils{
      *When commType is COMBAT : ~200 at max
      * </pre>
      * **/
-    public static int writeCommMessageOverrwriteLesserPriorityMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
+    public static int writeAndOverrwriteLesserPriorityMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
         int channel = getWriteChannelOfLesserPriority(type, flag);
         writeSHAFlagMessage(message, flag, channel);
+        updateHead(type, incrementHead(channel, type));
         return channel;
     }
 
@@ -362,9 +368,10 @@ public class Comms extends Utils{
      *When commType is COMBAT : ~200 at max
      * </pre>
      * **/
-    public static int writeCommMessageOverrwriteLesserPriorityMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
+    public static int writeAndOverrwriteLesserPriorityMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
         int channel = getWriteChannelOfLesserPriority(type, flag);
         writeSHAFlagMessage(loc, flag, channel);
+        updateHead(type, incrementHead(channel, type));
         return channel;
     }
 
@@ -379,9 +386,12 @@ public class Comms extends Utils{
      *When commType is COMBAT : ~200 at max
      * </pre>
      * **/
-    public static int writeCommMessageOverrwriteStrictlyLesserPriorityMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
+    public static int writeAndOverrwriteStrictlyLesserPriorityMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
         int channel = getWriteChannelOfStrictlyLesserPriority(type, flag);
-        if (channel != -1) writeSHAFlagMessage(message, flag, channel);
+        if (channel != -1){
+            writeSHAFlagMessage(message, flag, channel);
+            updateHead(type, incrementHead(channel, type));
+        }
         return channel;
     }
 
@@ -396,9 +406,12 @@ public class Comms extends Utils{
      *When commType is COMBAT : ~200 at max
      * </pre>
      * **/
-    public static int writeCommMessageOverrwriteStrictlyLesserPriorityMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
+    public static int writeAndOverrwriteStrictlyLesserPriorityMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
         int channel = getWriteChannelOfStrictlyLesserPriority(type, flag);
-        if (channel != -1) writeSHAFlagMessage(loc, flag, channel);
+        if (channel != -1){
+            writeSHAFlagMessage(loc, flag, channel);
+            updateHead(type, incrementHead(channel, type));
+        }
         return channel;
     }
 
