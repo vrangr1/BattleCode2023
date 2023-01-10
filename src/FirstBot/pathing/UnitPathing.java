@@ -1,4 +1,4 @@
-package FirstBot;
+package FirstBot.pathing;
 
 import battlecode.common.*;
 
