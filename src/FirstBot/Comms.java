@@ -145,7 +145,7 @@ public class Comms extends Utils{
                 return i;
             i = incrementHead(i, type);
         }while(i != type.channelHead);
-        return decrementHead(i, type);
+        return i;
     }
 
     /**
@@ -163,7 +163,7 @@ public class Comms extends Utils{
                 return i;
             i = incrementHead(i, type);
         }while(i != type.channelHead);
-        return decrementHead(i, type);
+        return i;
     }
 
     /**
@@ -236,8 +236,8 @@ public class Comms extends Utils{
         return SHAFlags[message & 0xF];
     }
 
-    public static SHAFlag readSHAFlagType(int sharedArrayIndex) throws GameActionException{
-        int message = rc.readSharedArray(sharedArrayIndex);
+    public static SHAFlag readSHAFlagType(int channelIndex) throws GameActionException{
+        int message = rc.readSharedArray(channelIndex);
         return readSHAFlagFromMessage(message);
     }
 
@@ -474,15 +474,13 @@ public class Comms extends Utils{
     public static MapLocation findLocationOfThisType(COMM_TYPE type, SHAFlag flag) throws GameActionException{
         type.channelHead = readMessageWithoutSHAFlag(type.channelHeadArrayLocationIndex);
         int i = type.channelHead;
-        
         do{
+            i = decrementHead(i, type);
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) == flag){
                 return readLocationFromMessage(message);
             }
-            i = incrementHead(i, type);
         }while(i != type.channelHead);
-        
         assert false;
         return null;
     }
@@ -493,13 +491,13 @@ public class Comms extends Utils{
         type.channelHead = readMessageWithoutSHAFlag(type.channelHeadArrayLocationIndex);
         int i = type.channelHead;
         do{
+            i = decrementHead(i, type);
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) == flag){
                 channel = i;
                 loc = readLocationFromMessage(message);
                 break;
             }
-            i = incrementHead(i, type);
         }while(i != type.channelHead);
         
         if (channel != -1) wipeChannel(channel);
@@ -579,21 +577,5 @@ public class Comms extends Utils{
         if (channel != -1)
             wipeChannel(channel);
         return nearestLoc;
-    }
-
-    /**
-     * Finds and returns the first message found in the communication channels that has the given SHAFlag.
-     * @param type : Search for the message in this type's channels (LEAD or COMBAT);
-     * @param flag : the SHAFlag that is being searched for in the comms channels.
-     * @return the first message (with the SHAFlag removed from it; message >> 4) found of the correct SHAFlag type or -1 if none found.
-     * @throws GameActionException
-     */
-    public static int findMessageOfThisType(COMM_TYPE type, SHAFlag flag) throws GameActionException{
-        for (int i = type.channelStart; i < type.channelStop; ++i){
-            int message = rc.readSharedArray(i);
-            if (readSHAFlagFromMessage(message) == flag)
-                return (message >> 4);
-        }
-        return -1;
     }
 }
