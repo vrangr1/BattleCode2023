@@ -16,11 +16,11 @@ public class Comms extends Utils{
     ////////////////////////////////////////
 
     private static final int SHAFLAG_BITLENGTH = 4;
-    private static final int MAXIMUM_HEADQUARTERS_CHANNELS = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 10;
+    private static final int ISLAND_CHANNELS_COUNT = 10;
     private static final int COMBAT_CHANNELS_COUNT = 32;
-    // ununsed channels count: 10 (in the case of max count of headquarters (i.e. 4))
+    // ununsed channels count: 0 (in the case of max count of headquarters (i.e. 4))
     private static final int TOTAL_CHANNELS_COUNT = COMMS_VARCOUNT; // 64
     private static int channelsUsed = 0;
     private static int commsHeadquarterCount = -1;
@@ -38,24 +38,23 @@ public class Comms extends Utils{
         // HEADQUARTERS' MESSAGES' TYPES
         HEADQUARTER_LOCATION,               // 0x1
         ENEMY_HEADQUARTER_LOCATION,         // 0x2
-        HEADQUARTER_MESSAGE,                // 0x3
+        HEADQUARTER_MESSAGE,//To be decided // 0x3
 
         // WELLS CHANNELS MESSAGES' TYPES
         ADAMANTIUM_WELL_LOCATION,           // 0x4
         MANA_WELL_LOCATION,                 // 0x5
         ELIXIR_WELL_LOCATION,               // 0x6
 
+        // ISLAND CHANNELS MESSAGES' TYPES
+        OCCUPIED_ISLAND,                    // 0x7
+        UNOCCUPIED_ISLAND,                  // 0x8
+
         // COMBAT CHANNELS MESSAGES' TYPES
-        COMBAT_LOCATION,                    // 0x7
-        ENEMY_ADAMANTIUM_WELL_LOCATION,     // 0x8
-        ENEMY_MANA_WELL_LOCATION,           // 0x9
-        ENEMY_ANCHOR_LOCATION,              // 0xA
-        ENEMY_ELIXIR_ANCHOR_LOCATION,       // 0xB
-        ENEMY_ELIXIR_WELL_LOCATION,         // 0xC
-        ANCHOR_DEFENSE_NEEDED,              // 0xD
+        COMBAT_LOCATION,                    // 0x9
+        ISLAND_DEFENSE_NEEDED,              // 0xA
 
         // COMMS UTILITY TYPE
-        ARRAY_HEAD;                         // 0xE
+        ARRAY_HEAD;                         // 0xB
         // Can go upto 0xF. If more needed, let me know. I can make do without a few types.
 
         public boolean higherPriority(SHAFlag flag){
@@ -76,7 +75,8 @@ public class Comms extends Utils{
     public static enum COMM_TYPE{
         WELLS,          // 0x1
         COMBAT,         // 0x2
-        HEADQUARTER;    // 0x3
+        ISLAND,         // 0x3
+        HEADQUARTER;    // 0x4
 
         public int channelStart, channelStop, channelHead, channelHeadArrayLocationIndex;
     }
@@ -98,7 +98,7 @@ public class Comms extends Utils{
     public static int getHeadquartersCount() throws GameActionException{
         if (commsHeadquarterCount != -1 && rc.getRoundNum() > 10) return commsHeadquarterCount;
         int count = 0;
-        for (int i = 0; i < channelsUsed; i += 3){
+        for (int i = 0; i < channelsUsed; i += CHANNELS_COUNT_PER_HEADQUARTER){
             if (readSHAFlagFromMessage(i) == SHAFlag.HEADQUARTER_LOCATION)
                 count++;
             else break;
@@ -126,6 +126,64 @@ public class Comms extends Utils{
         return Math.max(type.channelStart, (i + 1) % type.channelStop);
     }
 
+    private static int decrementHead(int i, COMM_TYPE type){
+        if (i - 1 < type.channelStart) return type.channelStop - 1;
+        return i - 1;
+    }
+
+    /**
+     * Gets the first empty channel it can find. If none found, gets the last used channel.
+     * @param type Communication type: WELLS, COMBAT only
+     * @returns channel index
+     * @throws GameActionException
+     */
+    private static int getWriteChannel(COMM_TYPE type) throws GameActionException{
+        type.channelHead = readMessageWithoutSHAFlag(type.channelHeadArrayLocationIndex);
+        int i = type.channelHead;
+        do{
+            if (readSHAFlagType(i) == SHAFlag.EMPTY_MESSAGE)
+                return i;
+            i = incrementHead(i, type);
+        }while(i != type.channelHead);
+        return decrementHead(i, type);
+    }
+
+    /**
+     * Gets the first channel of lesser or equal priority it can find. If none found, gets the oldest channel used irrespective of priority.
+     * @param type Communication type: WELLS, COMBAT only
+     * @param flag Message type: EMPTY_MESSAGE, HEADQUARTER_LOCATION...
+     * @returns channel index
+     * @throws GameActionException
+     */
+    private static int getWriteChannelOfLesserPriority(COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        type.channelHead = readMessageWithoutSHAFlag(type.channelHeadArrayLocationIndex);
+        int i = type.channelHead;
+        do{
+            if (readSHAFlagFromMessage(rc.readSharedArray(i)).lesserOrEqualPriority(flag))
+                return i;
+            i = incrementHead(i, type);
+        }while(i != type.channelHead);
+        return decrementHead(i, type);
+    }
+
+    /**
+     * Gets the first channel of <strong>STRICTLY</strong> lesser priority it can find. If none found, returns -1.
+     * @param type Communication type: WELLS, COMBAT only
+     * @param flag Message type: EMPTY_MESSAGE, HEADQUARTER_LOCATION...
+     * @returns channel index or -1
+     * @throws GameActionException
+     */
+    private static int getWriteChannelOfStrictlyLesserPriority(COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        type.channelHead = readMessageWithoutSHAFlag(type.channelHeadArrayLocationIndex);
+        int i = type.channelHead;
+        do{
+            if (readSHAFlagFromMessage(rc.readSharedArray(i)).lesserOrEqualPriority(flag))
+                return i;
+            i = incrementHead(i, type);
+        }while(i != type.channelHead);
+        return -1;
+    }
+
 
 
     ////////////////////////////////////////
@@ -151,9 +209,9 @@ public class Comms extends Utils{
     }
 
     private static void botCommsInit() throws GameActionException{
-        switch(rc.getType()){
-            case HEADQUARTERS: BotHeadquarters.initComms(); return;
-            default: break;
+        if (rc.getType() == RobotType.HEADQUARTERS){
+            BotHeadquarters.initComms();
+            return;
         }
         int headquarterCount = getHeadquartersCount();
         channelsUsed += headquarterCount * 3;
@@ -164,6 +222,7 @@ public class Comms extends Utils{
         commsHeadquarterCount = -1;
         botCommsInit();
         allocateChannels(COMM_TYPE.WELLS, WELLS_CHANNELS_COUNT);
+        allocateChannels(COMM_TYPE.ISLAND, ISLAND_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.COMBAT, COMBAT_CHANNELS_COUNT);
     }
 
@@ -196,16 +255,28 @@ public class Comms extends Utils{
     // WRITE METHODS ///////////////////////
     ////////////////////////////////////////
 
-    /** Writes 0 to the given channel.
-     * @BytecodeCost at least 75
+    /**
+     * Writes the coordinates of the given MapLocation to the given channel.
+     * @param loc : MapLocation that is to be hashed and written into the given channel
+     * @param flag : SHAFlag (i.e. message type) of the given message
+     * @param channel : channel index into which the message is to be written
+     * @throws GameActionException
+     * @BytecodeCost At least 75
      */
-    public static void writeSHAFlagMessage(MapLocation loc, SHAFlag flag, int channel) throws GameActionException{
+    private static void writeSHAFlagMessage(MapLocation loc, SHAFlag flag, int channel) throws GameActionException{
         int value = intFromMapLocation(loc);
         rc.writeSharedArray(channel, (value << SHAFLAG_BITLENGTH) | flag.ordinal());
     }
 
-    // Mostly for non-location type messages
-    public static void writeSHAFlagMessage(int message, SHAFlag flag, int channel) throws GameActionException{
+    /**
+     * Writes the given integer message into the given channel. Mostly for non location type messages
+     * @param message : integer message that is to be written into the given channel. Must be < 4095 and >= 0
+     * @param flag : SHAFlag (i.e. message type) of the given message
+     * @param channel : index into which the message is to be written
+     * @throws GameActionException
+     * @BytecodeCost : ~75
+     */
+    private static void writeSHAFlagMessage(int message, SHAFlag flag, int channel) throws GameActionException{
         rc.writeSharedArray(channel, (message << SHAFLAG_BITLENGTH) | flag.ordinal());
     }
 
@@ -226,6 +297,109 @@ public class Comms extends Utils{
             else if (flag == SHAFlag.ENEMY_HEADQUARTER_LOCATION) continue;
             else assert false : "logical error in writeEnemyHeadquarterLocation func";
         }
+    }
+
+    /** Writes to the communication channels (WELLS, ISLAND, OR COMBAT). This searches for an empty channel in which it can write the message. If it can't find any empty channel, it'll write to the oldest accessed shared channel.
+     * @param type : One of Comms.COMM_TYPE.LEAD or Comms.COMM_TYPE.ISLAND or Comms.COMM_TYPE.COMBAT depending on whose channels need to be written into.
+     * @param message : the int message that you want to write to the channel. In most cases it's going to be int form of a MapLocation. There's another overloaded function with the same name that accepts MapLocation as input.
+     * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
+     * @return the channel index to which the message was written
+     * @BytecodeCost<pre>
+     *      When COMM_TYPE is WELLS   : ~100 at max
+     *When COMM_TYPE is ISLAND : ~100 at max
+     *When COMM_TYPE is COMBAT : ~200 at max
+     * </pre>
+     * @throws GameActionException
+     * **/
+    public static int writeCommMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
+        int channel = getWriteChannel(type);
+        writeSHAFlagMessage(message, flag, channel);
+        return channel;
+    }
+
+    /** Writes to the communication channels (WELLS, ISLAND, OR COMBAT). This searches for an empty channel in which it can write the message. If it can't find any empty channel, it'll write to the oldest accessed shared channel.
+     * @param type : One of Comms.COMM_TYPE.LEAD or Comms.COMM_TYPE.ISLAND or Comms.COMM_TYPE.COMBAT depending on whose channels need to be written into.
+     * @param loc : the location that you want to write into a communication channel. If you want to send an int message there's another overloaded function with the same name that accepts int as input.
+     * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
+     * @return the channel index to which the message was written
+     * @BytecodeCost<pre>
+     *      When commType is LEAD   : ~100 at max
+     *When commType is ISLAND : ~200 at max
+     *When commType is COMBAT : ~200 at max
+     * </pre>
+     * **/
+    public static int writeCommMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
+        int message = intFromMapLocation(loc);
+        return writeCommMessage(type, message, flag);
+    }
+
+    /** Writes to the communication channel. This directly searches for a channel whose information holds less or <strong>EQUAL</strong> priority than the current message (priority decided by SHAFlag).
+     * @param type : One of Comms.COMM_TYPE.LEAD or Comms.COMM_TYPE.ISLAND or Comms.COMM_TYPE.COMBAT depending on whose channels need to be written into.
+     * @param message : the int message that you want to write to the channel. In most cases it's going to be int form of a MapLocation. There's another overloaded function with the same name that accepts MapLocation as input.
+     * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
+     * @return the channel index to which the message was written
+     * @BytecodeCost<pre>
+     *      When commType is LEAD   : ~100 at max
+     *When commType is ISLAND : ~200 at max
+     *When commType is COMBAT : ~200 at max
+     * </pre>
+     * **/
+    public static int writeCommMessageOverrwriteLesserPriorityMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
+        int channel = getWriteChannelOfLesserPriority(type, flag);
+        writeSHAFlagMessage(message, flag, channel);
+        return channel;
+    }
+
+
+    /** Writes to the communication channel. This directly searches for a channel whose information holds less or <strong>EQUAL</strong> priority than the current message (priority decided by SHAFlag).
+     * @param type : One of Comms.COMM_TYPE.LEAD or Comms.COMM_TYPE.ISLAND or Comms.COMM_TYPE.COMBAT depending on whose channels need to be written into.
+     * @param loc : the location that you want to write into a communication channel. If you want to send an int message there's another overloaded function with the same name that accepts int as input.
+     * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
+     * @return the channel index to which the message was written
+     * @BytecodeCost<pre>
+     *      When commType is LEAD   : ~100 at max
+     *When commType is ISLAND : ~200 at max
+     *When commType is COMBAT : ~200 at max
+     * </pre>
+     * **/
+    public static int writeCommMessageOverrwriteLesserPriorityMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
+        int channel = getWriteChannelOfLesserPriority(type, flag);
+        writeSHAFlagMessage(loc, flag, channel);
+        return channel;
+    }
+
+    /** Writes to the communication channel. This directly searches for a channel whose information holds <strong>STRICTLY</strong> less priority than the current message (priority decided by SHAFlag). If none are found, returns -1.
+     * @param type : One of Comms.COMM_TYPE.LEAD or Comms.COMM_TYPE.ISLAND or Comms.COMM_TYPE.COMBAT depending on whose channels need to be written into.
+     * @param message : the int message that you want to write to the channel. In most cases it's going to be int form of a MapLocation. There's another overloaded function with the same name that accepts MapLocation as input.
+     * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
+     * @return the channel index to which the message was written. If no channels of strictly lesser priority can be found. Returns -1.
+     * @BytecodeCost<pre>
+     *      When commType is LEAD   : ~100 at max
+     *When commType is ISLAND : ~200 at max
+     *When commType is COMBAT : ~200 at max
+     * </pre>
+     * **/
+    public static int writeCommMessageOverrwriteStrictlyLesserPriorityMessage(COMM_TYPE type, int message, SHAFlag flag) throws GameActionException{
+        int channel = getWriteChannelOfStrictlyLesserPriority(type, flag);
+        if (channel != -1) writeSHAFlagMessage(message, flag, channel);
+        return channel;
+    }
+
+    /** Writes to the communication channel. This directly searches for a channel whose information holds <strong>STRICTLY</strong> less priority than the current message (priority decided by SHAFlag). If none are found, returns -1.
+     * @param type : One of Comms.COMM_TYPE.LEAD or Comms.COMM_TYPE.ISLAND or Comms.COMM_TYPE.COMBAT depending on whose channels need to be written into.
+     * @param loc : the location that you want to write into a communication channel. If you want to send an int message there's another overloaded function with the same name that accepts int as input.
+     * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
+     * @return the channel index to which the message was written. If no channels of strictly lesser priority can be found. Returns -1.
+     * @BytecodeCost<pre>
+     *      When commType is LEAD   : ~100 at max
+     *When commType is ISLAND : ~200 at max
+     *When commType is COMBAT : ~200 at max
+     * </pre>
+     * **/
+    public static int writeCommMessageOverrwriteStrictlyLesserPriorityMessage(COMM_TYPE type, MapLocation loc, SHAFlag flag) throws GameActionException{
+        int channel = getWriteChannelOfStrictlyLesserPriority(type, flag);
+        if (channel != -1) writeSHAFlagMessage(loc, flag, channel);
+        return channel;
     }
 
 
@@ -250,11 +424,45 @@ public class Comms extends Utils{
             wipeChannel(i);
     }
 
+    /**
+     * Wipe channnels of a particular type
+     * @param type COMM_TYPE: WELLS, ISLAND, OR COMBAT
+     * @throws GameActionException
+     */
+    public static void wipeChannelsCOMMTYPE(COMM_TYPE type) throws GameActionException{
+        for (int i = type.channelStart; i < type.channelStop; ++i)
+            wipeChannel(i);
+        type.channelHead = type.channelStart;
+        writeSHAFlagMessage(type.channelHead, SHAFlag.ARRAY_HEAD, type.channelHeadArrayLocationIndex);
+    }
+
 
 
     ////////////////////////////////////////
     // FIND METHODS ////////////////////////
     ////////////////////////////////////////
+
+    MapLocation[] getEnemyHeadquartersLocationsList() throws GameActionException{
+        int headquarterCount = getHeadquartersCount(), count = 0;
+        MapLocation[] locations = new MapLocation[headquarterCount];
+        for (int i = COMM_TYPE.HEADQUARTER.channelStart + 1; i < COMM_TYPE.HEADQUARTER.channelStop; i += CHANNELS_COUNT_PER_HEADQUARTER){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) == SHAFlag.ENEMY_HEADQUARTER_LOCATION)
+                locations[count++] = readLocationFromMessage(message);
+        }
+        if (count != headquarterCount){
+            MapLocation[] newLocs = new MapLocation[count];
+            switch(count){
+                case 4: newLocs[3] = locations[3];
+                case 3: newLocs[2] = locations[2];
+                case 2: newLocs[1] = locations[1];
+                case 1: newLocs[0] = locations[0]; break;
+                case 0: newLocs = null;
+            }
+            return newLocs;
+        }
+        return locations;
+    }
 
     /**
      * Finds and returns the location from the first message found in the communication channels that has the given SHAFlag.
@@ -296,5 +504,96 @@ public class Comms extends Utils{
         
         if (channel != -1) wipeChannel(channel);
         return loc;
+    }
+
+    /**
+     * Finds and returns the nearest location (to the reference location) that has the given SHAFlag from the communication channels.
+     * @param loc  : The reference location.
+     * @param type : Search for the message in this type's channels (WELLS or ISLAND or COMBAT);
+     * @param flag : the SHAFlag that is being searched for in the comms channels.
+     * @return the first MapLocation found of the correct SHAFlag type or null if none found.
+     * @throws GameActionException
+     */
+    public static MapLocation findNearestLocationOfThisType(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        MapLocation nearestLoc = null;
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) != flag) continue;
+            MapLocation newLoc = readLocationFromMessage(message);
+            if (nearestLoc == null || loc.distanceSquaredTo(nearestLoc) > loc.distanceSquaredTo(newLoc)) nearestLoc = newLoc;
+        }
+        return nearestLoc;
+    }
+
+    public static MapLocation findNearestLocationOfThisTypeOutOfVision(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        MapLocation nearestLoc = null;
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) != flag) continue;
+            MapLocation newLoc = readLocationFromMessage(message);
+            // We don't want locations in vision
+            if (!rc.canSenseLocation(newLoc) && (nearestLoc == null || loc.distanceSquaredTo(nearestLoc) > loc.distanceSquaredTo(newLoc))) 
+                nearestLoc = newLoc;
+        }
+        return nearestLoc;
+    }
+
+
+    public static MapLocation findNearestLocationOfThisTypeOutOfVisionAndWipeChannel(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        MapLocation nearestLoc = null;
+        int channel = -1;
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) != flag) continue;
+            MapLocation newLoc = readLocationFromMessage(message);
+            // We don't want locations in vision
+            if (!rc.canSenseLocation(newLoc) && (nearestLoc == null || loc.distanceSquaredTo(nearestLoc) > loc.distanceSquaredTo(newLoc))){
+                nearestLoc = newLoc;
+                channel = i;
+            }
+        }
+        if (channel != -1) wipeChannel(channel);
+        return nearestLoc;
+    }
+
+    /**
+     * Finds and returns the nearest location (to the reference location) that has the given SHAFlag from the communication channels and wipes the channel after reading.
+     * @param loc  : The reference location.
+     * @param type : Search for the message in this type's channels (WELLS or ISLAND or COMBAT);
+     * @param flag : the SHAFlag that is being searched for in the comms channels.
+     * @return the first MapLocation found of the correct SHAFlag type or null if none found.
+     * @throws GameActionException
+     */
+    public static MapLocation findNearestLocationOfThisTypeAndWipeChannel(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        MapLocation nearestLoc = null;
+        int channel = -1;
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) != flag) continue;
+            MapLocation newLoc = readLocationFromMessage(message);
+            if (nearestLoc == null || loc.distanceSquaredTo(nearestLoc) > loc.distanceSquaredTo(newLoc)){ 
+                nearestLoc = newLoc;
+                channel = i;
+            }
+        }
+        if (channel != -1)
+            wipeChannel(channel);
+        return nearestLoc;
+    }
+
+    /**
+     * Finds and returns the first message found in the communication channels that has the given SHAFlag.
+     * @param type : Search for the message in this type's channels (LEAD or COMBAT);
+     * @param flag : the SHAFlag that is being searched for in the comms channels.
+     * @return the first message (with the SHAFlag removed from it; message >> 4) found of the correct SHAFlag type or -1 if none found.
+     * @throws GameActionException
+     */
+    public static int findMessageOfThisType(COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) == flag)
+                return (message >> 4);
+        }
+        return -1;
     }
 }
