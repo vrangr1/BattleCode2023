@@ -33,7 +33,7 @@ public strictfp class RobotPlayer {
         // You can also use indicators to save debug notes in replays.
         rc.setIndicatorString("Hello world!");
         
-        Constants.initConstants(rc);
+        Utils.initUtils(rc);
         try{
             switch(rc.getType()){
                 case HEADQUARTERS: BotHeadquarters.initHeadquarters(); break;

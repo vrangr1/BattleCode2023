@@ -2,7 +2,7 @@ package FirstBot;
 
 import battlecode.common.*;
 
-public class BotBooster {
+public class BotBooster extends Utils{
     public static void initBooster() throws GameActionException{
 
     }

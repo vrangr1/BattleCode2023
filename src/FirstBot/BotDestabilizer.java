@@ -2,7 +2,7 @@ package FirstBot;
 
 import battlecode.common.*;
 
-public class BotDestabilizer {
+public class BotDestabilizer extends Utils{
     public static void initDestabilizer() throws GameActionException{
 
     }

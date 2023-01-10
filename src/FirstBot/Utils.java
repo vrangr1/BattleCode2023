@@ -1,26 +1,14 @@
 package FirstBot;
 
 import battlecode.common.*;
-
-import java.util.Random; // TODO: Remove this. Or check bytecode cost of methods.
+import FirstBot.path.*;
 
 public class Utils extends Constants{
-    /**
-     * A random number generator.
-     * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
-     * import at the top of this file. Here, we *seed* the RNG with a constant number (6147); this makes sure
-     * we get the same sequence of numbers every time this code is run. This is very useful for debugging!
-     */
-    static final Random rng = new Random(6147);
+    public static RobotController rc;
+    public static Pathing pathing;
 
-    public static final Direction[] directions = {
-        Direction.NORTH,
-        Direction.NORTHEAST,
-        Direction.EAST,
-        Direction.SOUTHEAST,
-        Direction.SOUTH,
-        Direction.SOUTHWEST,
-        Direction.WEST,
-        Direction.NORTHWEST,
-    };
+    public static void initUtils(RobotController rc1) throws GameActionException{
+        rc = rc1;
+        pathing = new Pathing();
+    }
 }
