@@ -23,4 +23,5 @@ public class Constants {
      */
     static final Random rng = new Random(6147);
 
+    public static final int COMMS_VARCOUNT = GameConstants.SHARED_ARRAY_LENGTH;
 }
