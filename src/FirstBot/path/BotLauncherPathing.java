@@ -292,7 +292,7 @@ public class BotLauncherPathing implements UnitPathing {
     }
 
     public int locationScore(MapLocation loc) throws GameActionException {
-        if (rc.sensePassability(loc)) 
+        if (rc.canSenseLocation(loc) && rc.sensePassability(loc)) 
             return 0;
         else
             return 10000;

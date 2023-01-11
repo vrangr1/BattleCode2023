@@ -55,9 +55,18 @@ public class Pathing extends Utils {
         }
     }
 
+    public void setAndMoveToDestination(MapLocation dest) throws GameActionException{
+        setNewDestination(dest);
+        moveToDestination();
+    }
+
     // Computer next direction to move to
     public void pathTo(MapLocation target) throws GameActionException {
         if (!rc.isMovementReady()) return;
+
+        if (getMapInfo(rc.getLocation()).hasCloud()){
+            fuzzyMovesLeft += 1;
+        }
 
         if (fuzzyMovesLeft > 0) {
             fuzzyMove(target);
