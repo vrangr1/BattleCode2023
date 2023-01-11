@@ -179,7 +179,8 @@ public class Comms extends Utils{
         channelsUsed += channelCount;
         type.channelHead = type.channelStart;
         type.channelHeadArrayLocationIndex = type.channelStop;
-        writeSHAFlagMessage(type.channelHead, SHAFlag.ARRAY_HEAD, type.channelHeadArrayLocationIndex);
+        if (rc.canWriteSharedArray(type.channelHeadArrayLocationIndex, type.channelHead))
+            writeSHAFlagMessage(type.channelHead, SHAFlag.ARRAY_HEAD, type.channelHeadArrayLocationIndex);
     }
 
     public static void writeHeadquarterLocation(MapLocation headquarterLoc) throws GameActionException{
@@ -189,10 +190,13 @@ public class Comms extends Utils{
             SHAFlag flag = readSHAFlagType(i);
             if (flag == SHAFlag.EMPTY_MESSAGE){
                 writeSHAFlagMessage(headquarterLoc, SHAFlag.HEADQUARTER_LOCATION, i);
+                commsHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
                 break;
             }
-            else if (flag == SHAFlag.HEADQUARTER_LOCATION) continue;
-            
+            else if (flag == SHAFlag.HEADQUARTER_LOCATION){
+                commsHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
+                continue;
+            }
             assert false;
         }
     }
@@ -480,7 +484,7 @@ public class Comms extends Utils{
         if (commsHeadquarterCount != -1 && rc.getRoundNum() > 1) return commsHeadquarterCount;
         MapLocation[] tempLocs = new MapLocation[GameConstants.MAX_STARTING_HEADQUARTERS];
         int count = 0;
-        for (int i = 0; i < channelsUsed; i += CHANNELS_COUNT_PER_HEADQUARTER){
+        for (int i = 0; i < MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) == SHAFlag.HEADQUARTER_LOCATION){
                 count++;
@@ -490,11 +494,12 @@ public class Comms extends Utils{
             else break;
         }
         if ((count <= 0 && rc.getRoundNum() > 1) || count > 4)
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "headquarter count can't be this.");
+            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "headquarter count can't be this. count: " + Integer.toString(count));
         commsHeadquarterCount = count;
         COMM_TYPE.HEADQUARTER.channelStart = 0;
         COMM_TYPE.HEADQUARTER.channelStop = count * CHANNELS_COUNT_PER_HEADQUARTER - 1;
         if (commsHeadquarterLocations == null){
+            commsHeadquarterLocations = new MapLocation[commsHeadquarterCount];
             switch(count){
                 case 4: commsHeadquarterLocations[3] = tempLocs[3];
                 case 3: commsHeadquarterLocations[2] = tempLocs[2];
