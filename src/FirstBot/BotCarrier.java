@@ -7,9 +7,28 @@ import java.util.Set;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class BotCarrier extends Utils{
+public class BotCarrier extends Explore{
     public static void initCarrier() throws GameActionException{
 
+    }
+
+    public static void getExploreDir() throws GameActionException{
+        Direction away = directionAwayFromAllRobots();
+        if (away != null){
+            assignExplore3Dir(away);
+            return;
+        }
+        MapLocation closestHQ = Comms.findNearestHeadquarter();
+        if (rc.canSenseLocation(closestHQ)) 
+            assignExplore3Dir(closestHQ.directionTo(rc.getLocation()));
+        else
+            assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
+    }
+
+    public static MapLocation explore() throws GameActionException{
+        if (exploreDir == CENTER)
+            getExploreDir();
+        return getExplore3Target();
     }
 
     public static void runCarrier() throws GameActionException{

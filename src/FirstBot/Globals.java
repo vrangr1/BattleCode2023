@@ -17,6 +17,16 @@ public class Globals {
         Direction.WEST,
         Direction.NORTHWEST,
     };
+    public static final Direction NORTH = Direction.NORTH;
+    public static final Direction NORTHEAST = Direction.NORTHEAST;
+    public static final Direction EAST = Direction.EAST;
+    public static final Direction SOUTHEAST = Direction.SOUTHEAST;
+    public static final Direction SOUTH = Direction.SOUTH;
+    public static final Direction SOUTHWEST = Direction.SOUTHWEST;
+    public static final Direction WEST = Direction.WEST;
+    public static final Direction NORTHWEST = Direction.NORTHWEST;
+    public static final Direction CENTER = Direction.CENTER;
+    
     /**
      * A random number generator.
      * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
@@ -30,6 +40,9 @@ public class Globals {
     public static RobotController rc;
     public static Pathing pathing;
     public static int MAX_WELLS_COUNT; // 144 in the worst possible case (60 x 60 map size and full 4% of map is wells)
+    public static Direction exploreDir = CENTER;
+    public static MapLocation explore3Target;
+    public static MapLocation[] headquartersLocations;
 
     public static int turnCount;
     public static int BIRTH_ROUND;
@@ -98,7 +111,7 @@ public class Globals {
         // TODO: Get parent headquarter location
     }
 
-    public static void updateGlobals(){
+    public static void updateGlobals() throws GameActionException{
         currentLocation = rc.getLocation();
         MAX_HEALTH = UNIT_TYPE.getMaxHealth();
         int curRound = rc.getRoundNum();
@@ -113,6 +126,6 @@ public class Globals {
         if (curHealth < myHealth) underAttack = true;
         else underAttack = false;
         myHealth = curHealth;
+        Comms.initCommunicationsArray();
     }
-
 }

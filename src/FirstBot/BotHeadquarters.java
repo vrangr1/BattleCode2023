@@ -7,16 +7,6 @@ public class BotHeadquarters extends Utils{
 
     }
 
-    // Don't invoke in initHeadquarters()
-    public static void initComms() throws GameActionException{
-        if (rc.getRoundNum() > 4)
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "how is round num < 4 here");
-        int headquarterCount = Comms.getHeadquartersCount();
-        if (rc.getRoundNum() != headquarterCount + 1 || headquarterCount != Comms.getNumChannelsUsed()/3)
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "unexpected behavior");
-        Comms.allocateHeadquartersChannels(Comms.CHANNELS_COUNT_PER_HEADQUARTER, rc.getLocation());
-    }
-
     public static void runHeadquarters() throws GameActionException{
         // Pick a direction to build in.
         Direction dir = directions[rng.nextInt(directions.length)];
