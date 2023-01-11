@@ -264,7 +264,7 @@ public class BotLauncher extends CombatUtils{
             if (closestHostile == null) return false;
 			if (!standOff) currentDestination = closestHostile.location;
             if (closestHostile != null)
-                if (!standOff)
+                if (!standOff && rc.canWriteSharedArray(0, 0))
 				    Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
             return true;
         }
