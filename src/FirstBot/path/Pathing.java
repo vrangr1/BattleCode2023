@@ -5,7 +5,7 @@ import FirstBot.Utils;
 
 public class Pathing extends Utils {
     UnitPathing up;
-    MapLocation destination;
+    MapLocation destination = null;
 
     int[] tracker = new int[113];
 
