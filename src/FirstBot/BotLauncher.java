@@ -8,7 +8,6 @@ public class BotLauncher extends CombatUtils{
     private static RobotInfo[] inRangeEnemies;
     private static MapLocation finalDestination = null; 
     private static boolean standOff = false;
-    private static MapLocation closestHealingArchon = null;
 
     public static void initLauncher() throws GameActionException{
         findNewCombatLocation();

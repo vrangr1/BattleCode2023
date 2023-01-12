@@ -80,6 +80,25 @@ public class Globals {
     public static boolean isMapSquare = true;
     public static MapLocation CENTER_OF_THE_MAP;
 
+    public static final Direction droidVisionDirs[] = new Direction[]{
+        Direction.NORTHWEST, Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, 
+        Direction.NORTH, Direction.NORTH, Direction.NORTHEAST, Direction.NORTHEAST, 
+        Direction.EAST, Direction.EAST, Direction.EAST, Direction.EAST, 
+        Direction.SOUTHEAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTH, 
+        Direction.SOUTH, Direction.SOUTH, Direction.SOUTHWEST, Direction.SOUTHWEST, 
+        Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTHWEST, 
+        Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, Direction.NORTH, 
+        Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.EAST, 
+        Direction.EAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, 
+        Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTHWEST, 
+        Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTHWEST, 
+        Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, 
+        Direction.EAST, Direction.EAST, Direction.EAST, Direction.EAST, 
+        Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, 
+        Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTH, 
+        Direction.NORTH, Direction.NORTH, Direction.EAST, Direction.EAST,
+        Direction.SOUTH, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.CENTER};
+
     public static void initGlobals(RobotController rc1) throws GameActionException{
         rc = rc1;
         pathing = new Pathing();

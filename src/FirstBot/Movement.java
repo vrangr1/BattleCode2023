@@ -160,50 +160,50 @@ public class Movement extends Utils{
     }
 
     
-    // public static MapLocation moveToLattice(int minLatticeDist, int weights){
-    //     try { 
-    //         MapLocation lCurrentLocation = rc.getLocation();
-    //         MapLocation lArchonLocation = Util.getClosestArchonLocation();
-    //         MapLocation bestLoc = null;
-    //         MapLocation myLoc = rc.getLocation();
+    public static MapLocation moveToLattice(int minLatticeDist, int weights){
+        try { 
+            MapLocation lCurrentLocation = rc.getLocation();
+            MapLocation lArchonLocation = Comms.findNearestHeadquarter();
+            MapLocation bestLoc = null;
+            MapLocation myLoc = rc.getLocation();
 
-    //         int bestDist = 0;
-    //         // int byteCodeSaver=0;
-    //         if (lArchonLocation == null) return null;
-    //         int congruence = (lArchonLocation.x + lArchonLocation.y + 1) % 2;
+            int bestDist = 0;
+            // int byteCodeSaver=0;
+            if (lArchonLocation == null) return null;
+            int congruence = (lArchonLocation.x + lArchonLocation.y + 1) % 2;
 
-    //         if ((myLoc.x + myLoc.y)%2 == congruence && myLoc.distanceSquaredTo(lArchonLocation) >= minLatticeDist + weights){
-    //             bestDist = myLoc.distanceSquaredTo(lArchonLocation);
-    //             bestLoc = myLoc;
-    //             // return bestLoc;
-    //         }
+            if ((myLoc.x + myLoc.y)%2 == congruence && myLoc.distanceSquaredTo(lArchonLocation) >= minLatticeDist + weights){
+                bestDist = myLoc.distanceSquaredTo(lArchonLocation);
+                bestLoc = myLoc;
+                // return bestLoc;
+            }
 
-    //         for (int i = droidVisionDirs.length; i-- > 0; ) { //TODO: Add a bytecode check
-    //             if (Clock.getBytecodesLeft() < 2000) return bestLoc;
-    //             lCurrentLocation = lCurrentLocation.add(droidVisionDirs[i]);
-    //             if ((lCurrentLocation.x + lCurrentLocation.y) % 2 != congruence) continue;
-    //             if (!rc.canSenseLocation(lCurrentLocation)) continue;
-    //             if (!rc.onTheMap(lCurrentLocation)) continue;
-    //             if (rc.canSenseRobotAtLocation(lCurrentLocation)) continue;
-    //             if (UNIT_TYPE == RobotType.MINER && rc.senseLead(lCurrentLocation) == 0) continue;
+            for (int i = droidVisionDirs.length; i-- > 0; ) { //TODO: Add a bytecode check
+                if (Clock.getBytecodesLeft() < 2000) return bestLoc;
+                lCurrentLocation = lCurrentLocation.add(droidVisionDirs[i]);
+                if ((lCurrentLocation.x + lCurrentLocation.y) % 2 != congruence) continue;
+                if (!rc.canSenseLocation(lCurrentLocation)) continue;
+                if (!rc.onTheMap(lCurrentLocation)) continue;
+                if (rc.canSenseRobotAtLocation(lCurrentLocation)) continue;
+                if (UNIT_TYPE == RobotType.CARRIER && rc.senseWell(lCurrentLocation) == null) continue;
 
-    //             int estimatedDistance = lCurrentLocation.distanceSquaredTo(lArchonLocation);
+                int estimatedDistance = lCurrentLocation.distanceSquaredTo(lArchonLocation);
 
-    //             if (estimatedDistance < minLatticeDist + weights) continue;
+                if (estimatedDistance < minLatticeDist + weights) continue;
 
-    //             if (bestLoc == null  || estimatedDistance < bestDist){
-    //                 bestLoc = lCurrentLocation;
-    //                 bestDist = estimatedDistance;
-    //             }
-    //         }
-    //         if (bestLoc != null){
-    //             return bestLoc;
-    //         }
-    //     } catch (Exception e){
-    //         e.printStackTrace();
-    //     }
-    //     return null;
-    // }
+                if (bestLoc == null  || estimatedDistance < bestDist){
+                    bestLoc = lCurrentLocation;
+                    bestDist = estimatedDistance;
+                }
+            }
+            if (bestLoc != null){
+                return bestLoc;
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
     
     public static boolean retreatIfNecessary(RobotInfo[] visibleFriends, RobotInfo[] visibleHostiles) throws GameActionException {
         if (visibleHostiles.length == 0 //|| visibleFriends.length >= visibleHostiles.length
