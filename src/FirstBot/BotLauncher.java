@@ -6,13 +6,11 @@ public class BotLauncher extends CombatUtils{
 
     private static RobotInfo[] visibleEnemies;
     private static RobotInfo[] inRangeEnemies;
-    private static boolean inHealingState;
     private static MapLocation finalDestination = null; 
     private static boolean standOff = false;
     private static MapLocation closestHealingArchon = null;
 
     public static void initLauncher() throws GameActionException{
-        inHealingState = false;
         findNewCombatLocation();
         if (currentDestination == null) currentDestination = CENTER_OF_THE_MAP;
     }
@@ -251,9 +249,9 @@ public class BotLauncher extends CombatUtils{
             // Most important function
             if (inRangeEnemies.length > 0 && tryToBackUpToMaintainMaxRangeSoldier(visibleEnemies)) return true; // Cant attack, try to move out
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
-            if (!inHealingState && tryMoveToHelpAlly(closestHostile)) return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
-            if (!inHealingState && tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) return true;
-            if (!inHealingState && tryMoveToAttackProductionUnit(closestHostile)) return true;
+            if (tryMoveToHelpAlly(closestHostile)) return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
+            if (tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) return true;
+            if (tryMoveToAttackProductionUnit(closestHostile)) return true;
         }
         return false;
     }

@@ -260,22 +260,22 @@ public class Movement extends Utils{
     /**
      * Moves away from closest archon when passed null.
      */
-    // public static boolean moveAwayFromLocation(MapLocation loc){
-    //     try{
-    //         if (loc == null) loc = getClosestArchonLocation();
-    //         if (loc == null) return false;
-    //         Direction dir = loc.directionTo(rc.getLocation());
-    //         MapLocation ret = rc.getLocation();
-    //         ret = ret.translate(dir.dx, dir.dy);
-    //         ret = ret.translate(dir.dx, dir.dy);
-    //         ret = ret.translate(dir.dx, dir.dy);
-    //         ret = ret.translate(dir.dx, dir.dy);
-    //         ret = ret.translate(dir.dx, dir.dy);
-    //         return goToDirect(ret);
-    //     } catch (Exception e){
-    //         e.printStackTrace();
-    //     }
-    //     return false;
-    // }
+    public static boolean moveAwayFromLocation(MapLocation loc){
+        try{
+            if (loc == null) loc = Comms.findNearestHeadquarter();
+            if (loc == null) return false;
+            Direction dir = loc.directionTo(rc.getLocation());
+            MapLocation ret = rc.getLocation();
+            ret = ret.translate(dir.dx, dir.dy);
+            ret = ret.translate(dir.dx, dir.dy);
+            ret = ret.translate(dir.dx, dir.dy);
+            ret = ret.translate(dir.dx, dir.dy);
+            ret = ret.translate(dir.dx, dir.dy);
+            return goToDirect(ret);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }

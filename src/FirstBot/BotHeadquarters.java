@@ -3,31 +3,37 @@ package FirstBot;
 import battlecode.common.*;
 
 public class BotHeadquarters extends Utils{
+    private static int unitNumber = 0;
+
     public static void initHeadquarters() throws GameActionException{
 
     }
 
     public static void runHeadquarters() throws GameActionException{
-        // Pick a direction to build in.
+        if (rc.getRoundNum() == 2){
+            Comms.initCommunicationsArray();
+        }
+
         Direction dir = directions[rng.nextInt(directions.length)];
         MapLocation newLoc = rc.getLocation().add(dir);
-        if (rc.canBuildAnchor(Anchor.STANDARD)) {
-            // If we can build an anchor do it!
-            rc.buildAnchor(Anchor.STANDARD);
-            rc.setIndicatorString("Building anchor! " + rc.getAnchor());
-        }
-        if (rng.nextBoolean()) {
-            // Let's try to build a carrier.
+
+        if (unitNumber % 2 == 0 && unitNumber % 5 == 0){
+            rc.setIndicatorString("Trying to build a amplifier");
+            tryToBuild(RobotType.AMPLIFIER, newLoc);
+        } else if (unitNumber % 2 == 0){
             rc.setIndicatorString("Trying to build a carrier");
-            if (rc.canBuildRobot(RobotType.CARRIER, newLoc)) {
-                rc.buildRobot(RobotType.CARRIER, newLoc);
-            }
+            tryToBuild(RobotType.CARRIER, newLoc);
         } else {
-            // Let's try to build a launcher.
             rc.setIndicatorString("Trying to build a launcher");
-            if (rc.canBuildRobot(RobotType.LAUNCHER, newLoc)) {
-                rc.buildRobot(RobotType.LAUNCHER, newLoc);
-            }
+            tryToBuild(RobotType.LAUNCHER, newLoc);
+        }
+        
+    }
+
+    private static void tryToBuild(RobotType robotType, MapLocation loc) throws GameActionException{
+        if (rc.canBuildRobot(robotType, loc)){
+            rc.buildRobot(robotType, loc);
+            unitNumber++;
         }
     }
 }

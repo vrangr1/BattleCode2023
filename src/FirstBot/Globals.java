@@ -107,7 +107,7 @@ public class Globals {
         myHealth = rc.getHealth();
         underAttack = false;
         CENTER_OF_THE_MAP = new MapLocation(MAP_WIDTH/2, MAP_HEIGHT/2);
-
+        Comms.initCommunicationsArray();
         // TODO: Get parent headquarter location
     }
 
@@ -126,6 +126,5 @@ public class Globals {
         if (curHealth < myHealth) underAttack = true;
         else underAttack = false;
         myHealth = curHealth;
-        Comms.initCommunicationsArray();
     }
 }
