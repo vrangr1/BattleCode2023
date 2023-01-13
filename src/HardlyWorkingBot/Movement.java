@@ -6,6 +6,7 @@ public class Movement extends Utils{
     
     public static boolean tryMoveInDirection(MapLocation dest) throws GameActionException {
         try{
+            if (dest == null) return false;
             if(!rc.isMovementReady()) return false;
             MapLocation lCR = rc.getLocation();
             if (lCR.equals(dest)) return false;

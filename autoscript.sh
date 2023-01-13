@@ -1,7 +1,7 @@
 #!/bin/bash
 start_time=$SECONDS
-team1=FirstBot
-team2=examplefuncsplayer
+team1=OFirstBot
+team2=HardlyWorkingBot
 
 mkdir -p logs
 if test -f "logs/results.log"; then
@@ -64,7 +64,7 @@ grep -E "Birth |vs. " logs/log1.log >> logs/freezing.log
 echo -e "===========\n" >> logs/results.log
 grep -E "Birth |vs. " logs/log2.log >> logs/freezing.log 
 elapsed=$(( SECONDS - start_time ))
-eval "echo Elapsed time: $(date -u "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
+eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
 #1: maptestsmall  : 20 x 20 : 400
 #2: SmallElements : 20 x 20 : 400
 #3: AllElements   : 30 x 30 : 900

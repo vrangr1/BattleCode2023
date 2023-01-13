@@ -1,5 +1,6 @@
 package HardlyWorkingBot;
 
+import HardlyWorkingBot.Comms.COMM_TYPE;
 import battlecode.common.*;
 
 public class BotLauncher extends CombatUtils{
@@ -10,6 +11,7 @@ public class BotLauncher extends CombatUtils{
         MARCHING, // Going to a location given by comms
         PURSUING,
         ENGAGING,
+        FLANKING,
         GUARDING,
         RETREATING,
         HIDING, // In the clouds
@@ -20,7 +22,8 @@ public class BotLauncher extends CombatUtils{
 
     private static RobotInfo[] visibleEnemies;
     private static RobotInfo[] inRangeEnemies;
-    private static MapLocation finalDestination = null; 
+    private static int vNonHQEnemies = 0;
+    private static int inRNonHQEnemies = 0;
     private static boolean standOff = false;
 
     public static void initLauncher() throws GameActionException{
@@ -64,27 +67,40 @@ public class BotLauncher extends CombatUtils{
     private static void updateVision() throws GameActionException {
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
         inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
+        vNonHQEnemies = 0;
+        inRNonHQEnemies = 0;
+        for (int i = visibleEnemies.length; --i >= 0;) {
+            if (visibleEnemies[i].type != RobotType.HEADQUARTERS) {
+                vNonHQEnemies++;
+            }
+        }
+        for (int i = inRangeEnemies.length; --i >= 0;) {
+            if (inRangeEnemies[i].type != RobotType.HEADQUARTERS) {
+                inRNonHQEnemies++;
+            }
+        }
     }
 
     private static double getEnemyScore(RobotInfo enemyUnit) throws GameActionException{
         RobotType enemyType = enemyUnit.type;
         int enemyHealth = enemyUnit.getHealth();
-        if (enemyHealth <= 6 && enemyType != RobotType.HEADQUARTERS) return 100000; // Instakill
+        if (enemyHealth <= UNIT_TYPE.damage && enemyType != RobotType.HEADQUARTERS) 
+            return 100000; // Instakill
         // TODO: Factor in time dilation cost
         // int rubbleAtLocation = rc.senseRubble(enemyUnit.getLocation());
 		switch(enemyType) {
-        case HEADQUARTERS:
-			return -100.0;
-		case AMPLIFIER:
-			return 1;
-        case CARRIER:
-		case BOOSTER:
-        case DESTABILIZER:
-			return 0.22 /(enemyHealth * (10.0)); // Max= 0.22, Min = 0.005 Low priority
-		case LAUNCHER:
-			return 220.0 * enemyType.damage / (enemyHealth * (10.0));
-        default:
-            return -2.0;
+            case HEADQUARTERS:
+		    	return -100.0;
+		    case AMPLIFIER:
+		    	return 1;
+            case CARRIER:
+		    case BOOSTER:
+            case DESTABILIZER:
+		    	return 0.22 / (enemyHealth * (10.0)); // Max= 0.22, Min = 0.005 Low priority
+		    case LAUNCHER:
+		    	return 220.0 * enemyType.damage / (enemyHealth * (10.0));
+            default:
+                return -2.0;
 		}
 	}
 
@@ -103,7 +119,6 @@ public class BotLauncher extends CombatUtils{
             rc.attack(bestTarget.location);
 		}
 	}
-
 
     private static boolean tryMoveToHelpAlly(RobotInfo closestHostile) throws GameActionException {
         if(closestHostile == null) return false;
@@ -128,14 +143,11 @@ public class BotLauncher extends CombatUtils{
 	}
 
     private static boolean tryMoveToAttackProductionUnit(RobotInfo closestHostile) throws GameActionException {
-        if(closestHostile == null) return false;
+        if (closestHostile == null) return false;
 		if (closestHostile.type.canAttack() || closestHostile.type == RobotType.HEADQUARTERS) 
             return false;
 	    pathing.setAndMoveToDestination(closestHostile.location);
-        if (!rc.isMovementReady()){
-            return true;
-        } 
-        else if (Movement.tryMoveInDirection(closestHostile.location)) {
+        if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
             rc.setIndicatorString("Trying to attack production unit");
             return true;
         }
@@ -148,9 +160,7 @@ public class BotLauncher extends CombatUtils{
         int numNearbyHostiles = 0;
 		for (int i = visibleHostiles.length; --i >= 0;) {
 			if (visibleHostiles[i].type.canAttack()) {
-				// if (!SMALL_MAP && visibleHostiles[i].location.distanceSquaredTo(closestHostileLocation) <= UNIT_TYPE.actionRadiusSquared) {
 					numNearbyHostiles += 1;
-				// }
 			}
 		}
 		RobotInfo[] visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
@@ -240,7 +250,7 @@ public class BotLauncher extends CombatUtils{
 	}
 
     private static boolean tryToMicro() throws GameActionException {
-        if (visibleEnemies.length == 0) { // TODO: Either wait or get out of any possible Watchtower range. Skip if charging
+        if (vNonHQEnemies == 0) { // TODO: Either wait or get out of any possible Watchtower range. Skip if charging
             return false;
         }
 
@@ -250,35 +260,55 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isActionReady()){
-            if (inRangeEnemies.length > 0) {
+            if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
                 launcherState = Status.ENGAGING;
             }
-            else if (rc.isMovementReady() && visibleEnemies.length > 0) {
+            else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
-                if(tryMoveToHelpAlly(closestHostile)) return true;
-                if(tryMoveToAttackProductionUnit(closestHostile)) return true;
+                if(tryMoveToHelpAlly(closestHostile)) {
+                    launcherState = Status.FLANKING;
+                    return true;
+                }
+                if(tryMoveToAttackProductionUnit(closestHostile)) {
+                    launcherState = Status.PURSUING;
+                    return true;
+                }
             }
         }
         if (rc.isMovementReady()){
             // Most important function
-            if (inRangeEnemies.length > 0 && tryToBackUpToMaintainMaxRangeSoldier(visibleEnemies)) return true; // Cant attack, try to move out
+            if (inRNonHQEnemies > 0 && tryToBackUpToMaintainMaxRangeSoldier(visibleEnemies)) {
+                launcherState = Status.FLANKING;
+                return true;
+            }
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
-            if (tryMoveToHelpAlly(closestHostile)) return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
-            if (tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) return true;
-            if (tryMoveToAttackProductionUnit(closestHostile)) return true;
+            if (tryMoveToHelpAlly(closestHostile)) {
+                launcherState = Status.FLANKING;
+                return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
+            }
+            if (tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) {
+                launcherState = Status.FLANKING;
+                return true;
+            }
+            if (tryMoveToAttackProductionUnit(closestHostile)) {
+                launcherState = Status.PURSUING;
+                return true;
+            }
         }
         return false;
     }
 
     public static boolean sendCombatLocation(RobotInfo[] visibleHostiles) throws GameActionException{
-        if (visibleHostiles.length != 0){
+        if (vNonHQEnemies > 0){
 			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleHostiles);
             if (closestHostile == null) return false;
-			if (!standOff) currentDestination = closestHostile.location;
-            if (closestHostile != null)
-                if (!standOff && rc.canWriteSharedArray(0, 0))
+			if (!standOff){ 
+                currentDestination = closestHostile.getLocation();
+                // TODO: Check if this can pushed out of loop
+                if (rc.canWriteSharedArray(0, 0))
 				    Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
+            }
             return true;
         }
         return false;
@@ -295,7 +325,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void simpleAttack() throws GameActionException{
-        if (inRangeEnemies.length > 10 && rc.isActionReady()){
+        if (inRNonHQEnemies > 10 && rc.isActionReady()){
             chooseTargetAndAttack(inRangeEnemies);
         }
     }
