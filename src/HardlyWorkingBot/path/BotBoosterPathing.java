@@ -293,7 +293,7 @@ public class BotBoosterPathing implements UnitPathing {
 
     public int locationScore(MapLocation loc) throws GameActionException {
         if (rc.canSenseLocation(loc) && rc.sensePassability(loc)) 
-            return 0;
+            return 10;
         else
             return 10000;
     }
@@ -1998,199 +1998,235 @@ public class BotBoosterPathing implements UnitPathing {
         Direction ans = null;
         double bestScore = 0;
         double currDist = Math.sqrt(l112.distanceSquaredTo(target));
+        double cost = Double.MAX_VALUE;
         
         double score78 = (currDist - Math.sqrt(l78.distanceSquaredTo(target))) / d78;
         if (score78 > bestScore) {
             bestScore = score78;
             ans = dir78;
+            cost = d78;
         }
 
         double score93 = (currDist - Math.sqrt(l93.distanceSquaredTo(target))) / d93;
         if (score93 > bestScore) {
             bestScore = score93;
             ans = dir93;
+            cost = d93;
         }
 
         double score108 = (currDist - Math.sqrt(l108.distanceSquaredTo(target))) / d108;
         if (score108 > bestScore) {
             bestScore = score108;
             ans = dir108;
+            cost = d108;
         }
 
         double score123 = (currDist - Math.sqrt(l123.distanceSquaredTo(target))) / d123;
         if (score123 > bestScore) {
             bestScore = score123;
             ans = dir123;
+            cost = d123;
         }
 
         double score138 = (currDist - Math.sqrt(l138.distanceSquaredTo(target))) / d138;
         if (score138 > bestScore) {
             bestScore = score138;
             ans = dir138;
+            cost = d138;
         }
 
         double score64 = (currDist - Math.sqrt(l64.distanceSquaredTo(target))) / d64;
         if (score64 > bestScore) {
             bestScore = score64;
             ans = dir64;
+            cost = d64;
         }
 
         double score79 = (currDist - Math.sqrt(l79.distanceSquaredTo(target))) / d79;
         if (score79 > bestScore) {
             bestScore = score79;
             ans = dir79;
+            cost = d79;
         }
 
         double score139 = (currDist - Math.sqrt(l139.distanceSquaredTo(target))) / d139;
         if (score139 > bestScore) {
             bestScore = score139;
             ans = dir139;
+            cost = d139;
         }
 
         double score154 = (currDist - Math.sqrt(l154.distanceSquaredTo(target))) / d154;
         if (score154 > bestScore) {
             bestScore = score154;
             ans = dir154;
+            cost = d154;
         }
 
         double score50 = (currDist - Math.sqrt(l50.distanceSquaredTo(target))) / d50;
         if (score50 > bestScore) {
             bestScore = score50;
             ans = dir50;
+            cost = d50;
         }
 
         double score65 = (currDist - Math.sqrt(l65.distanceSquaredTo(target))) / d65;
         if (score65 > bestScore) {
             bestScore = score65;
             ans = dir65;
+            cost = d65;
         }
 
         double score155 = (currDist - Math.sqrt(l155.distanceSquaredTo(target))) / d155;
         if (score155 > bestScore) {
             bestScore = score155;
             ans = dir155;
+            cost = d155;
         }
 
         double score170 = (currDist - Math.sqrt(l170.distanceSquaredTo(target))) / d170;
         if (score170 > bestScore) {
             bestScore = score170;
             ans = dir170;
+            cost = d170;
         }
 
         double score51 = (currDist - Math.sqrt(l51.distanceSquaredTo(target))) / d51;
         if (score51 > bestScore) {
             bestScore = score51;
             ans = dir51;
+            cost = d51;
         }
 
         double score171 = (currDist - Math.sqrt(l171.distanceSquaredTo(target))) / d171;
         if (score171 > bestScore) {
             bestScore = score171;
             ans = dir171;
+            cost = d171;
         }
 
         double score52 = (currDist - Math.sqrt(l52.distanceSquaredTo(target))) / d52;
         if (score52 > bestScore) {
             bestScore = score52;
             ans = dir52;
+            cost = d52;
         }
 
         double score172 = (currDist - Math.sqrt(l172.distanceSquaredTo(target))) / d172;
         if (score172 > bestScore) {
             bestScore = score172;
             ans = dir172;
+            cost = d172;
         }
 
         double score53 = (currDist - Math.sqrt(l53.distanceSquaredTo(target))) / d53;
         if (score53 > bestScore) {
             bestScore = score53;
             ans = dir53;
+            cost = d53;
         }
 
         double score173 = (currDist - Math.sqrt(l173.distanceSquaredTo(target))) / d173;
         if (score173 > bestScore) {
             bestScore = score173;
             ans = dir173;
+            cost = d173;
         }
 
         double score54 = (currDist - Math.sqrt(l54.distanceSquaredTo(target))) / d54;
         if (score54 > bestScore) {
             bestScore = score54;
             ans = dir54;
+            cost = d54;
         }
 
         double score69 = (currDist - Math.sqrt(l69.distanceSquaredTo(target))) / d69;
         if (score69 > bestScore) {
             bestScore = score69;
             ans = dir69;
+            cost = d69;
         }
 
         double score159 = (currDist - Math.sqrt(l159.distanceSquaredTo(target))) / d159;
         if (score159 > bestScore) {
             bestScore = score159;
             ans = dir159;
+            cost = d159;
         }
 
         double score174 = (currDist - Math.sqrt(l174.distanceSquaredTo(target))) / d174;
         if (score174 > bestScore) {
             bestScore = score174;
             ans = dir174;
+            cost = d174;
         }
 
         double score70 = (currDist - Math.sqrt(l70.distanceSquaredTo(target))) / d70;
         if (score70 > bestScore) {
             bestScore = score70;
             ans = dir70;
+            cost = d70;
         }
 
         double score85 = (currDist - Math.sqrt(l85.distanceSquaredTo(target))) / d85;
         if (score85 > bestScore) {
             bestScore = score85;
             ans = dir85;
+            cost = d85;
         }
 
         double score145 = (currDist - Math.sqrt(l145.distanceSquaredTo(target))) / d145;
         if (score145 > bestScore) {
             bestScore = score145;
             ans = dir145;
+            cost = d145;
         }
 
         double score160 = (currDist - Math.sqrt(l160.distanceSquaredTo(target))) / d160;
         if (score160 > bestScore) {
             bestScore = score160;
             ans = dir160;
+            cost = d160;
         }
 
         double score86 = (currDist - Math.sqrt(l86.distanceSquaredTo(target))) / d86;
         if (score86 > bestScore) {
             bestScore = score86;
             ans = dir86;
+            cost = d86;
         }
 
         double score101 = (currDist - Math.sqrt(l101.distanceSquaredTo(target))) / d101;
         if (score101 > bestScore) {
             bestScore = score101;
             ans = dir101;
+            cost = d101;
         }
 
         double score116 = (currDist - Math.sqrt(l116.distanceSquaredTo(target))) / d116;
         if (score116 > bestScore) {
             bestScore = score116;
             ans = dir116;
+            cost = d116;
         }
 
         double score131 = (currDist - Math.sqrt(l131.distanceSquaredTo(target))) / d131;
         if (score131 > bestScore) {
             bestScore = score131;
             ans = dir131;
+            cost = d131;
         }
 
         double score146 = (currDist - Math.sqrt(l146.distanceSquaredTo(target))) / d146;
         if (score146 > bestScore) {
             bestScore = score146;
             ans = dir146;
+            cost = d146;
         }
 
+    if (cost > 150){
+        return BugNav.walkTowards(target);
+    }
         return ans;
     }
 

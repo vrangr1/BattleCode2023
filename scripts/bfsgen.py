@@ -118,6 +118,7 @@ def gen_selection(radius, smaller_radius):
         Direction ans = null;
         double bestScore = 0;
         double currDist = Math.sqrt(l{encode(0,0)}.distanceSquaredTo(target));
+        double cost = Double.MAX_VALUE;
         """
     for x in range(-7, 8):
         for y in range(-7, 8):
@@ -127,6 +128,7 @@ def gen_selection(radius, smaller_radius):
         if (score{encode(x,y)} > bestScore) {{
             bestScore = score{encode(x,y)};
             ans = dir{encode(x,y)};
+            cost = d{encode(x,y)};
         }}
 """
     return out
@@ -182,7 +184,7 @@ public class Bot{unit}Pathing implements UnitPathing {{
 
     public int locationScore(MapLocation loc) throws GameActionException {{
         if (rc.canSenseLocation(loc) && rc.sensePassability(loc)) 
-            return 0;
+            return 10;
         else
             return 10000;
     }}
@@ -192,6 +194,9 @@ public class Bot{unit}Pathing implements UnitPathing {{
 {gen_bfs(radius)}
 {gen_print(radius)}
 {gen_selection(radius, smaller_radius)}
+    if (cost > 150){{
+        return BugNav.walkTowards(target);
+    }}
         return ans;
     }}
 
