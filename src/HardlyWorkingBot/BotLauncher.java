@@ -41,7 +41,9 @@ public class BotLauncher extends CombatUtils{
     public static void runLauncher() throws GameActionException{
         updateVision();
         standOff = false;
-        opportunisticCombatDestination();
+        if (vNonHQEnemies == 0) {
+            opportunisticCombatDestination();
+        }
 
         tryToMicro();
         updateVision();
@@ -86,7 +88,7 @@ public class BotLauncher extends CombatUtils{
         RobotType enemyType = enemyUnit.type;
         int enemyHealth = enemyUnit.getHealth();
         if (enemyHealth <= UNIT_TYPE.damage && enemyType != RobotType.HEADQUARTERS) 
-            return 100000; // Instakill
+            return 100000 + enemyHealth; // Instakill
         // TODO: Factor in time dilation cost
         // int rubbleAtLocation = rc.senseRubble(enemyUnit.getLocation());
 		switch(enemyType) {
@@ -256,6 +258,9 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered(visibleEnemies)){
+            if (rc.isActionReady() && inRNonHQEnemies > 0) {
+                chooseTargetAndAttack(inRangeEnemies);
+            }
             launcherState = Status.RETREATING;
             return true;
         }
@@ -342,6 +347,28 @@ public class BotLauncher extends CombatUtils{
                 currentDestination = nearestCombatLocation;
                 launcherState = Status.MARCHING;
             }
+        }
+    }
+
+    private static void FSM() throws GameActionException{
+        switch(launcherState){
+            case FLANKING:
+                if (vNonHQEnemies == 0) launcherState = Status.GUARDING;
+                break;
+            case ENGAGING:
+                if (vNonHQEnemies == 0) launcherState = Status.FLANKING;
+                break;
+            case MARCHING:
+                if (vNonHQEnemies > 0) launcherState = Status.ENGAGING;
+                break;
+            case GUARDING:
+                if (inRNonHQEnemies > 0) launcherState = Status.ENGAGING;
+                if (vNonHQEnemies == 0 && !rc.senseMapInfo(rc.getLocation()).hasCloud()) {
+                    launcherState = Status.MARCHING;
+                }
+                break;
+            default:
+                break;
         }
     }
 
