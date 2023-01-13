@@ -46,7 +46,7 @@ public class BugNav extends Utils {
      */
     private static boolean isObstacle(RobotController rc, Direction d) throws GameActionException {
         MapLocation adjacentLocation = rc.getLocation().add(d);
-        return rc.sensePassability(adjacentLocation);
+        return !rc.sensePassability(adjacentLocation);
         // return rubbleOnLocation > ACCEPTABLE_RUBBLE;
     }
 }

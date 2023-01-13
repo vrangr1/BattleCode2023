@@ -37,17 +37,25 @@ public class BotCarrier extends Explore{
     }
 
     private static void movementWrapper(MapLocation dest) throws GameActionException{
-        if (rc.isMovementReady())
+        if (rc.isMovementReady()){
             pathing.setAndMoveToDestination(dest);
-        if (rc.isMovementReady())
-            Movement.goToDirect(dest);
+        }
+        if (rc.isMovementReady()){
+            Direction bugDir = BugNav.walkTowards(dest);
+            if (bugDir != null)
+                rc.move(bugDir);
+        }
     }
 
     private static void movementWrapper() throws GameActionException{
-        if (rc.isMovementReady())
+        if (rc.isMovementReady()){
             pathing.setAndMoveToDestination(explore());
-        if (rc.isMovementReady())
-            Movement.goToDirect(explore());
+        }
+        if (rc.isMovementReady()){
+            Direction bugDir = BugNav.walkTowards(explore());
+            if (bugDir != null)
+                rc.move(bugDir);
+        }
     }
 
     private static void getExploreDir() throws GameActionException{
