@@ -1,5 +1,7 @@
 package FirstBot;
 
+import java.util.Map;
+
 import battlecode.common.*;
 
 /* 
@@ -40,23 +42,24 @@ public class Comms extends Utils{
         // HEADQUARTERS' MESSAGES' TYPES
         HEADQUARTER_LOCATION,               // 0x1
         ENEMY_HEADQUARTER_LOCATION,         // 0x2
-        HEADQUARTER_MESSAGE,//To be decided // 0x3
+        COLLECT_ANCHOR,                     // 0x3
 
         // WELLS CHANNELS MESSAGES' TYPES
-        ADAMANTIUM_WELL_LOCATION,           // 0x4
-        MANA_WELL_LOCATION,                 // 0x5
-        ELIXIR_WELL_LOCATION,               // 0x6
+        WELL_LOCATION,                      // 0x4
+        // ADAMANTIUM_WELL_LOCATION,           // 0x5
+        // MANA_WELL_LOCATION,                 // 0x6
+        // ELIXIR_WELL_LOCATION,               // 0x7
 
         // ISLAND CHANNELS MESSAGES' TYPES
-        OCCUPIED_ISLAND,                    // 0x7
-        UNOCCUPIED_ISLAND,                  // 0x8
+        OCCUPIED_ISLAND,                    // 0x8
+        UNOCCUPIED_ISLAND,                  // 0x9
 
         // COMBAT CHANNELS MESSAGES' TYPES
-        COMBAT_LOCATION,                    // 0x9
-        ISLAND_DEFENSE_NEEDED,              // 0xA
+        COMBAT_LOCATION,                    // 0xA
+        ISLAND_DEFENSE_NEEDED,              // 0xB
 
         // COMMS UTILITY TYPE
-        ARRAY_HEAD;                         // 0xB
+        ARRAY_HEAD;                         // 0xC
         // Can go upto 0xF. If more needed, let me know. I can make do without a few types.
 
         public boolean higherPriority(SHAFlag flag){
@@ -191,6 +194,7 @@ public class Comms extends Utils{
             if (flag == SHAFlag.EMPTY_MESSAGE){
                 writeSHAFlagMessage(headquarterLoc, SHAFlag.HEADQUARTER_LOCATION, i);
                 commsHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
+                BotHeadquarters.headquarterIndex = i + 2;
                 break;
             }
             else if (flag == SHAFlag.HEADQUARTER_LOCATION){
@@ -264,7 +268,7 @@ public class Comms extends Utils{
      * @throws GameActionException
      * @BytecodeCost At least 75
      */
-    private static void writeSHAFlagMessage(MapLocation loc, SHAFlag flag, int channel) throws GameActionException{
+    public static void writeSHAFlagMessage(MapLocation loc, SHAFlag flag, int channel) throws GameActionException{
         int value = intFromMapLocation(loc);
         rc.writeSharedArray(channel, (value << SHAFLAG_BITLENGTH) | flag.ordinal());
     }
@@ -277,7 +281,7 @@ public class Comms extends Utils{
      * @throws GameActionException
      * @BytecodeCost : ~75
      */
-    private static void writeSHAFlagMessage(int message, SHAFlag flag, int channel) throws GameActionException{
+    public static void writeSHAFlagMessage(int message, SHAFlag flag, int channel) throws GameActionException{
         rc.writeSharedArray(channel, (message << SHAFLAG_BITLENGTH) | flag.ordinal());
     }
 
@@ -459,7 +463,7 @@ public class Comms extends Utils{
     }
 
     /**
-     * Wipe channnels of a particular type
+     * Wipe channels of a particular type
      * @param type COMM_TYPE: WELLS, ISLAND, OR COMBAT
      * @throws GameActionException
      */
@@ -468,6 +472,18 @@ public class Comms extends Utils{
             wipeChannel(i);
         type.channelHead = type.channelStart;
         writeSHAFlagMessage(type.channelHead, SHAFlag.ARRAY_HEAD, type.channelHeadArrayLocationIndex);
+    }
+
+
+    public static void wipeThisLocationFromChannels(COMM_TYPE type, SHAFlag flag, MapLocation loc) throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0)) return;
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) == flag && readLocationFromMessage(message) == loc){
+                rc.writeSharedArray(i, 0);
+                continue;
+            }
+        }
     }
 
 
@@ -611,16 +627,21 @@ public class Comms extends Utils{
      * @param loc  : The reference location.
      * @param type : Search for the message in this type's channels (WELLS or ISLAND or COMBAT);
      * @param flag : the SHAFlag that is being searched for in the comms channels.
-     * @return the first MapLocation found of the correct SHAFlag type or null if none found.
+     * @return the nearest MapLocation found of the correct SHAFlag type or null if none found.
      * @throws GameActionException
      */
     public static MapLocation findNearestLocationOfThisType(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
         MapLocation nearestLoc = null;
+        int nearestDist = -1, newDist;
         for (int i = type.channelStart; i < type.channelStop; ++i){
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) != flag) continue;
             MapLocation newLoc = readLocationFromMessage(message);
-            if (nearestLoc == null || loc.distanceSquaredTo(nearestLoc) > loc.distanceSquaredTo(newLoc)) nearestLoc = newLoc;
+            newDist = loc.distanceSquaredTo(newLoc);
+            if (nearestLoc == null || nearestDist > newDist){
+                nearestLoc = newLoc;
+                nearestDist = newDist;
+            }
         }
         return nearestLoc;
     }
@@ -661,7 +682,7 @@ public class Comms extends Utils{
      * @param loc  : The reference location.
      * @param type : Search for the message in this type's channels (WELLS or ISLAND or COMBAT);
      * @param flag : the SHAFlag that is being searched for in the comms channels.
-     * @return the first MapLocation found of the correct SHAFlag type or null if none found.
+     * @return the nearest MapLocation found of the correct SHAFlag type or null if none found.
      * @throws GameActionException
      */
     public static MapLocation findNearestLocationOfThisTypeAndWipeChannel(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
@@ -679,5 +700,17 @@ public class Comms extends Utils{
         if (channel != -1)
             wipeChannel(channel);
         return nearestLoc;
+    }
+
+    public static MapLocation checkIfAnchorProduced() throws GameActionException{
+        for (int i = 0; i < MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
+            int message = rc.readSharedArray(i + 2);
+            if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){
+                assert rc.getType() == RobotType.CARRIER;
+                BotCarrier.collectAnchorHQidx = i + 2;
+                return readLocationFromMessage(message);
+            }
+        }
+        return null;
     }
 }

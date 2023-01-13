@@ -79,6 +79,7 @@ public class Globals {
     public static int MAP_SIZE;
     public static boolean isMapSquare = true;
     public static MapLocation CENTER_OF_THE_MAP;
+    public static int ISLAND_COUNT;
 
     public static final Direction droidVisionDirs[] = new Direction[]{
         Direction.NORTHWEST, Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, 
@@ -126,6 +127,7 @@ public class Globals {
         myHealth = rc.getHealth();
         underAttack = false;
         CENTER_OF_THE_MAP = new MapLocation(MAP_WIDTH/2, MAP_HEIGHT/2);
+        ISLAND_COUNT = rc.getIslandCount();
         Comms.initCommunicationsArray();
         // TODO: Get parent headquarter location
     }

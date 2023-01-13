@@ -3,9 +3,11 @@
 ## Comms:
 ~~* Headquarter count: Fix.~~
 * Flushing the queues
-* Lesser or equal priority message overwriting. If none found, overwrite oldest message.
+~~* Lesser or equal priority message overwriting. If none found, overwrite oldest message.~~
+
+## Carriers:
 
 ## Combat:
-
-### vrangr's requests:
-* Verify combat message types' priority order
+~~* Verify combat message types' priority order~~
+~~* Find out if an anchor can be thrown by a carrier~~ yes
+* Find out how much damage is done by throwing an anchor by a carrier.

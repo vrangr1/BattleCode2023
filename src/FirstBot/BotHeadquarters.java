@@ -1,12 +1,13 @@
 package FirstBot;
 
+import FirstBot.Comms.SHAFlag;
 import battlecode.common.*;
 
 public class BotHeadquarters extends Utils{
     private static int unitNumber = 0;
+    public static int headquarterIndex = -1;
 
     public static void initHeadquarters() throws GameActionException{
-
     }
 
     public static void runHeadquarters() throws GameActionException{
@@ -17,13 +18,18 @@ public class BotHeadquarters extends Utils{
         Direction dir = directions[rng.nextInt(directions.length)];
         MapLocation newLoc = rc.getLocation().add(dir);
 
-        if (unitNumber % 2 == 0 && unitNumber % 5 == 0){
+        if (rc.getRoundNum() % 50 == 0){
             rc.setIndicatorString("Trying to build a amplifier");
             tryToBuild(RobotType.AMPLIFIER, newLoc);
-        } else if (unitNumber % 2 == 0){
+        } else if (rc.getRoundNum() % 40 == 0){
             rc.setIndicatorString("Trying to build a carrier");
             tryToBuild(RobotType.CARRIER, newLoc);
-        } else {
+        } 
+        else if (rc.getRoundNum() % 70 == 0){
+            rc.setIndicatorString("Trying to build an anchor");
+            tryToBuild(Anchor.STANDARD);
+        } 
+        else {
             rc.setIndicatorString("Trying to build a launcher");
             tryToBuild(RobotType.LAUNCHER, newLoc);
         }
@@ -34,6 +40,17 @@ public class BotHeadquarters extends Utils{
         if (rc.canBuildRobot(robotType, loc)){
             rc.buildRobot(robotType, loc);
             unitNumber++;
+        }
+    }
+
+    private static void tryToBuild(Anchor anchor) throws GameActionException{
+        if (rc.canBuildAnchor(anchor)){
+            rc.buildAnchor(anchor);
+            unitNumber++;
+            MapLocation loc = Comms.readLocationFromMessage(rc.readSharedArray(headquarterIndex - 2));
+            // assert loc == currentLocation : "has to be; read loc " + loc + "; curLoc: " + currentLocation;
+            if (!loc.equals(currentLocation)) assert false;
+            Comms.writeSHAFlagMessage(currentLocation, SHAFlag.COLLECT_ANCHOR, headquarterIndex);
         }
     }
 }

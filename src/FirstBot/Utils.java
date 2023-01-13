@@ -87,22 +87,6 @@ public class Utils extends Globals{
         return loc.x < rc.getMapWidth() && loc.x >= 0 && loc.y < rc.getMapHeight() && loc.y >= 0;
     }
 
-
-    // Bytecode Cost: 50-60
-    // public static MapLocation getClosestArchonLocation(){
-    //     int minDistance = Integer.MAX_VALUE;
-    //     int curDistance = 0;
-    //     MapLocation closest = null;
-    //     for(int i = 0; i < archonCount; i++){
-    //         curDistance = rc.getLocation().distanceSquaredTo(archonLocations[i]);
-    //         if (curDistance < minDistance){
-    //             minDistance = curDistance;
-    //             closest = archonLocations[i];
-    //         }
-    //     }
-    //     return closest;
-    // }
-
     // public static boolean isOverCrowdedArchon(){
     //     int unitsBeingHealedByArchon = 0;
     //     MapLocation closest = archonLocations[0];
@@ -113,21 +97,6 @@ public class Utils extends Globals{
     //         }
     //     }
     //     return unitsBeingHealedByArchon > 5;
-    // }
-
-    // public static MapLocation getClosestArchonLocation(boolean isArchon){
-    //     int minDistance = Integer.MAX_VALUE;
-    //     int curDistance = 0;
-    //     MapLocation closest = null;
-    //     for(int i = 0; i < archonCount; i++){
-    //         curDistance = rc.getLocation().distanceSquaredTo(archonLocations[i]);
-    //         if(curDistance == 0 && isArchon) continue; // I don't want to flee to my own location
-    //         if (curDistance < minDistance){
-    //             minDistance = curDistance;
-    //             closest = archonLocations[i];
-    //         }
-    //     }
-    //     return closest;
     // }
 
     public static RobotInfo getClosestUnit(RobotInfo[] units) {
@@ -257,5 +226,30 @@ public class Utils extends Globals{
 
     public static MapInfo getMapInfo(MapLocation src) throws GameActionException{
         return rc.senseMapInfo(src);
-    } 
+    }
+
+    /**
+     * Returns the nearest location to the bot out of the list of locations provided
+     * @param locations : list of locations
+     * @return : the nearest location
+     * @BytecodeCost: ~10 * locations.length
+     */
+    public static MapLocation getNearestLocation(MapLocation[] locations){
+        MapLocation optLoc = null, myLoc = rc.getLocation();
+        int optDist = -1, curDist;
+        for (MapLocation loc: locations){
+            curDist = myLoc.distanceSquaredTo(loc);
+            if (optLoc == null){
+                optLoc = loc;
+                optDist = curDist;
+                continue;
+            }
+            if (curDist < optDist){
+                optLoc = loc;
+                optDist = curDist;
+            }
+            else if (curDist == optDist){} // TODO: Deal with this case (by clouds/nonclouds, etc)
+        }
+        return optLoc;
+    }
 }
