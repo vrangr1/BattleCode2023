@@ -62,6 +62,7 @@ public class BotLauncher extends CombatUtils{
             chooseTargetAndAttack(inRangeEnemies);
             launcherState = Status.ENGAGING;
         }
+        rc.setIndicatorString(launcherState.toString());
     }
 
     private static void updateVision() throws GameActionException {

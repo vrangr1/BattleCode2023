@@ -194,9 +194,9 @@ public class Bot{unit}Pathing implements UnitPathing {{
 {gen_bfs(radius)}
 {gen_print(radius)}
 {gen_selection(radius, smaller_radius)}
-    if (cost > 150){{
-        return BugNav.walkTowards(target);
-    }}
+        if (cost > 150){{
+            return BugNav.walkTowards(target);
+        }}
         return ans;
     }}
 

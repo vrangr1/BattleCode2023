@@ -3444,9 +3444,9 @@ public class BotHeadquarterPathing implements UnitPathing {
             cost = d162;
         }
 
-    if (cost > 150){
-        return BugNav.walkTowards(target);
-    }
+        if (cost > 150){
+            return BugNav.walkTowards(target);
+        }
         return ans;
     }
 
