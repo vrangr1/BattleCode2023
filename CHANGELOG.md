@@ -14,4 +14,9 @@
 
 ## Hardly Working Bot
 * Fixed anchor problem to a limited extent
+* Improved carrier pathing
+* Added BugNav to pathing
+* Added some utility functions to comms
+* Some essential carrier bug fixes
 
+## AHopefullyAnchorBot
