@@ -177,4 +177,46 @@ public class Explore extends Utils{
         checkDirection();
         return explore3Target;
     }
+
+    public static void getExploreDir(boolean randomExploration) throws GameActionException{
+        if (randomExploration){
+            assignExplore3Dir(directions[rng.nextInt(2311) % 8]);
+            return;
+        }
+        Direction away = directionAwayFromAllRobots();
+        if (away != null){
+            assignExplore3Dir(away);
+            return;
+        }
+        MapLocation closestHQ = Comms.findNearestHeadquarter();
+        if (rc.canSenseLocation(closestHQ)) 
+            assignExplore3Dir(closestHQ.directionTo(currentLocation));
+        else
+            assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
+    }
+
+    public static MapLocation explore(boolean randomExploration) throws GameActionException{
+        if (exploreDir == CENTER)
+            getExploreDir(randomExploration);
+        return getExplore3Target();
+    }
+
+    public static void getExploreDir() throws GameActionException{
+        Direction away = directionAwayFromAllRobots();
+        if (away != null){
+            assignExplore3Dir(away);
+            return;
+        }
+        MapLocation closestHQ = Comms.findNearestHeadquarter();
+        if (rc.canSenseLocation(closestHQ)) 
+            assignExplore3Dir(closestHQ.directionTo(currentLocation));
+        else
+            assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
+    }
+
+    public static MapLocation explore() throws GameActionException{
+        if (exploreDir == CENTER)
+            getExploreDir();
+        return getExplore3Target();
+    }
 }

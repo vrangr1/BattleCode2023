@@ -5,7 +5,7 @@ import java.util.Random;
 
 import AHopefullyAnchorBot.path.BugNav;
 
-public class BotCarrier extends Explore{
+public class BotCarrier extends Utils{
 
     private static boolean movingToIsland = false;
     private static MapLocation movementDestination = null;
@@ -50,36 +50,13 @@ public class BotCarrier extends Explore{
 
     private static void movementWrapper() throws GameActionException{
         if (rc.isMovementReady()){
-            pathing.setAndMoveToDestination(explore());
+            pathing.setAndMoveToDestination(Explore.explore(randomExploration));
         }
         if (rc.isMovementReady()){
-            Direction bugDir = BugNav.walkTowards(explore());
+            Direction bugDir = BugNav.walkTowards(Explore.explore(randomExploration));
             if (bugDir != null)
                 rc.move(bugDir);
         }
-    }
-
-    private static void getExploreDir() throws GameActionException{
-        if (randomExploration){
-            assignExplore3Dir(directions[rng.nextInt(2311) % 8]);
-            return;
-        }
-        Direction away = directionAwayFromAllRobots();
-        if (away != null){
-            assignExplore3Dir(away);
-            return;
-        }
-        MapLocation closestHQ = Comms.findNearestHeadquarter();
-        if (rc.canSenseLocation(closestHQ)) 
-            assignExplore3Dir(closestHQ.directionTo(currentLocation));
-        else
-            assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
-    }
-
-    private static MapLocation explore() throws GameActionException{
-        if (exploreDir == CENTER)
-            getExploreDir();
-        return getExplore3Target();
     }
 
     /**
