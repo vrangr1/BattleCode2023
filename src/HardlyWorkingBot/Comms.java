@@ -1,7 +1,5 @@
 package HardlyWorkingBot;
 
-import java.util.Map;
-
 import battlecode.common.*;
 
 /* 
@@ -297,7 +295,7 @@ public class Comms extends Utils{
         for (int i = COMM_TYPE.HEADQUARTER.channelStart + 1; i < COMM_TYPE.HEADQUARTER.channelStop; i += CHANNELS_COUNT_PER_HEADQUARTER){
             int message = rc.readSharedArray(i);
             SHAFlag flag = readSHAFlagFromMessage(message);
-            if (flag == SHAFlag.ENEMY_HEADQUARTER_LOCATION && loc == readLocationFromMessage(message)){
+            if (flag == SHAFlag.ENEMY_HEADQUARTER_LOCATION && loc.equals(readLocationFromMessage(message))){
                 commsEnemyHeadquarterCount = Math.max(i/CHANNELS_COUNT_PER_HEADQUARTER, commsEnemyHeadquarterCount);
                 if (commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER].x == -1)
                     commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER] = loc;
@@ -479,7 +477,7 @@ public class Comms extends Utils{
         if (!rc.canWriteSharedArray(0, 0)) return;
         for (int i = type.channelStart; i < type.channelStop; ++i){
             int message = rc.readSharedArray(i);
-            if (readSHAFlagFromMessage(message) == flag && readLocationFromMessage(message) == loc){
+            if (readSHAFlagFromMessage(message) == flag && readLocationFromMessage(message).equals(loc)){
                 rc.writeSharedArray(i, 0);
                 continue;
             }
@@ -702,7 +700,49 @@ public class Comms extends Utils{
         return nearestLoc;
     }
 
-    public static MapLocation checkIfAnchorProduced() throws GameActionException{
+    /**
+     * Function to check whether a location is already present in channels.
+     * @param loc : location to be checked. Another function present to check if a message is already there in the channels
+     * @param type : communication band to be checked in: WELLS, ISLANDS, COMBAT
+     * @param flag : SHAFlag of the message
+     * @return true or false
+     * @throws GameActionException
+     * @BytecodeCost<pre>
+     *      When COMM_TYPE is WELLS   : ~20 at max
+     *When COMM_TYPE is ISLAND : ~20 at max
+     *When COMM_TYPE is COMBAT : ~64 at max
+     * </pre>
+     */
+    public static boolean findIfLocationAlreadyPresent(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            int message = rc.readSharedArray(i);
+            if (readSHAFlagFromMessage(message) == flag && readLocationFromMessage(message).equals(loc))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Function to check whether a message is already present in channels.
+     * @param message : message to be checked. Another function present to check if a location is already there in the channels
+     * @param type : communication band to be checked in: WELLS, ISLANDS, COMBAT
+     * @return true or false
+     * @throws GameActionException
+     * @BytecodeCost<pre>
+     *      When COMM_TYPE is WELLS   : ~20 at max
+     *When COMM_TYPE is ISLAND : ~20 at max
+     *When COMM_TYPE is COMBAT : ~64 at max
+     * </pre>
+     */
+    public static boolean findIfMessageAlreadyPresent(int message, COMM_TYPE type) throws GameActionException{
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            if (rc.readSharedArray(i) == message)
+                return true;
+        }
+        return false;
+    }
+
+    public static MapLocation findIfAnchorProduced() throws GameActionException{
         for (int i = 0; i < MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
             int message = rc.readSharedArray(i + 2);
             if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){

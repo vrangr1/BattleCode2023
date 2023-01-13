@@ -1,7 +1,5 @@
 package HardlyWorkingBot;
 
-import javax.sound.sampled.TargetDataLine;
-
 import HardlyWorkingBot.Comms.SHAFlag;
 import battlecode.common.*;
 
@@ -121,7 +119,7 @@ public class BotCarrier extends Explore{
         updateVision();
         MapLocation loc = null;
         if (!goingToCollectAnchor)
-            loc = Comms.checkIfAnchorProduced();
+            loc = Comms.findIfAnchorProduced();
         if (loc != null){
             returnToHQ = true;
             movementDestination = loc;
@@ -133,17 +131,17 @@ public class BotCarrier extends Explore{
     }
 
     // TODO: Shift to CombatUtils
-    private static boolean checkIfEnemyHQInVision() throws GameActionException{
-        for (int i = visibleEnemies.length; i-->0;){
-            RobotInfo bot = visibleEnemies[i];
-            if (bot.type == RobotType.HEADQUARTERS){
-                if (rc.canWriteSharedArray(0, 0))
-                    Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, bot.getLocation(), Comms.SHAFlag.ENEMY_HEADQUARTER_LOCATION);
-                return true;
-            }
-        }
-        return false;
-    }
+    // private static boolean checkIfEnemyHQInVision() throws GameActionException{
+    //     for (int i = visibleEnemies.length; i-->0;){
+    //         RobotInfo bot = visibleEnemies[i];
+    //         if (bot.type == RobotType.HEADQUARTERS){
+    //             if (rc.canWriteSharedArray(0, 0))
+    //                 Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, bot.getLocation(), Comms.SHAFlag.ENEMY_HEADQUARTER_LOCATION);
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     // private static void resetVariables(){
     //     miningLocation = null;
