@@ -424,7 +424,7 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
      * @return the channel index to which the message was written. If no channels of strictly lesser priority can be found. Returns -1.
      * @BytecodeCost<pre>
-     *      When commType is LEAD   : ~100 at max
+     *      When commType is WELLS   : ~200 at max
      *When commType is ISLAND : ~200 at max
      *When commType is COMBAT : ~200 at max
      * </pre>
@@ -627,6 +627,11 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag that is being searched for in the comms channels.
      * @return the nearest MapLocation found of the correct SHAFlag type or null if none found.
      * @throws GameActionException
+     * @BytecodeCost<pre>
+     *      When COMM_TYPE is WELLS   : ~150 at max
+     *When COMM_TYPE is ISLAND : ~150 at max
+     *When COMM_TYPE is COMBAT : ~500 at max
+     * </pre>
      */
     public static MapLocation findNearestLocationOfThisType(MapLocation loc, COMM_TYPE type, SHAFlag flag) throws GameActionException{
         MapLocation nearestLoc = null;
@@ -748,7 +753,7 @@ public class Comms extends Utils{
             if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){
                 assert rc.getType() == RobotType.CARRIER;
                 BotCarrier.collectAnchorHQidx = i + 2;
-                return readLocationFromMessage(message);
+                return readLocationFromMessage(rc.readSharedArray(i));
             }
         }
         return null;

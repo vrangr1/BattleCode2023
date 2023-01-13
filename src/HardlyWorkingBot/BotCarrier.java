@@ -1,7 +1,8 @@
 package HardlyWorkingBot;
 
-import HardlyWorkingBot.Comms.SHAFlag;
 import battlecode.common.*;
+import java.util.Random;
+import HardlyWorkingBot.path.BugNav;
 
 public class BotCarrier extends Explore{
 
@@ -17,32 +18,7 @@ public class BotCarrier extends Explore{
     private static int desperationIndex = 0;
     private static boolean goingToCollectAnchor = false;
     public static int collectAnchorHQidx = -1;
-
-    // public static boolean isMinedThisTurn;
-    // public static int numOfMiners;
-    // private static final int maxCapacity = GameConstants.CARRIER_CAPACITY;
-    // private static MapLocation miningLocation;
-    // private static boolean inPlaceForMining;
-    // public static boolean commitSuicide;
-    // private static MapLocation suicideLocation;
-    // public static int desperationIndex;
-    // private static final int MIN_SUICIDE_DIST = 4;
-    // public static boolean prolificMiningLocationsAtBirth;
-    // private static boolean moveOut;
-    // private static boolean isFleeing;
-    // private static final boolean searchByDistance = false;
-    // private static final int randomPersistance = 20;
-    // private static boolean tooCrowded;
-    // private static final int CROWD_LIMIT = 5;
-    // private static final int LOW_HEALTH_STRAT_TRIGGER = (int)((MAX_HEALTH*3.0d)/10.0d);
-    // private static final int LOW_HEALTH_STRAT_RELEASER = (int)((MAX_HEALTH*8.0d)/10.0d);
-    // public static boolean lowHealthStratInPlay = false;
-    // public static MapLocation lowHealthStratArchon;
-    // public static int fleeCount;
-    // private static MapLocation finalDestination = null; 
-    // private static boolean DEBUG_MODE = false;
-
-    // private static WellInfo[] nearbyWells = null;
+    private static final boolean randomExploration = true;
 
     public static void initCarrier() throws GameActionException{
         movingToIsland = false;
@@ -54,40 +30,31 @@ public class BotCarrier extends Explore{
         collectedMana = 0;
         collectedElixir = 0;
         inPlaceForCollection = false;
-        // moveOut = false;
         desperationIndex = 0;
         goingToCollectAnchor = false;
         collectAnchorHQidx = -1;
-
-        // nearbyWells = rc.senseNearbyWells();
-        // resetVariables();
-        // lowHealthStratInPlay = false;
-        // lowHealthStratArchon = null;
-        // fleeCount = 0;
+        rng = new Random(rc.getRoundNum() + 6147);
     }
 
-    // public static boolean areMiningLocationsAbundant(){
-    //     try{
-    //         return (nearbyWells.length > 30);
-    //     } catch (Exception e){
-    //         e.printStackTrace();
-    //     }
-    //     return false;
-    // }
+    private static void movementWrapper(MapLocation dest) throws GameActionException{
+        if (rc.isMovementReady())
+            pathing.setAndMoveToDestination(dest);
+        if (rc.isMovementReady())
+            Movement.goToDirect(dest);
+    }
 
-    // TODO: Update this with average mining per turn of the location
-    public static boolean isLocationBeingMined(MapLocation loc) throws GameActionException{
-        MapLocation[] locAdjacentLocations = rc.getAllLocationsWithinRadiusSquared(loc, UNIT_TYPE.actionRadiusSquared);
-        for (int i = locAdjacentLocations.length; i-->0;){
-            MapLocation curLoc = locAdjacentLocations[i];
-            if (!rc.canSenseLocation(curLoc)) continue;
-            RobotInfo bot = rc.senseRobotAtLocation(curLoc);
-            if (bot != null && bot.team == MY_TEAM && bot.type == RobotType.CARRIER) return true;
+    private static void movementWrapper() throws GameActionException{
+        if (rc.isMovementReady())
+            pathing.setAndMoveToDestination(explore());
+        if (rc.isMovementReady())
+            Movement.goToDirect(explore());
+    }
+
+    private static void getExploreDir() throws GameActionException{
+        if (randomExploration){
+            assignExplore3Dir(directions[rng.nextInt(2311) % 8]);
+            return;
         }
-        return false;
-    }
-
-    public static void getExploreDir() throws GameActionException{
         Direction away = directionAwayFromAllRobots();
         if (away != null){
             assignExplore3Dir(away);
@@ -100,7 +67,7 @@ public class BotCarrier extends Explore{
             assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
     }
 
-    public static MapLocation explore() throws GameActionException{
+    private static MapLocation explore() throws GameActionException{
         if (exploreDir == CENTER)
             getExploreDir();
         return getExplore3Target();
@@ -124,35 +91,9 @@ public class BotCarrier extends Explore{
             returnToHQ = true;
             movementDestination = loc;
             goingToCollectAnchor = true;
-            System.out.println("going to collect anchor at " + movementDestination);
-            System.out.println("collect anchor hq id: " + collectAnchorHQidx);
             assert collectAnchorHQidx != -1 : "collectAnchorHQidx != -1";
         }
     }
-
-    // TODO: Shift to CombatUtils
-    // private static boolean checkIfEnemyHQInVision() throws GameActionException{
-    //     for (int i = visibleEnemies.length; i-->0;){
-    //         RobotInfo bot = visibleEnemies[i];
-    //         if (bot.type == RobotType.HEADQUARTERS){
-    //             if (rc.canWriteSharedArray(0, 0))
-    //                 Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, bot.getLocation(), Comms.SHAFlag.ENEMY_HEADQUARTER_LOCATION);
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // private static void resetVariables(){
-    //     miningLocation = null;
-    //     inPlaceForMining = false;
-    //     commitSuicide = false;
-    //     suicideLocation = null;
-    //     desperationIndex = 0;
-    //     moveOut = true; 
-    //     isFleeing = false;
-    // }
-
 
     public static int countOfCarriersInVicinity() throws GameActionException{
         RobotInfo[] visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
@@ -161,24 +102,6 @@ public class BotCarrier extends Explore{
             if (visibleAllies[i].type == RobotType.CARRIER) count++;
         }
         return count;
-    }
-
-    public static void opportunisticGathering() throws GameActionException{
-        // if (movementDestination == null || rc.canSenseLocation(movementDestination)) return;
-        // MapLocation[] nearbyLocations = rc.senseNearbyLocationsWithGold();
-        // if (nearbyLocations.length > 0){ 
-        //     miningLocation = findOptimalLocationForMiningGold(nearbyLocations);
-        //     inPlaceForMining = (rc.getLocation().distanceSquaredTo(miningLocation) <= 2);
-        //     return;
-        // }
-        // if (!depleteMine) nearbyLocations = rc.senseNearbyLocationsWithLead(MINER_VISION_RADIUS, 20);
-        // else nearbyLocations = rc.senseNearbyLocationsWithLead();
-        // if (nearbyLocations.length > 0){ 
-        //     miningLocation = findOptimalLocationForMiningLead(nearbyLocations);
-        //     if (miningLocation != null) inPlaceForMining = (rc.getLocation().distanceSquaredTo(miningLocation) <= 2);
-        //     else inPlaceForMining = false;
-        //     return;
-        // }
     }
 
     private static void resetCollectAnchorVariables(){
@@ -190,7 +113,8 @@ public class BotCarrier extends Explore{
 
     private static void collectAnchorFromHQ() throws GameActionException{
         // TODO: Add anchor stuff for anchor.accelerating too...
-        if (rc.getNumAnchors(Anchor.STANDARD) == 0){
+        int count = Comms.readMessageWithoutSHAFlag(collectAnchorHQidx);
+        if (count == 0){
             assert collectAnchorHQidx != -1 : "collectanchorhqidx != -1   2";
             Comms.wipeChannel(collectAnchorHQidx);
             resetCollectAnchorVariables();
@@ -198,6 +122,11 @@ public class BotCarrier extends Explore{
         }
         if (rc.canTakeAnchor(movementDestination, Anchor.STANDARD)){
             rc.takeAnchor(movementDestination, Anchor.STANDARD);
+            assert rc.canWriteSharedArray(0, 0) : "canWriteSharedArray";
+            if (count - 1 > 0)
+                Comms.writeSHAFlagMessage(count - 1, Comms.SHAFlag.COLLECT_ANCHOR, collectAnchorHQidx);
+            else
+                Comms.writeSHAFlagMessage(0, Comms.SHAFlag.EMPTY_MESSAGE, collectAnchorHQidx);
             resetCollectAnchorVariables();
         }
     }
@@ -206,10 +135,6 @@ public class BotCarrier extends Explore{
         if (!returnToHQ) return;
         assert movementDestination != null;
         if (currentLocation.distanceSquaredTo(movementDestination) > 2) return;
-        if (goingToCollectAnchor){
-            collectAnchorFromHQ();
-            return;
-        }
         if (collectedElixir > 0 && rc.canTransferResource(movementDestination, ResourceType.ELIXIR, collectedElixir)){
             rc.transferResource(movementDestination, ResourceType.ELIXIR, collectedElixir);
             collectedElixir = 0;
@@ -223,6 +148,10 @@ public class BotCarrier extends Explore{
             collectedAdamantium = 0;
         }
         currentInventoryWeight = rc.getWeight();
+        if (goingToCollectAnchor){
+            collectAnchorFromHQ();
+            return;
+        }
         if (currentInventoryWeight == 0){
             returnToHQ = false;
             movementDestination = null;
@@ -231,7 +160,8 @@ public class BotCarrier extends Explore{
 
     private static void updateCarrier() throws GameActionException{
         if (desperationIndex > 5){
-            pathing.setAndMoveToDestination(explore());
+            // pathing.setAndMoveToDestination(explore());
+            movementWrapper();
             desperationIndex--;
             return;
         }
@@ -244,21 +174,6 @@ public class BotCarrier extends Explore{
             movementDestination = Comms.findNearestHeadquarter();
         transferResourcesToHQ();
         collectedResourcesThisTurn = false;
-
-        // moveOut = true;
-        // tooCrowded = false;
-        // if (CombatUtils.militaryCount(visibleEnemies) == 0)
-        //     fleeCount = Math.max(0, fleeCount - 1);
-        // if (fleeCount == 0) isFleeing = false;
-        // else isFleeing = true;
-        // checkIfEnemyHQInVision();
-        // if (!isSafeToMine(currentLocation)){
-        //     isFleeing = true;
-        //     miningLocation = null;
-        //     inPlaceForMining = false;
-        //     isFleeing = CombatUtils.tryToBackUpToMaintainMaxRangeMiner(visibleEnemies);
-        //     fleeCount = 5;
-        // }
     }
 
     private static void resetIslandVariables(){
@@ -309,7 +224,7 @@ public class BotCarrier extends Explore{
      * @BytecodeCost : Can't compute but very heavy
      */
     private static MapLocation getMeAnIslandLocation() throws GameActionException{
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.ISLAND, SHAFlag.UNOCCUPIED_ISLAND);
+        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND);
         if (commsLoc != null && rc.canSenseLocation(commsLoc)) return commsLoc;
         MapLocation senseLoc = findNearestIslandInVision();
         if (senseLoc != null && rc.canWriteSharedArray(0, 0))
@@ -352,7 +267,8 @@ public class BotCarrier extends Explore{
         if (!canSenseDest || rc.senseTeamOccupyingIsland(targetedIslandId) == Team.NEUTRAL){
             // TODO: Can be removed if exceeding overall bytecode limits.
             if (!canSenseDest && opportunisticAnchorPlacement()) return;
-            pathing.setAndMoveToDestination(movementDestination);
+            // pathing.setAndMoveToDestination(movementDestination);
+            movementWrapper(movementDestination);
             return;
         }
         rc.setIndicatorString("Targeted island already occupied. Finding new island...");
@@ -370,7 +286,8 @@ public class BotCarrier extends Explore{
         MapLocation islandLoc = getMeAnIslandLocation();
         if (islandLoc == null){
             rc.setIndicatorString("can't find an island in vision or in comms. Exploring...");
-            pathing.setAndMoveToDestination(explore());
+            // pathing.setAndMoveToDestination(explore());
+            movementWrapper();
             return;
         }
         setIslandDestination(islandLoc);
@@ -394,6 +311,7 @@ public class BotCarrier extends Explore{
             default: assert false;
         }
         collectedResourcesThisTurn = true;
+        desperationIndex = 0;
         
         if (currentInventoryWeight == GameConstants.CARRIER_CAPACITY){
             returnToHQ = true;
@@ -407,19 +325,26 @@ public class BotCarrier extends Explore{
             return;
         if (returnToHQ && movementDestination != null && currentLocation.distanceSquaredTo(movementDestination) <= 2)
             return;
+        if (visibleEnemies == null);
     }
 
     private static void setWellDestination(MapLocation loc){
         movementDestination = loc;
         inPlaceForCollection = currentLocation.distanceSquaredTo(loc) <= 2;
+        desperationIndex = 0;
     }
 
+    /**
+     * Finds nearest well in vision.
+     * @return nearest well in vision if one exists. Returns null otherwise
+     * @throws GameActionException
+     * @BytecodeCost : ~ 100 + 10 * [well count in vision]
+     */
     private static MapLocation findNearestWellInVision() throws GameActionException{
         WellInfo[] nearbyWells = rc.senseNearbyWells();
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
         for (WellInfo well : nearbyWells){
-            // if (rc.senseTeamOccupyingIsland(islandId) != Team.NEUTRAL) continue;
             MapLocation loc = well.getMapLocation();
             curDist = currentLocation.distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
@@ -430,8 +355,13 @@ public class BotCarrier extends Explore{
         return nearestLoc;
     }
 
+    /**
+     * Find a Well location from which resources are to be collected. First try to find in comms. If that location is null or not in vision, try to find out if there's a location in vision that is better
+     * @throws GameActionException
+     * @BytecodeCost : ~ 350
+     */
     private static void getAndSetWellLocation() throws GameActionException{
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, SHAFlag.WELL_LOCATION);
+        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION);
         if (commsLoc != null && rc.canSenseLocation(commsLoc)){
             setWellDestination(commsLoc);
             return;
@@ -446,14 +376,18 @@ public class BotCarrier extends Explore{
         }
         else if (senseLoc != null) setWellDestination(senseLoc);
         else if (commsLoc != null) setWellDestination(commsLoc);
+        else{
+            movementDestination = null;
+            inPlaceForCollection = false;
+        }
     }
 
     private static void goToWell() throws GameActionException{
-        // moveOut = false;
         if (inPlaceForCollection){
             collectResources();
             return;
         }
+        if (!rc.isMovementReady()) return;
         int curDist = currentLocation.distanceSquaredTo(movementDestination);
         if (curDist <= 2) { // Reached location
             if (!rc.isLocationOccupied(movementDestination)){
@@ -467,53 +401,57 @@ public class BotCarrier extends Explore{
             collectResources();
             return;
         }
-        // If outside of vision or Location is not occupied:
+        if (desperationIndex == 5)
+            desperationIndex = 12;
+        // If outside of action radius
         if (!rc.canActLocation(movementDestination)){
-            rc.setIndicatorString("moving to well: " + movementDestination);
-            pathing.setAndMoveToDestination(movementDestination);
+            rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
+            // pathing.setAndMoveToDestination(movementDestination);
+            movementWrapper(movementDestination);
             return;
         }
-        pathing.setAndMoveToDestination(movementDestination);
+        // pathing.setAndMoveToDestination(movementDestination);
+        movementWrapper(movementDestination);
         if (desperationIndex < 5) return;
         if (rc.canWriteSharedArray(0, 0))
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION, movementDestination);
         desperationIndex = 12;
         movementDestination = null;
         inPlaceForCollection = false;
-        pathing.setAndMoveToDestination(explore());
-        desperationIndex--;
     }
 
     private static void gatherResources() throws GameActionException{
         // TODO: Add conditions and actions for behavior under attack here too.
         if (movingToIsland) resetIslandVariables();
         updateCarrier();
-        collectResources();
         if (desperationIndex > 5) return;
         if (returnToHQ){
             assert movementDestination != null : "movementDestination != null in gather resources";
-            pathing.setAndMoveToDestination(movementDestination);
+            // pathing.setAndMoveToDestination(movementDestination);
+            movementWrapper(movementDestination);
             return;
         }
+        collectResources();
         if (collectedResourcesThisTurn) return;
-        opportunisticGathering();
-        if (inPlaceForCollection)
-            collectResources();
-        else if (movementDestination != null){
+        if (movementDestination != null){
+            System.out.println("here222; movementDest: " + movementDestination);
             goToWell();
             collectResources();
         }
         else{
             getAndSetWellLocation();
+            System.out.println("here");
+            if (Clock.getBytecodesLeft() < 2000) return;
             goToWell();
             collectResources();
         }
-        if (!rc.canMove(NORTH) || !rc.canMove(SOUTH) || !rc.canMove(EAST) || !rc.canMove(WEST))
-            desperationIndex = 0;
-        else desperationIndex++;
+        if (!collectedResourcesThisTurn && rc.isMovementReady())
+            desperationIndex++;
+        else desperationIndex = 0;
     }
 
     public static void runCarrier() throws GameActionException{
+        rc.setIndicatorString("despInd: " + desperationIndex);
         updateOverall();
         attackIfAboutToDie();
         if (rc.getAnchor() != null)

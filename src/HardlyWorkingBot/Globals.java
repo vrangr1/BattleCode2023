@@ -34,13 +34,13 @@ public class Globals {
      * import at the top of this file. Here, we *seed* the RNG with a constant number (6147); this makes sure
      * we get the same sequence of numbers every time this code is run. This is very useful for debugging!
      */
-    static final Random rng = new Random(6147);
+    static Random rng = new Random(6147);
 
     public static final int COMMS_VARCOUNT = GameConstants.SHARED_ARRAY_LENGTH;
 
     public static RobotController rc;
     public static Pathing pathing;
-    public static int MAX_WELLS_COUNT; // 144 in the worst possible case (60 x 60 map size and full 4% of map is wells)
+    public static int MAX_WELLS_COUNT; // 144 in the best possible case (60 x 60 map size and full 4% of map is wells)
     public static Direction exploreDir = CENTER;
     public static MapLocation explore3Target;
     public static MapLocation[] headquartersLocations;

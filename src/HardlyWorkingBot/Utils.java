@@ -182,13 +182,13 @@ public class Utils extends Globals{
 
 
     public static void byteCodeTest(){
-        int temp = 1;
-        int index_i = 0, index_j =0;
-        int holder_1[] = new int[10];
-        int holder_2[][] = new int[10][10];
-        StringBuilder sb = new StringBuilder("111111111111111111111111111111111111111111111111111111111111");
-        StringBuilder s = sb.delete(20, 60); // 12 bytecodes irrespective of length of string
-        System.out.println("Bytecodes left before testing area: " + Clock.getBytecodesLeft()); // 7 bytecodes
+        // int temp = 1;
+        // int index_i = 0, index_j =0;
+        // int holder_1[] = new int[10];
+        // int holder_2[][] = new int[10][10];
+        // StringBuilder sb = new StringBuilder("111111111111111111111111111111111111111111111111111111111111");
+        // StringBuilder s = sb.delete(20, 60); // 12 bytecodes irrespective of length of string
+        // System.out.println("Bytecodes left before testing area: " + Clock.getBytecodesLeft()); // 7 bytecodes
         // StringBuilder s = sb.delete(20, 60); // 12 bytecodes irrespective of length of string
         // s.setCharAt(1, '2'); // 10 bytecodes (2/3 in reality)
         // s.setCharAt(2, '2');
@@ -251,5 +251,27 @@ public class Utils extends Globals{
             else if (curDist == optDist){} // TODO: Deal with this case (by clouds/nonclouds, etc)
         }
         return optLoc;
+    }
+
+    // public static Comms.SHAFlag getWellFlag(WellInfo well){
+    //     switch(well.getResourceType()){
+    //         case ADAMANTIUM: return Comms.SHAFlag.ADAMANTIUM_WELL_LOCATION;
+    //         case MANA: return Comms.SHAFlag.MANA_WELL_LOCATION;
+    //         case ELIXIR: return Comms.SHAFlag.ELIXIR_WELL_LOCATION;
+    //         default: assert false; return null;
+    //     }
+    // }
+
+    public static void findAndWriteWellLocationsToComms() throws GameActionException{
+        WellInfo[] nearbyWells = rc.senseNearbyWells();
+        MapLocation loc;
+        for (WellInfo well : nearbyWells){
+            loc = well.getMapLocation();
+            // if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, getWellFlag(well)))
+            if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION))
+                continue;
+            if (rc.canWriteSharedArray(0, 0))
+            Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, Comms.SHAFlag.WELL_LOCATION);
+        }
     }
 }

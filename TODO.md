@@ -7,6 +7,7 @@
 - [x] Lesser or equal priority message overwriting. If none found, overwrite oldest message.
 
 ## Carriers
+- [ ] Carriers need to explore more and avoid overcrowding
 
 ## Launchers
 

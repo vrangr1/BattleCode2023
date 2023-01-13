@@ -25,6 +25,7 @@ public class BotAmplifier extends Explore{
             if (away!=null)
                 Movement.tryMoveInDirection(explore(away));
         }
+        if (Clock.getBytecodesLeft() > 700) findAndWriteWellLocationsToComms();
     }
 
     private static Direction directionAwayFromAmplifierAndHQ(RobotInfo[] givenRobots){

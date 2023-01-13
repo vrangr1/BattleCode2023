@@ -9,7 +9,7 @@ public class BugNav extends Utils {
 
     private static Direction bugDirection = null;
 
-    static Direction walkTowards(MapLocation target) throws GameActionException {
+    public static Direction walkTowards(MapLocation target) throws GameActionException {
         bugDirection = null;
         if (!rc.isMovementReady()) {
             return null;
