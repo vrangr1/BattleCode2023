@@ -8,11 +8,11 @@
 - [ ] Add dedicated channels for maintaining count of units
 
 ## Carriers
-- [ ] Carriers need to explore more and avoid overcrowding
+- [x] Carriers need to explore more and avoid overcrowding
 - [ ] Prioritize resource collection based on lack of a resource.
 
 ## Build Order:
-- [ ] Perhaps use Ivan Geffner's build order
+- [x] Perhaps use Ivan Geffner's build order
 - [ ] If using bot counts for build order prioritization, use amplifier count as a confidence factor on how trustworthy each bot count is.
 
 ## Launchers
@@ -26,3 +26,13 @@
 - [x] Verify combat message types' priority order
 - [x] Find out if an anchor can be thrown by a carrier -> Yes
 - [ ] Find out how much damage is done by throwing an anchor by a carrier.
+
+## General
+- [ ] Carrier bytecode consumption reduction
+- [ ]  Amplifier built by HQ follow carriers carrying anchors
+- [ ]  Scan for unoccupied islands should be done by every bot (given bytecodes left)
+- [ ]  Defense of skyislands
+- [ ]  Send enemy occupied islands to combat channels
+- [ ]  Attack of skyislands via any units (launchers first to clear the enemy units and then any units for occupation of the same)
+- [ ]  Have amplifiers travel to combat locations
+- [ ]  Make maps
