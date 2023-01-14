@@ -50,7 +50,7 @@ public class BotAmplifier extends Explore{
         MapLocation lCR = rc.getLocation();
         for (int i= visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-			if (!hostile.type.canAttack()) continue;
+			if (hostile.type != RobotType.LAUNCHER) continue;
 			int distSq = lCR.distanceSquaredTo(hostile.location);
 			if (distSq < closestHostileDistSq) {
 				closestHostileDistSq = distSq;
@@ -69,7 +69,7 @@ public class BotAmplifier extends Explore{
 			int smallestDistSq = Integer.MAX_VALUE;
 			for (int i= visibleEnemies.length; --i >= 0;) {
                 RobotInfo hostile = visibleEnemies[i];
-				if (!hostile.type.canAttack()) continue;
+				if (hostile.type != RobotType.LAUNCHER) continue;
 				int distSq = hostile.location.distanceSquaredTo(dirLoc);
 				if (distSq < smallestDistSq) {
 					smallestDistSq = distSq;

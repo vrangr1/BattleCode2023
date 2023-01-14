@@ -220,7 +220,7 @@ public class BotCarrier extends Utils{
                 islandViable[islandId - 1] = false;
                 continue;
             }
-            assert islandViable[islandId - 1] : "islandViable[islandId - 1] == true";
+            assert islandViable[islandId - 1] : "islandViable[islandId - 1] == true" + rc.getRoundNum() + " " + rc.getID();
             MapLocation[] locations = rc.senseNearbyIslandLocations(islandId);
             for (MapLocation loc : locations){
                 curDist = currentLocation.distanceSquaredTo(loc);

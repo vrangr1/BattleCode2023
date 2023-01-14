@@ -222,7 +222,7 @@ public class BotLauncher extends CombatUtils{
 		int numHostilesThatAttackUs = 0;
 		for (int i = visibleHostiles.length; --i >= 0;) {
             RobotInfo hostile = visibleHostiles[i];
-			if (hostile.type.canAttack()) {
+			if (hostile.type == RobotType.LAUNCHER) {
 				int distSq = hostile.location.distanceSquaredTo(rc.getLocation());
 				if (distSq <= hostile.type.actionRadiusSquared) {
 					if (distSq < closestDistSq) {
@@ -246,7 +246,7 @@ public class BotLauncher extends CombatUtils{
 		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHostileThatAttacksUs.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		for (int i = nearbyAllies.length; --i >= 0;) {
             RobotInfo ally = nearbyAllies[i];
-			if (ally.type.canAttack()) {
+			if (ally.type == RobotType.LAUNCHER) {
 				if (ally.location.distanceSquaredTo(closestHostileThatAttacksUs.location)
 						<= ally.type.actionRadiusSquared) {
 					numAlliesAttackingClosestHostile += 1;
@@ -270,7 +270,7 @@ public class BotLauncher extends CombatUtils{
 		MapLocation retreatTarget = rc.getLocation();
 		for (int i = visibleHostiles.length; --i >= 0;) {
             RobotInfo hostile = visibleHostiles[i];
-			if (!hostile.type.canAttack()) continue;			
+			if (!(hostile.type == RobotType.LAUNCHER)) continue;			
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
 		if (!rc.getLocation().equals(retreatTarget)) {
