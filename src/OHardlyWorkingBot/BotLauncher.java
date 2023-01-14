@@ -246,7 +246,9 @@ public class BotLauncher extends CombatUtils{
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
 		if (!rc.getLocation().equals(retreatTarget)) {
-			// Direction retreatDir = rc.getLocation().directionTo(retreatTarget);
+            if (rc.isActionReady() && inRNonHQEnemies > 0) {
+                chooseTargetAndAttack(inRangeEnemies);
+            }
 			return Movement.tryForcedMoveInDirection(retreatTarget);
 		}
 		return false;
@@ -258,9 +260,6 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered(visibleEnemies)){
-            if (rc.isActionReady() && inRNonHQEnemies > 0) {
-                chooseTargetAndAttack(inRangeEnemies);
-            }
             launcherState = Status.RETREATING;
             return true;
         }

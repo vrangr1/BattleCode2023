@@ -28,7 +28,6 @@ public class BotLauncher extends CombatUtils{
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
-        updateVision();
         if (currentDestination == null) {
             currentDestination = CENTER_OF_THE_MAP;
             launcherState = Status.EXPLORE;
@@ -38,8 +37,41 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
+    private static void FSM() throws GameActionException{
+        switch(launcherState){
+            case BORN:
+                if (vNonHQEnemies > 0){
+                    launcherState = Status.ENGAGING;
+                }
+                else {
+                    opportunisticCombatDestination();
+                }
+            case FLANKING:
+                if (vNonHQEnemies == 0) launcherState = Status.GUARDING;
+                break;
+            case ENGAGING:
+                if (vNonHQEnemies == 0) launcherState = Status.FLANKING;
+                break;
+            case MARCHING:
+                if (vNonHQEnemies > 0) launcherState = Status.ENGAGING;
+                else{
+                    opportunisticCombatDestination();
+                }
+                break;
+            case GUARDING:
+                if (inRNonHQEnemies > 0) launcherState = Status.ENGAGING;
+                if (vNonHQEnemies == 0 && !rc.senseMapInfo(rc.getLocation()).hasCloud()) {
+                    launcherState = Status.MARCHING;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     public static void runLauncher() throws GameActionException{
-        updateVision();
+        updateVision(); // Get our current surrounding status
+
         standOff = false;
         if (vNonHQEnemies == 0) {
             opportunisticCombatDestination();
@@ -246,7 +278,9 @@ public class BotLauncher extends CombatUtils{
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
 		if (!rc.getLocation().equals(retreatTarget)) {
-			// Direction retreatDir = rc.getLocation().directionTo(retreatTarget);
+            if (rc.isActionReady() && inRNonHQEnemies > 0) {
+                chooseTargetAndAttack(inRangeEnemies);
+            }
 			return Movement.tryForcedMoveInDirection(retreatTarget);
 		}
 		return false;
@@ -258,9 +292,6 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered(visibleEnemies)){
-            if (rc.isActionReady() && inRNonHQEnemies > 0) {
-                chooseTargetAndAttack(inRangeEnemies);
-            }
             launcherState = Status.RETREATING;
             return true;
         }
@@ -330,45 +361,19 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
-    private static void simpleAttack() throws GameActionException{
-        if (inRNonHQEnemies > 10 && rc.isActionReady()){
-            chooseTargetAndAttack(inRangeEnemies);
-        }
-    }
-
     /**
     * This will try to update the destination of the soldier so as to not make it go away from fights to a predetermined location.
     */
     private static void opportunisticCombatDestination() throws GameActionException{
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-        if (nearestCombatLocation != null){ 
-            if (currentDestination == null || (!rc.canSenseLocation(currentDestination) && 
-                rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
+        if (nearestCombatLocation == null){
+            currentDestination = Explore.explore();
+            launcherState = Status.EXPLORE;
+        }
+        else if (currentDestination == null || (!rc.canSenseLocation(currentDestination) && 
+            rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
                 currentDestination = nearestCombatLocation;
                 launcherState = Status.MARCHING;
-            }
-        }
-    }
-
-    private static void FSM() throws GameActionException{
-        switch(launcherState){
-            case FLANKING:
-                if (vNonHQEnemies == 0) launcherState = Status.GUARDING;
-                break;
-            case ENGAGING:
-                if (vNonHQEnemies == 0) launcherState = Status.FLANKING;
-                break;
-            case MARCHING:
-                if (vNonHQEnemies > 0) launcherState = Status.ENGAGING;
-                break;
-            case GUARDING:
-                if (inRNonHQEnemies > 0) launcherState = Status.ENGAGING;
-                if (vNonHQEnemies == 0 && !rc.senseMapInfo(rc.getLocation()).hasCloud()) {
-                    launcherState = Status.MARCHING;
-                }
-                break;
-            default:
-                break;
         }
     }
 
