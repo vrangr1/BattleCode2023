@@ -220,7 +220,8 @@ public class Comms extends Utils{
 
     private static void headquarterChannelsInit() throws GameActionException{
         if (rc.getType() == RobotType.HEADQUARTERS && rc.getRoundNum() == 1){
-            wipeCountAndScoreChannels();
+            wipeCountChannels();
+            wipeScoreChannels();
             writeHeadquarterLocation(rc.getLocation());
             return;
         }
@@ -541,8 +542,11 @@ public class Comms extends Utils{
         rc.writeSharedArray(channel, 0);
     }
 
-    public static void wipeCountAndScoreChannels() throws GameActionException{
+    public static void wipeCountChannels() throws GameActionException{
         wipeChannel(LAUNCHER_COUNT_CHANNEL);
+    }
+    
+    public static void wipeScoreChannels() throws GameActionException{
         wipeChannel(LAUNCHER_SCORE_CHANNEL);
         wipeChannel(CARRIER_SCORE_CHANNEL);
         wipeChannel(AMPLIFIER_SCORE_CHANNEL);
@@ -551,6 +555,7 @@ public class Comms extends Utils{
         // wipeChannel(DESTABILIZER_SCORE_CHANNEL);
         // wipeChannel(ACCELERATING_ANCHOR_COUNT_CHANNEL);
     }
+
 
     /** Writes 0 to all channels. Heavy bytecode cost
      * @BytecodeCost 6400
