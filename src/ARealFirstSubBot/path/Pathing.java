@@ -1,6 +1,6 @@
 package ARealFirstSubBot.path;
 
-import OFirstSubmissionBot.Utils;
+import ARealFirstSubBot.Utils;
 import battlecode.common.*;
 
 public class Pathing extends Utils {

@@ -3,7 +3,7 @@ package ARealFirstSubBot;
 import battlecode.common.*;
 import java.util.Random;
 
-import OFirstSubmissionBot.path.*;
+import ARealFirstSubBot.path.*;
 
 public class Globals {
     
