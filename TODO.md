@@ -10,6 +10,7 @@
 ## Carriers
 - [x] Carriers need to explore more and avoid overcrowding
 - [ ] Prioritize resource collection based on lack of a resource.
+- [ ] While returning to HQ to collect anchor, periodically check on the anchor count. If reaches zero, go back to resource gathering.
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order
