@@ -373,7 +373,7 @@ public class BotCarrier extends Utils{
             collectResources();
             return;
         }
-        if (!rc.isMovementReady()) return;
+        if (!rc.isMovementReady() || movementDestination == null) return;
         int curDist = currentLocation.distanceSquaredTo(movementDestination);
         if (curDist <= 2) { // Reached location
             if (!rc.isLocationOccupied(movementDestination)){

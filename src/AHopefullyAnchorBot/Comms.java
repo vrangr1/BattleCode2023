@@ -16,16 +16,20 @@ public class Comms extends Utils{
     ////////////////////////////////////////
 
     private static final int SHAFLAG_BITLENGTH = 4;
-    private static final int CARRIER_COUNT_CHANNEL = 0;
-    private static final int LAUNCHER_COUNT_CHANNEL = 1;
-    private static final int AMPLIFIER_COUNT_CHANNEL = 2;
-    private static final int BOOSTER_COUNT_CHANNEL = 3;
-    private static final int DESTABILIZER_COUNT_CHANNEL = 4;
-    private static final int START_CHANNEL_BANDS = 5;
+    private static final int CARRIER_SCORE_CHANNEL = 0;
+    private static final int LAUNCHER_SCORE_CHANNEL = 1;
+    private static final int AMPLIFIER_SCORE_CHANNEL = 2;
+    private static final int BOOSTER_SCORE_CHANNEL = 3;
+    private static final int DESTABILIZER_SCORE_CHANNEL = 4;
+    private static final int STANDARD_ANCHOR_SCORE_CHANNEL = 5;
+    private static final int LAUNCHER_COUNT_CHANNEL = 6;
+    // private static final int ACCELERATING_ANCHOR_COUNT_CHANNEL = 6;
+    private static final int START_CHANNEL_BANDS = 7;
     private static final int MAX_HEADQUARTERS_CHANNLS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 10;
     private static final int ISLAND_CHANNELS_COUNT = 10;
+    private static final int AMPLIFIER_CHANNELS_COUNT = 5;
     private static final int COMBAT_CHANNELS_COUNT = 20;
 
     // ununsed channels count: 0 (in the case of max count of headquarters (i.e. 4))
@@ -63,8 +67,11 @@ public class Comms extends Utils{
         COMBAT_LOCATION,                    // 0xA
         ISLAND_DEFENSE_NEEDED,              // 0xB
 
+        // AMPLIFIER CHANNELS MESSAGES' TYPES
+        AMPLIFIER_LOCATION,                 // 0xC
+
         // COMMS UTILITY TYPE
-        ARRAY_HEAD;                         // 0xC
+        ARRAY_HEAD;                         // 0xD
         // Can go upto 0xF. If more needed, let me know. I can make do without a few types.
 
         public boolean higherPriority(SHAFlag flag){
@@ -86,7 +93,8 @@ public class Comms extends Utils{
         WELLS,          // 0x1
         COMBAT,         // 0x2
         ISLAND,         // 0x3
-        HEADQUARTER;    // 0x4
+        HEADQUARTER,    // 0x4
+        AMPLIFIER;      // 0x5
 
         public int channelStart, channelStop, channelHead, channelHeadArrayLocationIndex;
     }
@@ -194,16 +202,16 @@ public class Comms extends Utils{
     public static void writeHeadquarterLocation(MapLocation headquarterLoc) throws GameActionException{
         if (rc.getRoundNum() != 1)
             throw new GameActionException(GameActionExceptionType.ROUND_OUT_OF_RANGE, "round number has to be 1 here.");
-        for (int i = 0; i < MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
+        for (int i = START_CHANNEL_BANDS; i < START_CHANNEL_BANDS + MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
             SHAFlag flag = readSHAFlagType(i);
             if (flag == SHAFlag.EMPTY_MESSAGE){
                 writeSHAFlagMessage(headquarterLoc, SHAFlag.HEADQUARTER_LOCATION, i);
-                commsHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
+                commsHeadquarterCount = (i - START_CHANNEL_BANDS)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
                 Builder.setHeadquarterIndex(i + 2);
                 break;
             }
             else if (flag == SHAFlag.HEADQUARTER_LOCATION){
-                commsHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
+                commsHeadquarterCount = (i - START_CHANNEL_BANDS)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
                 continue;
             }
             assert false;
@@ -212,6 +220,7 @@ public class Comms extends Utils{
 
     private static void headquarterChannelsInit() throws GameActionException{
         if (rc.getType() == RobotType.HEADQUARTERS && rc.getRoundNum() == 1){
+            wipeCountAndScoreChannels();
             writeHeadquarterLocation(rc.getLocation());
             return;
         }
@@ -220,19 +229,16 @@ public class Comms extends Utils{
     }
 
     public static void initCommunicationsArray() throws GameActionException{
-        channelsUsed = 0;
+        channelsUsed = START_CHANNEL_BANDS;
         commsHeadquarterCount = -1;
         commsEnemyHeadquarterCount = 0;
         commsHeadquarterLocations = null;
         commsEnemyHeadquarterLocations = null;
         headquarterChannelsInit();
-        if (rc.getRoundNum() == 1){
-            if (rc.getType() != RobotType.HEADQUARTERS)
-                throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "unexpected behavior");
-            return;
-        }
+        if (rc.getRoundNum() == 1) return;
         allocateChannels(COMM_TYPE.WELLS, WELLS_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.ISLAND, ISLAND_CHANNELS_COUNT);
+        allocateChannels(COMM_TYPE.AMPLIFIER, AMPLIFIER_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.COMBAT, COMBAT_CHANNELS_COUNT);
     }
 
@@ -303,30 +309,30 @@ public class Comms extends Utils{
             int message = rc.readSharedArray(i);
             SHAFlag flag = readSHAFlagFromMessage(message);
             if (flag == SHAFlag.ENEMY_HEADQUARTER_LOCATION && loc.equals(readLocationFromMessage(message))){
-                commsEnemyHeadquarterCount = Math.max(i/CHANNELS_COUNT_PER_HEADQUARTER, commsEnemyHeadquarterCount);
-                if (commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER].x == -1)
-                    commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER] = loc;
+                commsEnemyHeadquarterCount = Math.max((i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER + 1, commsEnemyHeadquarterCount);
+                if (commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER].x == -1)
+                    commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER] = loc;
                 return;
             }
             else if (flag == SHAFlag.ENEMY_HEADQUARTER_LOCATION && empty)
                 throw new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "shouldn't have happened");
             else if (flag == SHAFlag.ENEMY_HEADQUARTER_LOCATION){
-                if (commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER].x == -1)
-                    commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
-                commsEnemyHeadquarterCount = Math.max(i/CHANNELS_COUNT_PER_HEADQUARTER, commsEnemyHeadquarterCount);
+                if (commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER].x == -1)
+                    commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
+                commsEnemyHeadquarterCount = Math.max((i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER + 1, commsEnemyHeadquarterCount);
                 if (commsEnemyHeadquarterCount > getHeadquartersCount())
                     throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "enemy hq count. How???");
                 continue;
             }
             else if (flag == SHAFlag.EMPTY_MESSAGE && !empty){
                 empty = true;
-                if ((i/CHANNELS_COUNT_PER_HEADQUARTER) <= commsEnemyHeadquarterCount)
+                if (((i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER) <= commsEnemyHeadquarterCount)
                     throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "enemy hq count. How2222???");
-                commsEnemyHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
+                commsEnemyHeadquarterCount = (i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
                 if (commsEnemyHeadquarterCount > getHeadquartersCount())
                     throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "enemy hq count. How???");
                 writeSHAFlagMessage(loc, SHAFlag.ENEMY_HEADQUARTER_LOCATION, i);
-                commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER] = loc;
+                commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER] = loc;
                 return;
             }
             else assert false : "logical error in writeEnemyHeadquarterLocation func";
@@ -448,6 +454,82 @@ public class Comms extends Utils{
 
 
     ////////////////////////////////////////
+    // BUILD ORDER STUFF ///////////////////
+    ////////////////////////////////////////
+
+    /** Updates the count of the robot to increment by 1.
+     * @param robotType : One of RobotType.HEADQUARTER, RobotType.CARRIER
+     * @param channel : the channel to which the head needs to be updated.
+     * @BytecodeCost ~90
+     */
+    public static void incrementRobotCount(RobotType robotType) throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0)) return;
+        int channel = getRobotCountChannel(robotType);
+        rc.writeSharedArray(channel, rc.readSharedArray(channel) + 1);
+    }
+
+    public static void resetRobotCount(RobotType robotType) throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0)) return;
+        rc.writeSharedArray(getRobotCountChannel(robotType), 0);
+    }
+
+    public static void writeScore(RobotType type, int score) throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0)) return;
+        rc.writeSharedArray(getRobotScoreChannel(type), score);
+    }
+
+    public static void writeScore(Anchor anchor, int score) throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0)) return;
+        rc.writeSharedArray(getRobotScoreChannel(anchor), score);
+    }
+
+    private static int getRobotCountChannel(RobotType robotType) throws GameActionException{
+        switch(robotType){
+            case LAUNCHER: return LAUNCHER_COUNT_CHANNEL;
+            default: break;
+        }
+        assert false;
+        return -1;
+    }
+
+    public static int getRobotCount(RobotType robotType) throws GameActionException{
+        return rc.readSharedArray(getRobotCountChannel(robotType));
+    }
+
+    private static int getRobotScoreChannel(RobotType type) throws GameActionException{
+        switch(type){
+            case CARRIER: return CARRIER_SCORE_CHANNEL;
+            case AMPLIFIER: return AMPLIFIER_SCORE_CHANNEL;
+            case LAUNCHER: return LAUNCHER_SCORE_CHANNEL;
+            case BOOSTER: return BOOSTER_SCORE_CHANNEL;
+            case DESTABILIZER: return DESTABILIZER_SCORE_CHANNEL;
+            default: assert false;
+        }
+        assert false;
+        return -1;
+    }
+
+    private static int getRobotScoreChannel(Anchor anchor) throws GameActionException{
+        switch(anchor){
+            case STANDARD: return STANDARD_ANCHOR_SCORE_CHANNEL;
+            // case ACCELERATING: return ACCELERATING_ANCHOR_COUNT_CHANNEL;
+            default: assert false;
+        }
+        assert false;
+        return -1;
+    }
+
+    public static int getRobotScore(RobotType robotType) throws GameActionException{
+        return rc.readSharedArray(getRobotScoreChannel(robotType));
+    }
+
+    public static int getRobotScore(Anchor anchor) throws GameActionException{
+        return rc.readSharedArray(getRobotScoreChannel(anchor));
+    }
+
+
+
+    ////////////////////////////////////////
     // WIPE CHANNELS METHODS ///////////////
     ////////////////////////////////////////
 
@@ -457,6 +539,17 @@ public class Comms extends Utils{
      */
     public static void wipeChannel(int channel) throws GameActionException{
         rc.writeSharedArray(channel, 0);
+    }
+
+    public static void wipeCountAndScoreChannels() throws GameActionException{
+        wipeChannel(LAUNCHER_COUNT_CHANNEL);
+        wipeChannel(LAUNCHER_SCORE_CHANNEL);
+        wipeChannel(CARRIER_SCORE_CHANNEL);
+        wipeChannel(AMPLIFIER_SCORE_CHANNEL);
+        wipeChannel(STANDARD_ANCHOR_SCORE_CHANNEL);
+        // wipeChannel(BOOSTER_SCORE_CHANNEL);
+        // wipeChannel(DESTABILIZER_SCORE_CHANNEL);
+        // wipeChannel(ACCELERATING_ANCHOR_COUNT_CHANNEL);
     }
 
     /** Writes 0 to all channels. Heavy bytecode cost
@@ -469,7 +562,7 @@ public class Comms extends Utils{
 
     /**
      * Wipe channels of a particular type
-     * @param type COMM_TYPE: WELLS, ISLAND, OR COMBAT
+     * @param type COMM_TYPE: WELLS, ISLAND, AMPLIFIER, or COMBAT
      * @throws GameActionException
      */
     public static void wipeChannelsCOMMTYPE(COMM_TYPE type) throws GameActionException{
@@ -505,20 +598,20 @@ public class Comms extends Utils{
         if (commsHeadquarterCount != -1 && rc.getRoundNum() > 1) return commsHeadquarterCount;
         MapLocation[] tempLocs = new MapLocation[GameConstants.MAX_STARTING_HEADQUARTERS];
         int count = 0;
-        for (int i = 0; i < MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
+        for (int i = START_CHANNEL_BANDS; i < START_CHANNEL_BANDS + MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) == SHAFlag.HEADQUARTER_LOCATION){
                 count++;
                 if (commsHeadquarterLocations == null) 
-                    tempLocs[i/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
+                    tempLocs[(i - START_CHANNEL_BANDS)/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
             }
             else break;
         }
         if ((count <= 0 && rc.getRoundNum() > 1) || count > 4)
             throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "headquarter count can't be this. count: " + Integer.toString(count));
         commsHeadquarterCount = count;
-        COMM_TYPE.HEADQUARTER.channelStart = 0;
-        COMM_TYPE.HEADQUARTER.channelStop = count * CHANNELS_COUNT_PER_HEADQUARTER - 1;
+        COMM_TYPE.HEADQUARTER.channelStart = START_CHANNEL_BANDS;
+        COMM_TYPE.HEADQUARTER.channelStop = START_CHANNEL_BANDS + count * CHANNELS_COUNT_PER_HEADQUARTER - 1;
         if (commsHeadquarterLocations == null){
             commsHeadquarterLocations = new MapLocation[commsHeadquarterCount];
             switch(count){
@@ -541,7 +634,7 @@ public class Comms extends Utils{
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) != SHAFlag.HEADQUARTER_LOCATION)
                 throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "getting hq loc: how did this happen");
-            commsHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
+            commsHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
         }
         return commsHeadquarterLocations;
     }
@@ -569,22 +662,41 @@ public class Comms extends Utils{
             if (commsEnemyHeadquarterLocations == null) assert false;
             return commsEnemyHeadquarterLocations;
         }
-        if (commsEnemyHeadquarterCount == 0){
-            if (commsEnemyHeadquarterLocations != null) assert false;
+        if (commsEnemyHeadquarterLocations == null)
             commsEnemyHeadquarterLocations = createNullMapLocations(headquarterCount);
-        }
+        // System.out.println("reached here!");
         for (int i = COMM_TYPE.HEADQUARTER.channelStart + 1; i < COMM_TYPE.HEADQUARTER.channelStop; i += CHANNELS_COUNT_PER_HEADQUARTER){
-            if (commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER].x != -1) continue;
+            if (commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER].x != -1) continue;
             int message = rc.readSharedArray(i);
             SHAFlag flag = readSHAFlagFromMessage(message);
             if (flag == SHAFlag.EMPTY_MESSAGE) 
                 return commsEnemyHeadquarterLocations;
             if (flag != SHAFlag.ENEMY_HEADQUARTER_LOCATION)
                 throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "not enemy hq location. No!");
-            commsEnemyHeadquarterLocations[i/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
-            commsEnemyHeadquarterCount = i/CHANNELS_COUNT_PER_HEADQUARTER;
+            commsEnemyHeadquarterLocations[(i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER] = readLocationFromMessage(message);
+            commsEnemyHeadquarterCount = (i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
         }
         return commsEnemyHeadquarterLocations;
+    }
+
+    public static MapLocation findNearestEnemyHeadquarterLocation() throws GameActionException{
+        if (rc.getRoundNum() < 2) assert false;
+        MapLocation[] enemyHeadquarters = getEnemyHeadquartersLocationsList();
+        if (enemyHeadquarters == null) return null;
+        MapLocation optLoc = null, myLoc = rc.getLocation();
+        int optDist = -1, enemyHeadquarterCount = getHeadquartersCount(), curDist;
+        for (int i = 0; i < enemyHeadquarterCount; ++i){
+            if (enemyHeadquarters[i] == null || enemyHeadquarters[i].x == -1) return optLoc;
+            curDist = myLoc.distanceSquaredTo(enemyHeadquarters[i]);
+            if (optLoc == null || curDist < optDist){
+                optLoc = enemyHeadquarters[i];
+                optDist = curDist;
+            }
+        }
+        if (optLoc != null)
+            return optLoc;
+        else
+            return CENTER_OF_THE_MAP;
     }
 
     /**
@@ -755,7 +867,8 @@ public class Comms extends Utils{
     }
 
     public static MapLocation findIfAnchorProduced() throws GameActionException{
-        for (int i = 0; i < MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
+        if (rc.getRoundNum() < 3) return null;
+        for (int i = COMM_TYPE.HEADQUARTER.channelStart; i < COMM_TYPE.HEADQUARTER.channelStop; i += CHANNELS_COUNT_PER_HEADQUARTER){
             int message = rc.readSharedArray(i + 2);
             if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){
                 assert rc.getType() == RobotType.CARRIER;

@@ -1,6 +1,5 @@
 package AHopefullyAnchorBot;
 
-import AHopefullyAnchorBot.Comms.COMM_TYPE;
 import battlecode.common.*;
 
 public class BotLauncher extends CombatUtils{
@@ -74,8 +73,8 @@ public class BotLauncher extends CombatUtils{
     }
 
     public static void runLauncher() throws GameActionException{
+        if (TRACKING_LAUNCHER_COUNT) Comms.incrementRobotCount(RobotType.LAUNCHER);
         updateVision(); // Get our current surrounding status
-
         standOff = false;
         if (vNonHQEnemies == 0) {
             closerCombatDestination();

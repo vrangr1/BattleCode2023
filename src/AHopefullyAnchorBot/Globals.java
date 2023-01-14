@@ -82,6 +82,8 @@ public class Globals {
     public static MapLocation CENTER_OF_THE_MAP;
     public static int ISLAND_COUNT;
 
+    public static final boolean TRACKING_LAUNCHER_COUNT = true;
+
     public static final Direction droidVisionDirs[] = new Direction[]{
         Direction.NORTHWEST, Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, 
         Direction.NORTH, Direction.NORTH, Direction.NORTHEAST, Direction.NORTHEAST, 

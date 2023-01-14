@@ -444,13 +444,13 @@ public class BotCarrier extends Explore{
         collectResources();
         if (collectedResourcesThisTurn) return;
         if (movementDestination != null){
-            System.out.println("here222; movementDest: " + movementDestination);
+            // System.out.println("here222; movementDest: " + movementDestination);
             goToWell();
             collectResources();
         }
         else{
             getAndSetWellLocation();
-            System.out.println("here");
+            // System.out.println("here");
             if (Clock.getBytecodesLeft() < 2000) return;
             goToWell();
             collectResources();

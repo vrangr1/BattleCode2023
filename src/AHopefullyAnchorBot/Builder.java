@@ -4,6 +4,53 @@ import battlecode.common.*;
 
 public class Builder extends Utils {
     private static int headquarterIndex = -1;
+    public static int adamantium, mana, elixir;
+    private static final boolean USING_CWBUILDER = true;
+
+    public static void initBuilder() throws GameActionException{
+        adamantium = 0;
+        mana = 0;
+        elixir = 0;
+        if (USING_CWBUILDER)
+            CWBuilder.initCWBuilder();
+    }
+
+    private static void updateBuilder() throws GameActionException{
+        adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
+        mana = rc.getResourceAmount(ResourceType.MANA);
+        elixir = rc.getResourceAmount(ResourceType.ELIXIR);
+    }
+
+    public static boolean hasResourcesToBuild(RobotType type, int count){
+        switch(type){
+            case CARRIER: return adamantium >= count * RobotType.CARRIER.getBuildCost(ResourceType.ADAMANTIUM);
+            case LAUNCHER: return mana >= count * RobotType.LAUNCHER.getBuildCost(ResourceType.MANA);
+            case BOOSTER: return elixir >= count * RobotType.BOOSTER.getBuildCost(ResourceType.ELIXIR);
+            case DESTABILIZER: return elixir >= count * RobotType.DESTABILIZER.getBuildCost(ResourceType.ELIXIR);
+            case AMPLIFIER: return (
+                adamantium >= count * RobotType.CARRIER.getBuildCost(ResourceType.ADAMANTIUM)
+                && 
+                mana >= count * RobotType.AMPLIFIER.getBuildCost(ResourceType.MANA)
+            );
+            default: break;
+        }
+        assert false;
+        return false;
+    }
+
+    public static boolean hasResourcesToBuild(Anchor anchor, int count){
+        switch(anchor){
+            case STANDARD: return (
+                adamantium >= count * Anchor.STANDARD.adamantiumCost
+                && 
+                mana >= count * Anchor.STANDARD.manaCost
+            );
+            case ACCELERATING: return elixir >= count * Anchor.ACCELERATING.elixirCost;
+            default: break;
+        }
+        assert false;
+        return false;
+    }
 
     private static void tryToBuild(RobotType robotType, MapLocation loc) throws GameActionException{
         if (rc.canBuildRobot(robotType, loc))
@@ -19,11 +66,19 @@ public class Builder extends Utils {
             rc.buildAnchor(anchor);
             MapLocation loc = Comms.readLocationFromMessage(rc.readSharedArray(headquarterIndex - 2));
             assert loc.equals(currentLocation) : "has to be";
-            Comms.writeSHAFlagMessage(rc.getNumAnchors(Anchor.STANDARD), Comms.SHAFlag.COLLECT_ANCHOR, headquarterIndex);
+            int num_anchors = rc.getNumAnchors(Anchor.STANDARD);
+            assert num_anchors - 1 == Comms.readMessageWithoutSHAFlag(headquarterIndex) : "num anchor correctness";
+            Comms.writeSHAFlagMessage(num_anchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterIndex);
         }
     }
 
     public static void buildUnits() throws GameActionException{
+        updateBuilder();
+        if (USING_CWBUILDER){
+            CWBuilder.buildUnits();
+            return;
+        }
+
         Direction dir = directions[rng.nextInt(directions.length)];
         MapLocation newLoc = rc.getLocation().add(dir);
 
