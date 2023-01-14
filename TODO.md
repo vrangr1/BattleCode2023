@@ -28,7 +28,7 @@
 - [ ] Find out how much damage is done by throwing an anchor by a carrier.
 
 ## General
-- [ ] Carrier bytecode consumption reduction
+- [ ]  Carrier bytecode consumption reduction
 - [ ]  Amplifier built by HQ follow carriers carrying anchors
 - [ ]  Scan for unoccupied islands should be done by every bot (given bytecodes left)
 - [ ]  Defense of skyislands

@@ -237,7 +237,7 @@ public class BotCarrier extends Utils{
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
         for (int i = Comms.COMM_TYPE.ISLAND.channelStart; i < Comms.COMM_TYPE.ISLAND.channelStop; i++){
-            int message = Comms.readMessageWithoutSHAFlag(i);
+            int message = rc.readSharedArray(i);
             if (Comms.readSHAFlagFromMessage(message) != Comms.SHAFlag.UNOCCUPIED_ISLAND) continue;
             MapLocation loc = Comms.readLocationFromMessage(message);
             if (ignoreLocations[hashLocation(loc)]) continue;
@@ -281,7 +281,7 @@ public class BotCarrier extends Utils{
     }
 
     private static int hashLocation(MapLocation loc){
-        return loc.x * 60 + loc.y;
+        return loc.x * MAP_HEIGHT + loc.y;
     }
 
     private static void flagThisIsland(int islandId, MapLocation loc) throws GameActionException{
