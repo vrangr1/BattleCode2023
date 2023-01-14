@@ -164,7 +164,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		if (allyIsFighting) 
 			if (Movement.tryMoveInDirection(closestHostileLocation)) {
-				rc.setIndicatorString("Trying to help");
+				launcherState = Status.FLANKING;
                 return true;
             }
 		return false;
@@ -176,7 +176,7 @@ public class BotLauncher extends CombatUtils{
             return false;
 	    pathing.setAndMoveToDestination(closestHostile.location);
         if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
-            rc.setIndicatorString("Trying to attack production unit");
+            launcherState = Status.PURSUING;
             return true;
         }
 		return false;
@@ -200,9 +200,12 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() > closestHostile.health)) {
-			if (Movement.tryMoveInDirection(closestHostile.location))
+			if (Movement.tryMoveInDirection(closestHostile.location)){
+                launcherState = Status.FLANKING;
                 return true;
+            }
             else if(numNearbyAllies >= 1.5 * numNearbyHostiles && Movement.tryForcedMoveInDirection(closestHostile.location)){
+                launcherState = Status.FLANKING;
                 return true;
             }
             else {
@@ -296,11 +299,9 @@ public class BotLauncher extends CombatUtils{
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
                 if(tryMoveToHelpAlly(closestHostile)) {
-                    launcherState = Status.FLANKING;
                     return true;
                 }
                 if(tryMoveToAttackProductionUnit(closestHostile)) {
-                    launcherState = Status.PURSUING;
                     return true;
                 }
             }
@@ -313,15 +314,12 @@ public class BotLauncher extends CombatUtils{
             }
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (tryMoveToHelpAlly(closestHostile)) {
-                launcherState = Status.FLANKING;
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
             if (tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) {
-                launcherState = Status.FLANKING;
                 return true;
             }
             if (tryMoveToAttackProductionUnit(closestHostile)) {
-                launcherState = Status.PURSUING;
                 return true;
             }
         }
@@ -332,9 +330,8 @@ public class BotLauncher extends CombatUtils{
         if (vNonHQEnemies > 0){
 			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleHostiles);
             if (closestHostile == null) return false;
-			if (!standOff){ 
+			if (!standOff){ // The idea is to prevent standoffs from flooding comms with local info
                 currentDestination = closestHostile.getLocation();
-                // TODO: Check if this can pushed out of loop
                 if (rc.canWriteSharedArray(0, 0))
 				    Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
             }
