@@ -231,6 +231,7 @@ public class CWBuilder extends Utils{
             System.out.println("built standard anchor");
             rc.buildAnchor(Anchor.STANDARD);
             Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
+            Builder.sendAnchorCollectionCommand();
             return true;
         }
         return false;

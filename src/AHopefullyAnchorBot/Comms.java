@@ -69,9 +69,10 @@ public class Comms extends Utils{
 
         // AMPLIFIER CHANNELS MESSAGES' TYPES
         AMPLIFIER_LOCATION,                 // 0xC
+        ANCHOR_DEFENSE_NEEDED,              // 0xD
 
         // COMMS UTILITY TYPE
-        ARRAY_HEAD;                         // 0xD
+        ARRAY_HEAD;                         // 0xE
         // Can go upto 0xF. If more needed, let me know. I can make do without a few types.
 
         public boolean higherPriority(SHAFlag flag){

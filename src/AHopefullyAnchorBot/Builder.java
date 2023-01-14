@@ -72,6 +72,15 @@ public class Builder extends Utils {
         }
     }
 
+    public static void sendAnchorCollectionCommand() throws GameActionException{
+        MapLocation loc = Comms.readLocationFromMessage(rc.readSharedArray(headquarterIndex - 2));
+        assert loc.equals(currentLocation) : "has to be";
+
+        int numAnchors = rc.getNumAnchors(Anchor.STANDARD);
+        assert numAnchors != 0 : "num anchor correctness";
+        Comms.writeSHAFlagMessage(numAnchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterIndex);
+    }
+
     public static void buildUnits() throws GameActionException{
         updateBuilder();
         if (USING_CWBUILDER){

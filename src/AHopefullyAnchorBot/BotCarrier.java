@@ -20,6 +20,8 @@ public class BotCarrier extends Utils{
     private static boolean goingToCollectAnchor = false;
     public static int collectAnchorHQidx = -1;
     private static final boolean randomExploration = true;
+    private static boolean[] islandViable;
+    private static boolean[] ignoreLocations;
 
     public static void initCarrier() throws GameActionException{
         movingToIsland = false;
@@ -35,6 +37,21 @@ public class BotCarrier extends Utils{
         goingToCollectAnchor = false;
         collectAnchorHQidx = -1;
         rng = new Random(rc.getRoundNum() + 6147);
+        islandViable = new boolean[ISLAND_COUNT];
+        for (int i = 0; i < ISLAND_COUNT; i++)
+            islandViable[i] = true;
+        ignoreLocations = new boolean[MAP_HEIGHT * MAP_WIDTH];
+        for (int i = 0; i < MAP_HEIGHT * MAP_WIDTH; ++i)
+            ignoreLocations[i] = false;
+        if (Clock.getBytecodesLeft() < 6000) 
+            Clock.yield();
+    }
+
+    private static void unFlagAllIslands(){
+        for (int i = 0; i < ISLAND_COUNT; i++)
+            islandViable[i] = true;
+        for (int i = 0; i < MAP_HEIGHT * MAP_WIDTH; ++i)
+            ignoreLocations[i] = false;
     }
 
     private static void movementWrapper(MapLocation dest) throws GameActionException{
@@ -73,11 +90,17 @@ public class BotCarrier extends Utils{
         MapLocation loc = null;
         if (!goingToCollectAnchor)
             loc = Comms.findIfAnchorProduced();
-        if (loc != null){
+        if (!goingToCollectAnchor && loc != null){
             returnToHQ = true;
             movementDestination = loc;
             goingToCollectAnchor = true;
+            System.out.println("Heeding anchor call from HQ");
             assert collectAnchorHQidx != -1 : "collectAnchorHQidx != -1";
+        }
+        if (rc.getRoundNum() % 200 == 0){
+            unFlagAllIslands();
+            if (Clock.getBytecodesLeft() < 6000) 
+                Clock.yield();
         }
     }
 
@@ -102,7 +125,9 @@ public class BotCarrier extends Utils{
         int count = Comms.readMessageWithoutSHAFlag(collectAnchorHQidx);
         if (count == 0){
             assert collectAnchorHQidx != -1 : "collectanchorhqidx != -1   2";
-            Comms.wipeChannel(collectAnchorHQidx);
+            if (rc.readSharedArray(collectAnchorHQidx) != 0)
+                Comms.wipeChannel(collectAnchorHQidx);
+            System.out.println("False alarm, no anchor to collect. Wiping channel...");
             resetCollectAnchorVariables();
             return;
         }
@@ -113,6 +138,7 @@ public class BotCarrier extends Utils{
                 Comms.writeSHAFlagMessage(count - 1, Comms.SHAFlag.COLLECT_ANCHOR, collectAnchorHQidx);
             else
                 Comms.writeSHAFlagMessage(0, Comms.SHAFlag.EMPTY_MESSAGE, collectAnchorHQidx);
+            System.out.println("Collected anchor from HQ!");
             resetCollectAnchorVariables();
         }
     }
@@ -190,7 +216,11 @@ public class BotCarrier extends Utils{
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
         for (int islandId : nearbyIslands){
-            if (rc.senseTeamOccupyingIsland(islandId) != Team.NEUTRAL) continue;
+            if (rc.senseTeamOccupyingIsland(islandId) != Team.NEUTRAL){
+                islandViable[islandId - 1] = false;
+                continue;
+            }
+            assert islandViable[islandId - 1] : "islandViable[islandId - 1] == true";
             MapLocation[] locations = rc.senseNearbyIslandLocations(islandId);
             for (MapLocation loc : locations){
                 curDist = currentLocation.distanceSquaredTo(loc);
@@ -203,6 +233,23 @@ public class BotCarrier extends Utils{
         return nearestLoc;
     }
 
+    private static MapLocation findNearestIslandInComms() throws GameActionException{
+        MapLocation nearestLoc = null;
+        int nearestDist = -1, curDist;
+        for (int i = Comms.COMM_TYPE.ISLAND.channelStart; i < Comms.COMM_TYPE.ISLAND.channelStop; i++){
+            int message = Comms.readMessageWithoutSHAFlag(i);
+            if (Comms.readSHAFlagFromMessage(message) != Comms.SHAFlag.UNOCCUPIED_ISLAND) continue;
+            MapLocation loc = Comms.readLocationFromMessage(message);
+            if (ignoreLocations[hashLocation(loc)]) continue;
+            curDist = currentLocation.distanceSquaredTo(loc);
+            if (nearestLoc == null || curDist < nearestDist){
+                nearestLoc = loc;
+                nearestDist = curDist;
+            }
+        }
+        return nearestLoc;
+    }
+
     /**
      * Finds an unoccupied island location for carrier to place its anchor.
      * @return MapLocation. If none found, returns null
@@ -210,7 +257,7 @@ public class BotCarrier extends Utils{
      * @BytecodeCost : Can't compute but very heavy
      */
     private static MapLocation getMeAnIslandLocation() throws GameActionException{
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND);
+        MapLocation commsLoc = findNearestIslandInComms();
         if (commsLoc != null && rc.canSenseLocation(commsLoc)) return commsLoc;
         MapLocation senseLoc = findNearestIslandInVision();
         if (senseLoc != null && rc.canWriteSharedArray(0, 0))
@@ -233,6 +280,17 @@ public class BotCarrier extends Utils{
         return true;
     }
 
+    private static int hashLocation(MapLocation loc){
+        return loc.x * 60 + loc.y;
+    }
+
+    private static void flagThisIsland(int islandId, MapLocation loc) throws GameActionException{
+        islandViable[islandId - 1] = false;
+        if (rc.canWriteSharedArray(0, 0))
+            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND, loc);
+        else ignoreLocations[hashLocation(loc)] = true;
+    }
+
     private static void moveToIslandAndPlaceAnchor() throws GameActionException{
         assert movementDestination != null : "movementDestination != null";
         // assert targetedIslandId != -1 : "targetedIslandId != -1";
@@ -240,6 +298,7 @@ public class BotCarrier extends Utils{
         if (isCurLocIsland != -1 && rc.senseTeamOccupyingIsland(isCurLocIsland) == Team.NEUTRAL){
             if (rc.canPlaceAnchor()){
                 rc.setIndicatorString("A small dump for carrier, a huge jump for AnchorIslands! Placed Anchor!");
+                System.out.println("Placed Anchor!");
                 rc.placeAnchor();
                 resetIslandVariables();
             }
@@ -249,6 +308,7 @@ public class BotCarrier extends Utils{
         
         if (targetedIslandId == -1 && canSenseDest)
             targetedIslandId = rc.senseIsland(movementDestination);
+        if (canSenseDest) assert targetedIslandId == rc.senseIsland(movementDestination) : "targetedIslandId == rc.senseIsland(movementDestination)";
 
         if (!canSenseDest || rc.senseTeamOccupyingIsland(targetedIslandId) == Team.NEUTRAL){
             // TODO: Can be removed if exceeding overall bytecode limits.
@@ -258,8 +318,11 @@ public class BotCarrier extends Utils{
             return;
         }
         rc.setIndicatorString("Targeted island already occupied. Finding new island...");
+        assert targetedIslandId != -1 : "targetedIslandId != -1. targeted island occupied";
+        // islandViable[targetedIslandId - 1] = false;
+        assert movementDestination != null : "movementDestination != null";
+        flagThisIsland(targetedIslandId, movementDestination);
         resetIslandVariables();
-        carrierAnchorMode();
     }
 
     private static void carrierAnchorMode() throws GameActionException{
@@ -435,7 +498,7 @@ public class BotCarrier extends Utils{
     }
 
     public static void runCarrier() throws GameActionException{
-        rc.setIndicatorString("despInd: " + desperationIndex);
+        // rc.setIndicatorString("despInd: " + desperationIndex);
         updateOverall();
         attackIfAboutToDie();
         if (rc.getAnchor() != null)
