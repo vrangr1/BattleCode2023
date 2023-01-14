@@ -27,57 +27,20 @@ public class BotLauncher extends CombatUtils{
     private static int enemyHQInVision = 0;
     private static MapLocation enemyHQLocation = null;
     private static boolean standOff = false;
+    private static RobotInfo prevTurnHostile = null;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
     }
 
-    private static void FSM() throws GameActionException{
-        switch(launcherState){
-            // When born, fight or decide to march/explore
-            case BORN:
-                // Start engaging if enemy in vision [ENGAGING]
-                if (vNonHQEnemies > 0){
-                    launcherState = Status.ENGAGING;
-                }
-                // Else go march to combat location, otherwise explore [MARCHING|EXPLORE]
-                else {
-                    closerCombatDestination();
-                }
-                break;
-            // We were flanking last turn
-            case FLANKING:
-                // No enemy in vision
-                if (vNonHQEnemies == 0){
-                    launcherState = Status.GUARDING;
-                }
-                break;
-            case ENGAGING:
-                if (vNonHQEnemies == 0) launcherState = Status.FLANKING;
-                break;
-            case MARCHING:
-                if (vNonHQEnemies > 0) launcherState = Status.ENGAGING;
-                else{
-                    closerCombatDestination();
-                }
-                break;
-            case GUARDING:
-                if (inRNonHQEnemies > 0) launcherState = Status.ENGAGING;
-                if (vNonHQEnemies == 0 && !rc.senseMapInfo(rc.getLocation()).hasCloud()) {
-                    launcherState = Status.MARCHING;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
     public static void runLauncher() throws GameActionException{
         if (TRACKING_LAUNCHER_COUNT) Comms.incrementRobotCount(RobotType.LAUNCHER);
-        updateVision(); // Get our current surrounding status
+        
+        updateVision();
         standOff = false;
+        previousTurnResolution();
         if (vNonHQEnemies == 0) {
-            closerCombatDestination();
+            closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
         }
 
         tryToMicro();
@@ -87,6 +50,27 @@ public class BotLauncher extends CombatUtils{
         else {
             findNewCombatLocation();
         }
+        afterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE]
+        if (rc.isActionReady() && inRNonHQEnemies > 0) {
+            chooseTargetAndAttack(inRangeEnemies);
+        }
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
+    }
+
+    private static void previousTurnResolution() throws GameActionException {
+        if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
+            launcherState = Status.GUARDING;
+            boolean willDieIfPursuit = prevTurnHostile.getType().canAttack() && rc.getHealth() <= prevTurnHostile.getType().damage;
+            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryMoveInDirection(prevTurnHostile.location)){
+                launcherState = Status.PURSUING;
+            }
+        }
+        else{
+            prevTurnHostile = null;
+        }
+    }
+
+    private static void afterNonMovingCombat() throws GameActionException {
         if (visibleEnemies.length == 0 && rc.isMovementReady()) {
             if (pathing.getCurrentDestination() != currentDestination && currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
@@ -99,11 +83,6 @@ public class BotLauncher extends CombatUtils{
             }
             updateVision();
         }
-        if (rc.isActionReady() && inRNonHQEnemies > 0) {
-            chooseTargetAndAttack(inRangeEnemies);
-            launcherState = Status.ATTACKING;
-        }
-        rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
     }
 
     private static void updateVision() throws GameActionException {
@@ -164,6 +143,8 @@ public class BotLauncher extends CombatUtils{
 		}
 		if (bestTarget != null) {
             rc.attack(bestTarget.location);
+            prevTurnHostile = bestTarget;
+            launcherState = Status.ATTACKING;
 		}
 	}
 
@@ -299,7 +280,7 @@ public class BotLauncher extends CombatUtils{
 	}
 
     private static boolean tryToMicro() throws GameActionException {
-        if (vNonHQEnemies == 0) { // TODO: Either wait or get out of any possible Watchtower range. Skip if charging
+        if (vNonHQEnemies == 0) { // TODO: Either wait or get out of any possible Destabilizer range
             return false;
         }
 
@@ -311,7 +292,6 @@ public class BotLauncher extends CombatUtils{
         if (rc.isActionReady()){
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
-                launcherState = Status.ATTACKING;
             }
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
