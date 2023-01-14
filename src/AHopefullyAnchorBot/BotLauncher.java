@@ -25,6 +25,8 @@ public class BotLauncher extends CombatUtils{
     private static RobotInfo[] inRangeEnemies;
     private static int vNonHQEnemies = 0;
     private static int inRNonHQEnemies = 0;
+    private static int enemyHQInVision = 0;
+    private static MapLocation enemyHQLocation = null;
     private static boolean standOff = false;
 
     public static void initLauncher() throws GameActionException{
@@ -90,15 +92,19 @@ public class BotLauncher extends CombatUtils{
             if (pathing.getCurrentDestination() == null && currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
             }
-            pathing.moveToDestination(); // 2700 Bytecodes
-            launcherState = Status.MARCHING;
+            if (launcherState == Status.MARCHING) {
+                pathing.moveToDestination();
+            }
+            else if (launcherState == Status.EXPLORE) {
+                pathing.setAndMoveToDestination(Explore.explore());
+            }
             updateVision();
         }
         if (rc.isActionReady() && inRangeEnemies.length > 0) {
             chooseTargetAndAttack(inRangeEnemies);
             launcherState = Status.ATTACKING;
         }
-        rc.setIndicatorString(launcherState.toString());
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
     }
 
     private static void updateVision() throws GameActionException {
@@ -106,9 +112,14 @@ public class BotLauncher extends CombatUtils{
         inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
         vNonHQEnemies = 0;
         inRNonHQEnemies = 0;
+        enemyHQInVision = 0;
         for (int i = visibleEnemies.length; --i >= 0;) {
             if (visibleEnemies[i].type != RobotType.HEADQUARTERS) {
                 vNonHQEnemies++;
+            }
+            else{
+                enemyHQInVision++;
+                enemyHQLocation = visibleEnemies[i].location;
             }
         }
         for (int i = inRangeEnemies.length; --i >= 0;) {
@@ -355,6 +366,7 @@ public class BotLauncher extends CombatUtils{
     
     // If our current destination has no enemies left, move to the nearest new location with combat
     private static boolean findNewCombatLocation() throws GameActionException{
+        // circleEnemyHQ();
         if (currentDestination == null || (vNonHQEnemies == 0 && rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null) currentDestination = combatLocation;
@@ -368,6 +380,7 @@ public class BotLauncher extends CombatUtils{
     * This will try to update the destination of the soldier so as to not make it go away from closer fights
     */
     private static void closerCombatDestination() throws GameActionException{
+        // circleEnemyHQ();
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (nearestCombatLocation == null){
             currentDestination = Explore.explore();
@@ -377,6 +390,12 @@ public class BotLauncher extends CombatUtils{
             rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
                 currentDestination = nearestCombatLocation;
                 launcherState = Status.MARCHING;
+        }
+    }
+
+    private static void circleEnemyHQ(){
+        if (enemyHQInVision == visibleEnemies.length){
+            currentDestination = enemyHQLocation;
         }
     }
 

@@ -270,8 +270,9 @@ public class BotCarrier extends Explore{
         }
         boolean canSenseDest = rc.canSenseLocation(movementDestination);
         
-        if (targetedIslandId == -1 && canSenseDest)
-            targetedIslandId = rc.senseIsland(movementDestination);
+        // if (targetedIslandId == -1 && canSenseDest)
+        //     targetedIslandId = rc.senseIsland(movementDestination);
+        if (canSenseDest) targetedIslandId = rc.senseIsland(movementDestination);
 
         if (!canSenseDest || rc.senseTeamOccupyingIsland(targetedIslandId) == Team.NEUTRAL){
             // TODO: Can be removed if exceeding overall bytecode limits.
