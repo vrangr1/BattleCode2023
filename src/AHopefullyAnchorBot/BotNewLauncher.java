@@ -2,7 +2,7 @@ package AHopefullyAnchorBot;
 
 import battlecode.common.*;
 
-public class BotLauncher extends CombatUtils{
+public class BotNewLauncher extends CombatUtils{
 
     private enum Status {
         BORN, // State at start of first turn
@@ -36,21 +36,25 @@ public class BotLauncher extends CombatUtils{
         switch(launcherState){
             // When born, fight or decide to march/explore
             case BORN:
-                // Start engaging if enemy in vision [ENGAGING]
+                // Start engaging if enemy in vision -> [ENGAGING]
                 if (vNonHQEnemies > 0){
                     launcherState = Status.ENGAGING;
                 }
-                // Else go march to combat location, otherwise explore [MARCHING|EXPLORE]
+                // Else go march to combat location, otherwise explore -> [MARCHING|EXPLORE]
                 else {
                     closerCombatDestination();
                 }
                 break;
             // We were flanking last turn
             case FLANKING:
+                // Flanked successfully -> [ATTACKING]
+                if (inRNonHQEnemies > 0) {
+                    chooseTargetAndAttack(inRangeEnemies);
+                }
                 // No enemy in vision
                 if (vNonHQEnemies == 0){
                     launcherState = Status.GUARDING;
-                }
+                } 
                 break;
             case ENGAGING:
                 if (vNonHQEnemies == 0) launcherState = Status.FLANKING;
@@ -101,7 +105,6 @@ public class BotLauncher extends CombatUtils{
         }
         if (rc.isActionReady() && inRNonHQEnemies > 0) {
             chooseTargetAndAttack(inRangeEnemies);
-            launcherState = Status.ATTACKING;
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
     }
@@ -164,6 +167,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		if (bestTarget != null) {
             rc.attack(bestTarget.location);
+            launcherState = Status.ATTACKING;
 		}
 	}
 
@@ -183,20 +187,22 @@ public class BotLauncher extends CombatUtils{
 		}
 		if (allyIsFighting) 
 			if (Movement.tryMoveInDirection(closestHostileLocation)) {
-				rc.setIndicatorString("Trying to help");
+                launcherState = Status.FLANKING;
                 return true;
             }
 		return false;
 	}
 
     private static boolean tryMoveToAttackProductionUnit(RobotInfo closestHostile) throws GameActionException {
-        if (closestHostile == null) return false;
-		if (closestHostile.type.canAttack() || closestHostile.type == RobotType.HEADQUARTERS) 
+        if (closestHostile == null || closestHostile.type.canAttack() || closestHostile.type == RobotType.HEADQUARTERS) {
             return false;
-	    pathing.setAndMoveToDestination(closestHostile.location);
-        if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
-            rc.setIndicatorString("Trying to attack production unit");
-            return true;
+        }
+        else {
+	        pathing.setAndMoveToDestination(closestHostile.location);
+            if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
+                launcherState = Status.PURSUING;
+                return true;
+            }
         }
 		return false;
 	}
@@ -219,9 +225,12 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() > closestHostile.health)) {
-			if (Movement.tryMoveInDirection(closestHostile.location))
+			if (Movement.tryMoveInDirection(closestHostile.location)){
+                launcherState = Status.FLANKING;
                 return true;
+            }
             else if(numNearbyAllies >= 1.5 * numNearbyHostiles && Movement.tryForcedMoveInDirection(closestHostile.location)){
+                launcherState = Status.FLANKING;
                 return true;
             }
             else {
@@ -293,7 +302,9 @@ public class BotLauncher extends CombatUtils{
             if (rc.isActionReady() && inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
-			return Movement.tryForcedMoveInDirection(retreatTarget);
+			boolean didRetreat = Movement.tryForcedMoveInDirection(retreatTarget);
+            if (didRetreat) launcherState = Status.RETREATING;
+            return didRetreat;
 		}
 		return false;
 	}
@@ -304,23 +315,19 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered(visibleEnemies)){
-            launcherState = Status.RETREATING;
             return true;
         }
 
         if (rc.isActionReady()){
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
-                launcherState = Status.ATTACKING;
             }
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
                 if(tryMoveToHelpAlly(closestHostile)) {
-                    launcherState = Status.FLANKING;
                     return true;
                 }
                 if(tryMoveToAttackProductionUnit(closestHostile)) {
-                    launcherState = Status.PURSUING;
                     return true;
                 }
             }
@@ -328,20 +335,17 @@ public class BotLauncher extends CombatUtils{
         if (rc.isMovementReady()){
             // Most important function
             if (inRNonHQEnemies > 0 && tryToBackUpToMaintainMaxRangeLauncher(visibleEnemies)) {
-                launcherState = Status.FLANKING;
+                launcherState = Status.RETREATING;
                 return true;
             }
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (tryMoveToHelpAlly(closestHostile)) {
-                launcherState = Status.FLANKING;
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
             if (tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) {
-                launcherState = Status.FLANKING;
                 return true;
             }
             if (tryMoveToAttackProductionUnit(closestHostile)) {
-                launcherState = Status.PURSUING;
                 return true;
             }
         }

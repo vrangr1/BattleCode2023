@@ -80,7 +80,7 @@ public class CombatUtils extends Utils{
         return closestCombatUnit;
 	}
 
-    public static boolean tryToBackUpToMaintainMaxRangeSoldier(RobotInfo[] visibleHostiles) throws GameActionException {
+    public static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
 		int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (RobotInfo hostile : visibleHostiles) {
