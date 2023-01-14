@@ -3,29 +3,39 @@ package AFirstSubmissionBot;
 import battlecode.common.*;
 
 public class BotAmplifier extends Explore{
+
+    private enum Status{
+        BORN,
+        SPREADING,
+        BATTLE_COMM,
+        FLEEING,
+        ANCHOR_FOLLOWER,
+    }
+
+
+    private static Status amplifierState = Status.BORN;
     private static RobotInfo[] visibleEnemies;
     private static RobotInfo[] visibleAllies;
     private static int commAllyRobots = 0;
     private static int vNonHQEnemies = 0;
+    private static MapLocation closestEnemyLocation;
 
     public static void initAmplifier() throws GameActionException{
         updateVision();
-        if (vNonHQEnemies == 0 && commAllyRobots > 0){
-            Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
-            if (away!=null)
-                Movement.tryMoveInDirection(explore(away));
-        }
     }
 
     public static void runAmplifier() throws GameActionException{
+        closestEnemyLocation = null;
         updateVision();
         sendCombatLocation(visibleEnemies);
         if (vNonHQEnemies == 0 && commAllyRobots > 0){
             Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
-            if (away!=null)
-                Movement.tryMoveInDirection(explore(away));
+            if (away!=null && Movement.tryMoveInDirection(explore(away))){
+                // amplifierState = Status.SPREADING;
+            }
         }
         if (Clock.getBytecodesLeft() > 700) findAndWriteWellLocationsToComms();
+        rc.setIndicatorString(amplifierState.toString() + " " + closestEnemyLocation);
     }
 
     private static Direction directionAwayFromAmplifierAndHQ(RobotInfo[] givenRobots){
@@ -75,9 +85,12 @@ public class BotAmplifier extends Explore{
     private static boolean sendCombatLocation(RobotInfo[] visibleHostiles) throws GameActionException{
         if (vNonHQEnemies > 0){
 			RobotInfo closestHostile = CombatUtils.getClosestUnitWithCombatPriority(visibleHostiles);
-            if (closestHostile != null)
-				Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
-            return true;
+            if (closestHostile != null){
+                closestEnemyLocation = closestHostile.getLocation();
+                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
+                amplifierState = Status.BATTLE_COMM;
+                return true;
+            }
         }
         return false;
     }

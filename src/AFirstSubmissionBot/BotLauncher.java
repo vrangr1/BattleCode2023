@@ -88,7 +88,7 @@ public class BotLauncher extends CombatUtils{
             findNewCombatLocation();
         }
         if (visibleEnemies.length == 0 && rc.isMovementReady()) {
-            if (pathing.getCurrentDestination() == null && currentDestination != null) {
+            if (pathing.getCurrentDestination() != currentDestination && currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
             }
             if (launcherState == Status.MARCHING) {

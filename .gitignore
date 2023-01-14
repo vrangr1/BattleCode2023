@@ -201,3 +201,5 @@ fabric.properties
 .vscode/
 
 p_scripts/*
+
+src/OTCBot
