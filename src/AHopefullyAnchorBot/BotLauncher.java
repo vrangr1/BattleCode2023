@@ -11,6 +11,7 @@ public class BotLauncher extends CombatUtils{
         MARCHING, // Going to a location given by comms
         PURSUING,
         ENGAGING,
+        ATTACKING,
         FLANKING,
         GUARDING,
         RETREATING,
@@ -28,26 +29,27 @@ public class BotLauncher extends CombatUtils{
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
-        if (currentDestination == null) {
-            currentDestination = CENTER_OF_THE_MAP;
-            launcherState = Status.EXPLORE;
-        }
-        else{
-            launcherState = Status.MARCHING;
-        }
     }
 
     private static void FSM() throws GameActionException{
         switch(launcherState){
+            // When born or decide to march/explore
             case BORN:
+                // Start engaging if enemy in vision [ENGAGING]
                 if (vNonHQEnemies > 0){
                     launcherState = Status.ENGAGING;
                 }
+                // Else go march to combat location, otherwise explore [MARCHING|EXPLORE]
                 else {
-                    opportunisticCombatDestination();
+                    closerCombatDestination();
                 }
+                break;
+            // We were flanking last turn
             case FLANKING:
-                if (vNonHQEnemies == 0) launcherState = Status.GUARDING;
+                // No enemy in vision
+                if (vNonHQEnemies == 0){
+                    launcherState = Status.GUARDING;
+                }
                 break;
             case ENGAGING:
                 if (vNonHQEnemies == 0) launcherState = Status.FLANKING;
@@ -55,7 +57,7 @@ public class BotLauncher extends CombatUtils{
             case MARCHING:
                 if (vNonHQEnemies > 0) launcherState = Status.ENGAGING;
                 else{
-                    opportunisticCombatDestination();
+                    closerCombatDestination();
                 }
                 break;
             case GUARDING:
@@ -74,7 +76,7 @@ public class BotLauncher extends CombatUtils{
 
         standOff = false;
         if (vNonHQEnemies == 0) {
-            opportunisticCombatDestination();
+            closerCombatDestination();
         }
 
         tryToMicro();
@@ -94,7 +96,7 @@ public class BotLauncher extends CombatUtils{
         }
         if (rc.isActionReady() && inRangeEnemies.length > 0) {
             chooseTargetAndAttack(inRangeEnemies);
-            launcherState = Status.ENGAGING;
+            launcherState = Status.ATTACKING;
         }
         rc.setIndicatorString(launcherState.toString());
     }
@@ -299,7 +301,7 @@ public class BotLauncher extends CombatUtils{
         if (rc.isActionReady()){
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
-                launcherState = Status.ENGAGING;
+                launcherState = Status.ATTACKING;
             }
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
@@ -350,21 +352,22 @@ public class BotLauncher extends CombatUtils{
         }
         return false;
     }
-
+    
     // If our current destination has no enemies left, move to the nearest new location with combat
     private static boolean findNewCombatLocation() throws GameActionException{
-        if (currentDestination == null || (visibleEnemies.length == 0 && rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
+        if (currentDestination == null || (vNonHQEnemies == 0 && rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null) currentDestination = combatLocation;
+            pathing.setNewDestination(currentDestination);
             return true;
         }
         return false;
     }
 
     /**
-    * This will try to update the destination of the soldier so as to not make it go away from fights to a predetermined location.
+    * This will try to update the destination of the soldier so as to not make it go away from closer fights
     */
-    private static void opportunisticCombatDestination() throws GameActionException{
+    private static void closerCombatDestination() throws GameActionException{
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (nearestCombatLocation == null){
             currentDestination = Explore.explore();
