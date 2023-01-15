@@ -39,6 +39,7 @@ public class BotCarrier extends Utils{
     private static boolean[] ignoreLocations;
     private static boolean returnEarly = false;
     private static Status carrierStatus = null;
+    private static ResourceType prioritizedResource;
 
     public static void initCarrier() throws GameActionException{
         carrierStatus = Status.BORN;
@@ -56,6 +57,7 @@ public class BotCarrier extends Utils{
         collectAnchorHQidx = -1;
         returnEarly = false;
         rng = new Random(rc.getRoundNum() + 6147);
+        prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
         islandViable = new boolean[ISLAND_COUNT];
         for (int i = 0; i < ISLAND_COUNT; i++)
             islandViable[i] = true;
@@ -109,7 +111,7 @@ public class BotCarrier extends Utils{
             loc = locations[i];
             assert loc != null : "locations[i] != null";
             assert loc.x != -1 : "locations[i].x != -1";
-            assert !loc.equals(givenLoc) : "locations[i].equals(givenLoc)";
+            assert !loc.equals(givenLoc) : "locations[i].equals(givenLoc); round num: " + rc.getRoundNum() + "; id: " + rc.getID() + "; loc: " + loc + "; givenLoc: " + givenLoc;
         }
     }
 
@@ -498,19 +500,40 @@ public class BotCarrier extends Utils{
     }
 
     /**
+     * Finds nearest well of the given type in vision.
+     * @return nearest well in vision if one exists. Returns null otherwise
+     * @throws GameActionException
+     * @BytecodeCost : ~ 100 + 10 * [well count in vision]
+     */
+    private static MapLocation findNearestWellInVision(ResourceType resourceType) throws GameActionException{
+        WellInfo[] nearbyWells = rc.senseNearbyWells(resourceType);
+        MapLocation nearestLoc = null;
+        int nearestDist = -1, curDist;
+        for (WellInfo well : nearbyWells){
+            MapLocation loc = well.getMapLocation();
+            curDist = currentLocation.distanceSquaredTo(loc);
+            if (nearestLoc == null || curDist < nearestDist){
+                nearestLoc = loc;
+                nearestDist = curDist;
+            }
+        }
+        return nearestLoc;
+    }
+
+    /**
      * Find a Well location from which resources are to be collected. First try to find in comms. If that location is null or not in vision, try to find out if there's a location in vision that is better
      * @throws GameActionException
      * @BytecodeCost : ~ 350
      */
     private static void getAndSetWellLocation() throws GameActionException{
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION);
+        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource));
         if (commsLoc != null && rc.canSenseLocation(commsLoc)){
             setWellDestination(commsLoc);
             return;
         }
-        MapLocation senseLoc = findNearestWellInVision();
+        MapLocation senseLoc = findNearestWellInVision(prioritizedResource);
         if (senseLoc != null && rc.canWriteSharedArray(0, 0))
-            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.SHAFlag.WELL_LOCATION);
+            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.resourceFlag(prioritizedResource));
         if (senseLoc != null && commsLoc != null){
             if (currentLocation.distanceSquaredTo(commsLoc) <= currentLocation.distanceSquaredTo(senseLoc))
                 setWellDestination(commsLoc);
@@ -557,7 +580,7 @@ public class BotCarrier extends Utils{
         movementWrapper(movementDestination);
         if (desperationIndex < 5) return;
         if (rc.canWriteSharedArray(0, 0))
-            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION, movementDestination);
+            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource), movementDestination);
         desperationIndex = 12;
         movementDestination = null;
         inPlaceForCollection = false;
@@ -575,10 +598,8 @@ public class BotCarrier extends Utils{
         if (desperationIndex > 5) return;
         if (returnToHQ){
             assert movementDestination != null : "movementDestination != null in gather resources";
-            if (goingToCollectAnchor){
-                // assertNotHeadquarterLocation(movementDestination);
+            if (goingToCollectAnchor)
                 carrierStatus = Status.TRANSIT_ANCHOR_COLLECTION;
-            }
             else carrierStatus = Status.TRANSIT_RES_DEP;
             movementWrapper(movementDestination);
             return;

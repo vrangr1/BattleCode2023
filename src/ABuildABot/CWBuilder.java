@@ -83,7 +83,7 @@ public class CWBuilder extends Utils{
         return minLaunchers;
     }
 
-    public static void initCWBuilder(){
+    public static void initBuilder(){
         carrierScore = 0;
         launcherScore = 0;
         amplifierScore = 0;
@@ -94,7 +94,7 @@ public class CWBuilder extends Utils{
         if (minLauncherScore > getMinCarriers()) minLauncherScore = getMinCarriers();
     }
 
-    private static void updateCWBuilder() throws GameActionException{
+    public static void updateBuilder() throws GameActionException{
         launcherScore = Math.max(Comms.getRobotScore(RobotType.LAUNCHER), minLauncherScore);
         carrierScore = Comms.getRobotScore(RobotType.CARRIER);
         // amplifierScore = Comms.getRobotScore(RobotType.AMPLIFIER);
@@ -182,7 +182,7 @@ public class CWBuilder extends Utils{
     private static boolean tryBuildLauncher() throws GameActionException{
         // if (Comms.getRobotCount(RobotType.LAUNCHER) >= getMinLaunchers()) return false;
 
-        if (!Builder.hasResourcesToBuild(RobotType.LAUNCHER, 2)) return false;
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, 2)) return false;
 
         if (tryConstructEnvelope(RobotType.LAUNCHER, Comms.findNearestEnemyHeadquarterLocation())){
             Comms.writeScore(RobotType.LAUNCHER, updateScore(RobotType.LAUNCHER, launcherScore));
@@ -193,7 +193,7 @@ public class CWBuilder extends Utils{
 
     private static boolean tryBuildCarrier() throws GameActionException{
 
-        if (Builder.adamantium >= MIN_ADAMANTIUM_STOP_CARRIERS) {
+        if (BuilderWrapper.adamantium >= MIN_ADAMANTIUM_STOP_CARRIERS) {
             if (carrierScore <= launcherScore) {
                 //we don't build it if too much lead
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
@@ -206,9 +206,10 @@ public class CWBuilder extends Utils{
             // || 
             rc.getRoundNum() - lastBuildTurn <= MIN_WAIT_CARRIERS) && carrierScore > launcherScore) return false;
 
-        if (!Builder.hasResourcesToBuild(RobotType.CARRIER, 1)) return false;
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1)) return false;
+        ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
 
-        if (tryConstructEnvelope(RobotType.CARRIER, Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION))) {
+        if (tryConstructEnvelope(RobotType.CARRIER, Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource)))) {
             Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
             return true;
         }
@@ -224,21 +225,21 @@ public class CWBuilder extends Utils{
         // if (!shouldBuildAnchor()) return false;
         // if (comm.builderAlive()) return false;
 
-        if (!Builder.hasResourcesToBuild(Anchor.STANDARD, 1) || !Builder.hasResourcesToBuild(RobotType.LAUNCHER, 1)) return false;
+        if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1) || !BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, 1)) return false;
 
         System.out.println("trying to build standard anchor");
         if (rc.canBuildAnchor(Anchor.STANDARD)){
             System.out.println("built standard anchor");
             rc.buildAnchor(Anchor.STANDARD);
             Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
-            Builder.sendAnchorCollectionCommand();
+            BuilderWrapper.sendAnchorCollectionCommand();
             return true;
         }
         return false;
     }
 
     public static boolean tryBuildAmplifier() throws GameActionException{
-        if (!Builder.hasResourcesToBuild(RobotType.AMPLIFIER, 2)) return false;
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.AMPLIFIER, 2)) return false;
         
         if (tryConstructEnvelope(RobotType.AMPLIFIER, Comms.findNearestEnemyHeadquarterLocation())){
             Comms.writeScore(RobotType.AMPLIFIER, updateScore(RobotType.AMPLIFIER, amplifierScore));
@@ -260,8 +261,6 @@ public class CWBuilder extends Utils{
         //     tryConstructSage();
         //     tryBuildSoldier();
         // }
-
-        updateCWBuilder();
 
         if (tryBuildCarrier()) return;
         if (tryBuildLauncher()) return;

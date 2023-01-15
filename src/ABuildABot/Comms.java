@@ -54,10 +54,10 @@ public class Comms extends Utils{
         COLLECT_ANCHOR,                     // 0x3
 
         // WELLS CHANNELS MESSAGES' TYPES
-        WELL_LOCATION,                      // 0x4
-        // ADAMANTIUM_WELL_LOCATION,           // 0x5
-        // MANA_WELL_LOCATION,                 // 0x6
-        // ELIXIR_WELL_LOCATION,               // 0x7
+        // WELL_LOCATION,                      // 0x4
+        ADAMANTIUM_WELL_LOCATION,           // 0x5
+        MANA_WELL_LOCATION,                 // 0x6
+        ELIXIR_WELL_LOCATION,               // 0x7
 
         // ISLAND CHANNELS MESSAGES' TYPES
         OCCUPIED_ISLAND,                    // 0x8
@@ -108,6 +108,20 @@ public class Comms extends Utils{
 
     public static int getNumChannelsUsed(){
         return channelsUsed;
+    }
+
+    public static SHAFlag resourceFlag(ResourceType resourceType){
+        switch(resourceType){
+            case ADAMANTIUM:
+                return SHAFlag.ADAMANTIUM_WELL_LOCATION;
+            case MANA:
+                return SHAFlag.MANA_WELL_LOCATION;
+            case ELIXIR:
+                return SHAFlag.ELIXIR_WELL_LOCATION;
+            default: assert false;
+        }
+        assert false;
+        return null;
     }
 
 
@@ -208,7 +222,7 @@ public class Comms extends Utils{
             if (flag == SHAFlag.EMPTY_MESSAGE){
                 writeSHAFlagMessage(headquarterLoc, SHAFlag.HEADQUARTER_LOCATION, i);
                 commsHeadquarterCount = (i - START_CHANNEL_BANDS)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
-                Builder.setHeadquarterIndex(i + 2);
+                BuilderWrapper.setHeadquarterIndex(i + 2);
                 break;
             }
             else if (flag == SHAFlag.HEADQUARTER_LOCATION){
@@ -347,7 +361,7 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
      * @return the channel index to which the message was written
      * @BytecodeCost<pre>
-     *      When COMM_TYPE is WELLS   : ~100 at max
+     *      When COMM_TYPE is WELLS   : ~200 at max
      *When COMM_TYPE is ISLAND : ~100 at max
      *When COMM_TYPE is COMBAT : ~200 at max
      * </pre>
@@ -366,7 +380,7 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
      * @return the channel index to which the message was written
      * @BytecodeCost<pre>
-     *      When commType is LEAD   : ~100 at max
+     *      When commType is WELLS   : ~200 at max
      *When commType is ISLAND : ~200 at max
      *When commType is COMBAT : ~200 at max
      * </pre>
@@ -382,7 +396,7 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
      * @return the channel index to which the message was written
      * @BytecodeCost<pre>
-     *      When commType is LEAD   : ~100 at max
+     *      When commType is WELLS   : ~200 at max
      *When commType is ISLAND : ~200 at max
      *When commType is COMBAT : ~200 at max
      * </pre>
@@ -401,7 +415,7 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
      * @return the channel index to which the message was written
      * @BytecodeCost<pre>
-     *      When commType is LEAD   : ~100 at max
+     *      When commType is WELLS   : ~200 at max
      *When commType is ISLAND : ~200 at max
      *When commType is COMBAT : ~200 at max
      * </pre>
@@ -419,7 +433,7 @@ public class Comms extends Utils{
      * @param flag : the SHAFlag flag that denotes the type of the message: COMBAT_LOCATION, ADAMANTIUM_WELL_LOCATION, etc.
      * @return the channel index to which the message was written. If no channels of strictly lesser priority can be found. Returns -1.
      * @BytecodeCost<pre>
-     *      When commType is LEAD   : ~100 at max
+     *      When commType is WELLS   : ~200 at max
      *When commType is ISLAND : ~200 at max
      *When commType is COMBAT : ~200 at max
      * </pre>
@@ -883,5 +897,29 @@ public class Comms extends Utils{
             }
         }
         return null;
+    }
+
+
+
+    ////////////////////////////////////////
+    // SURVEY METHODS //////////////////////
+    ////////////////////////////////////////
+
+    /**
+     * Survey the vision radius for unoccupied islands and write them to the communication channels.
+     * @throws GameActionException
+     * @BytecodeCost ~ 220 + (11)
+     */
+    public static void surveyForIslands() throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0) && rc.getRoundNum() < 3) return;
+        COMM_TYPE type = COMM_TYPE.ISLAND;
+        int[] islandIDs = rc.senseNearbyIslands();
+        MapLocation[] locations;
+        if (islandIDs.length == 0) return;
+        for (int i = islandIDs.length; i-->0;){
+            if (rc.senseTeamOccupyingIsland(islandIDs[i]) != Team.NEUTRAL) continue;
+            locations = rc.senseNearbyIslandLocations(islandIDs[i]);
+            writeAndOverwriteLesserPriorityMessage(type, locations[0], SHAFlag.UNOCCUPIED_ISLAND);
+        }
     }
 }

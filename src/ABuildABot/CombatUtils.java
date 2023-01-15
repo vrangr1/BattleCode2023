@@ -15,6 +15,16 @@ public class CombatUtils extends Utils{
         }
     }
 
+    public static boolean isMilitaryUnit(RobotInfo bot){
+        return isMilitaryUnit(bot.type);
+    }
+
+    public static boolean hasMilitarUnit(RobotInfo[] bots){
+        for (int i = bots.length; --i >= 0;)
+            if (isMilitaryUnit(bots[i])) return true;
+        return false;
+    }
+
 	public static boolean isMaxHealth(RobotInfo bot){
 		return (bot.getHealth() == bot.type.getMaxHealth());
 	}

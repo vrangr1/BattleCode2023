@@ -2,23 +2,38 @@ package ABuildABot;
 
 import battlecode.common.*;
 
-public class Builder extends Utils {
+public class BuilderWrapper extends Utils {
     private static int headquarterIndex = -1;
     public static int adamantium, mana, elixir;
-    private static final boolean USING_CWBUILDER = true;
+    private static boolean elixirWellFound = false;
+
+    private enum BUILDERS{
+        CWBUILDER,
+        SAVVYBUILDER
+    };
+
+    private static final BUILDERS CURRENT_BUILDER = BUILDERS.CWBUILDER;
 
     public static void initBuilder() throws GameActionException{
         adamantium = 0;
         mana = 0;
         elixir = 0;
-        if (USING_CWBUILDER)
-            CWBuilder.initCWBuilder();
+        switch(CURRENT_BUILDER){
+            case CWBUILDER: CWBuilder.initBuilder(); break;
+            case SAVVYBUILDER: SavvyBuilder.initBuilder(); break;
+            default: break;
+        }
     }
 
     private static void updateBuilder() throws GameActionException{
         adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         mana = rc.getResourceAmount(ResourceType.MANA);
         elixir = rc.getResourceAmount(ResourceType.ELIXIR);
+        switch(CURRENT_BUILDER){
+            case CWBUILDER: CWBuilder.updateBuilder(); break;
+            case SAVVYBUILDER: SavvyBuilder.updateBuilder(); break;
+            default: break;
+        }
     }
 
     public static boolean hasResourcesToBuild(RobotType type, int count){
@@ -52,24 +67,8 @@ public class Builder extends Utils {
         return false;
     }
 
-    private static void tryToBuild(RobotType robotType, MapLocation loc) throws GameActionException{
-        if (rc.canBuildRobot(robotType, loc))
-            rc.buildRobot(robotType, loc);
-    }
-
     public static void setHeadquarterIndex(int index){
         headquarterIndex = index;
-    }
-
-    private static void tryToBuild(Anchor anchor) throws GameActionException{
-        if (rc.canBuildAnchor(anchor)){
-            rc.buildAnchor(anchor);
-            MapLocation loc = Comms.readLocationFromMessage(rc.readSharedArray(headquarterIndex - 2));
-            assert loc.equals(currentLocation) : "has to be";
-            int num_anchors = rc.getNumAnchors(Anchor.STANDARD);
-            assert num_anchors - 1 == Comms.readMessageWithoutSHAFlag(headquarterIndex) : "num anchor correctness";
-            Comms.writeSHAFlagMessage(num_anchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterIndex);
-        }
     }
 
     public static void sendAnchorCollectionCommand() throws GameActionException{
@@ -81,30 +80,26 @@ public class Builder extends Utils {
         Comms.writeSHAFlagMessage(numAnchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterIndex);
     }
 
+    public static ResourceType getPrioritizedResource(){
+        return (rc.getRoundNum() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA;
+    }
+
+    public static ResourceType mostNeedOfResource() throws GameActionException{
+        // if ()
+        if (Math.abs(adamantium - mana) > 500){
+            if (adamantium > mana) return ResourceType.MANA;
+            return ResourceType.ADAMANTIUM;
+        }
+        if(elixirWellFound && elixir < 100) return ResourceType.ELIXIR;
+        return null;
+    }
+
     public static void buildUnits() throws GameActionException{
         updateBuilder();
-        if (USING_CWBUILDER){
-            CWBuilder.buildUnits();
-            return;
-        }
-
-        Direction dir = directions[rng.nextInt(directions.length)];
-        MapLocation newLoc = rc.getLocation().add(dir);
-
-        if (rc.getRoundNum() % 30 == 0){
-            rc.setIndicatorString("Trying to build a amplifier");
-            tryToBuild(RobotType.AMPLIFIER, newLoc);
-        } else if (rc.getRoundNum() % 40 == 0){
-            rc.setIndicatorString("Trying to build a carrier");
-            tryToBuild(RobotType.CARRIER, newLoc);
-        } 
-        else if (rc.getRoundNum() % 70 == 0){
-            rc.setIndicatorString("Trying to build an anchor");
-            tryToBuild(Anchor.STANDARD);
-        }
-        else{
-            rc.setIndicatorString("Trying to build a launcher");
-            tryToBuild(RobotType.LAUNCHER, newLoc);
+        switch(CURRENT_BUILDER){
+            case CWBUILDER: CWBuilder.buildUnits(); break;
+            case SAVVYBUILDER: SavvyBuilder.buildUnits(); break;
+            default: break;
         }
     }
 }

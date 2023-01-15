@@ -253,25 +253,17 @@ public class Utils extends Globals{
         return optLoc;
     }
 
-    // public static Comms.SHAFlag getWellFlag(WellInfo well){
-    //     switch(well.getResourceType()){
-    //         case ADAMANTIUM: return Comms.SHAFlag.ADAMANTIUM_WELL_LOCATION;
-    //         case MANA: return Comms.SHAFlag.MANA_WELL_LOCATION;
-    //         case ELIXIR: return Comms.SHAFlag.ELIXIR_WELL_LOCATION;
-    //         default: assert false; return null;
-    //     }
-    // }
-
     public static void findAndWriteWellLocationsToComms() throws GameActionException{
         WellInfo[] nearbyWells = rc.senseNearbyWells();
         MapLocation loc;
+        Comms.SHAFlag flag;
         for (WellInfo well : nearbyWells){
             loc = well.getMapLocation();
-            // if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, getWellFlag(well)))
-            if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION))
+            flag = Comms.resourceFlag(well.getResourceType());
+            if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, flag))
                 continue;
             if (rc.canWriteSharedArray(0, 0))
-                Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, Comms.SHAFlag.WELL_LOCATION);
+                Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, flag);
         }
     }
 
