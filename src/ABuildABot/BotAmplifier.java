@@ -32,6 +32,7 @@ public class BotAmplifier extends Explore{
         sendCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
+            exploreDir = exploreDir.opposite();
             amplifierState = Status.FLEEING;
         }
         else if (rc.getRoundNum() < 25){
@@ -47,14 +48,8 @@ public class BotAmplifier extends Explore{
 
     private static void amplifierMove() throws GameActionException{
         if(rc.isMovementReady()){
-            Direction away; 
-            if (commAllyRobots > 0){
-                away = directionAwayFromAmplifierAndHQ(visibleAllies);
-            }
-            else{
-                away = Direction.CENTER;
-            }
-            if (away!=null && Movement.tryMoveInDirection(explore(away))){
+            Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
+            if (Movement.tryMoveInDirection(explore(away))){
                 amplifierState = Status.SPREADING;
             }
         }

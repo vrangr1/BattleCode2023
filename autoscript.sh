@@ -31,7 +31,7 @@ fi
 
 count=0
 for i in maptestsmall SmallElements \
-    AllElements DefaultMap
+    AllElements DefaultMap OctDoors
 do
   count=$[count+1]
   if test $count -eq 1; then
@@ -46,7 +46,7 @@ do
   )
   wait
 done
-echo "Grepping results"
+echo "========Grepping results========="
 # grep -F "wins" logs/log.log >> logs/results.log
 # grep -E "vs. |wins" logs/log.log >> logs/detailed_results.log
 # grep -E "Warning,|vs. " logs/log.log >> logs/warnings.log
@@ -69,3 +69,4 @@ eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M 
 #2: SmallElements : 20 x 20 : 400
 #3: AllElements   : 30 x 30 : 900
 #4: DefaultMap    : 32 x 32 : 1024
+#5: OctDoors      : 45 x 45 : 2025
