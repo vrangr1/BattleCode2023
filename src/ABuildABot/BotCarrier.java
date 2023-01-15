@@ -20,6 +20,8 @@ public class BotCarrier extends Utils{
         ATTACKING,
         PLACING_ANCHOR,
         ANCHOR_NOT_FOUND,
+        DESPERATE,
+        OCCUPIED__FINDING_ANOTHER_ISLAND,
     }
 
     private static boolean movingToIsland = false;
@@ -111,7 +113,7 @@ public class BotCarrier extends Utils{
             loc = locations[i];
             assert loc != null : "locations[i] != null";
             assert loc.x != -1 : "locations[i].x != -1";
-            assert !loc.equals(givenLoc) : "locations[i].equals(givenLoc); round num: " + rc.getRoundNum() + "; id: " + rc.getID() + "; loc: " + loc + "; givenLoc: " + givenLoc;
+            assert !loc.equals(givenLoc) : "locations[i].equals(givenLoc); round num: " + rc.getRoundNum() + "; id: " + rc.getID() + "; currentLocation: " + rc.getLocation() + "; targetLoc: " + givenLoc;
         }
     }
 
@@ -120,7 +122,7 @@ public class BotCarrier extends Utils{
         returnEarly = false;
         updateVision();
         MapLocation loc = null;
-        if (!goingToCollectAnchor){
+        if (rc.getAnchor() == null && !goingToCollectAnchor){
             loc = Comms.findIfAnchorProduced();
             if (loc != null){
                 returnToHQ = true;
@@ -374,7 +376,8 @@ public class BotCarrier extends Utils{
             movementWrapper(movementDestination);
             return;
         }
-        rc.setIndicatorString("Targeted island already occupied. Finding new island...");
+        // rc.setIndicatorString("Targeted island already occupied. Finding new island...");
+        carrierStatus = Status.OCCUPIED__FINDING_ANOTHER_ISLAND;
         assert targetedIslandId != -1 : "targetedIslandId != -1. targeted island occupied";
         // islandViable[targetedIslandId - 1] = false;
         assert movementDestination != null : "movementDestination != null";
@@ -387,7 +390,7 @@ public class BotCarrier extends Utils{
         // I have an anchor. So singularly focusing on getting it to the first island I can find.
         // TODO: Add conditions and actions for behavior under attack.
         if (returnEarly) return;
-        if (rc.canPlaceAnchor()){
+        if (rc.canPlaceAnchor() && rc.senseAnchor(rc.senseIsland(rc.getLocation())) == null){
             carrierStatus = Status.PLACING_ANCHOR;
             rc.placeAnchor();
             resetIslandVariables();
@@ -396,8 +399,8 @@ public class BotCarrier extends Utils{
             return;
         }
         if (movingToIsland){
-            moveToIslandAndPlaceAnchor();
             carrierStatus = Status.TRANSIT_TO_ISLAND;
+            moveToIslandAndPlaceAnchor();
             return;
         }
         MapLocation islandLoc = getMeAnIslandLocation();
@@ -583,6 +586,7 @@ public class BotCarrier extends Utils{
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource), movementDestination);
         desperationIndex = 12;
         movementDestination = null;
+        carrierStatus = Status.DESPERATE;
         inPlaceForCollection = false;
     }
 
@@ -623,7 +627,7 @@ public class BotCarrier extends Utils{
 
     private static void endOfTurnUpdate(){
         returnEarly = false;
-        if (carrierStatus == Status.TRANSIT_TO_WELL)
+        if (carrierStatus == Status.TRANSIT_TO_WELL || carrierStatus == Status.TRANSIT_TO_ISLAND)
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
         else
             rc.setIndicatorString(carrierStatus.toString());
