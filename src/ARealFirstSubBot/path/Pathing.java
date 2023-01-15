@@ -74,11 +74,11 @@ public class Pathing extends Utils {
         }
 
         if (rc.getLocation().distanceSquaredTo(target) <= 2) {
-            if (!rc.isLocationOccupied(target)) {
+            // if (!rc.isLocationOccupied(target)) {
                 if (rc.canMove(rc.getLocation().directionTo(target))) {
                     moveTo(rc.getLocation().directionTo(target));
                 }
-            }
+            // }
             return;
         }
 
