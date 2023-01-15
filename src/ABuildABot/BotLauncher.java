@@ -125,6 +125,9 @@ public class BotLauncher extends CombatUtils{
             }
             if (launcherState == Status.MARCHING || launcherState == Status.ISLAND_WORK) {
                 pathing.moveToDestination();
+                if (rc.isMovementReady()){
+                    Movement.tryMoveInDirection(currentDestination);
+                }
             }
             else if (launcherState == Status.EXPLORE) {
                 pathing.setAndMoveToDestination(Explore.explore());
@@ -403,11 +406,12 @@ public class BotLauncher extends CombatUtils{
             rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-            if (combatLocation != null) 
+            if (combatLocation != null){
                 currentDestination = combatLocation;
-            pathing.setNewDestination(currentDestination);
-            launcherState = Status.MARCHING;
-            return true;
+                pathing.setNewDestination(currentDestination);
+                launcherState = Status.MARCHING;
+                return true;
+            }
         }
         return false;
     }

@@ -39,12 +39,12 @@ do
   else
     echo -e "Running map $count: $i"
   fi
-#   (trap 'kill 0' SIGINT;
+  (trap 'kill 0' SIGINT;
 #   ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=$i -PenableProfiler=false run >> logs/log1.log &
   ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=$i -PenableProfiler=false run >> logs/log1.log
   ./gradlew -PteamA=$team2 -PteamB=$team1 -Pmaps=$i -PenableProfiler=false run >> logs/log2.log
-#   )
-#   wait
+  )
+  wait
 done
 echo "Grepping results"
 # grep -F "wins" logs/log.log >> logs/results.log

@@ -443,14 +443,36 @@ public class BotCarrier extends Utils{
     }
 
     private static void attackIfAboutToDie() throws GameActionException{
-        // TODO: Figure out what to do here
-        if (returnEarly) return;
-        carrierStatus = Status.ATTACKING;
+        // if (returnEarly) return;
         if (rc.getWeight() == 0) // Can't even attack...
             return;
-        if (returnToHQ && movementDestination != null && currentLocation.distanceSquaredTo(movementDestination) <= 2)
+        else if (returnToHQ && movementDestination != null && currentLocation.distanceSquaredTo(movementDestination) <= 2)
             return;
-        if (visibleEnemies == null);
+        else if (visibleEnemies.length == 0 || !rc.isActionReady() || rc.getHealth() == MAX_HEALTH)
+            return;
+        else{
+            // TODO: Add move in range and throw resource
+            double possibleDamage = Math.round(rc.getWeight()/5.0);
+            double bestScore = -1.0;
+            MapLocation attackLocation = null;
+            for (int i = visibleEnemies.length; --i >= 0;){
+                RobotInfo curEnemy = visibleEnemies[i];
+                if (rc.canAttack(curEnemy.location) && curEnemy.getType() != RobotType.HEADQUARTERS){
+                    double curScore = curEnemy.health - possibleDamage;
+                    if (curScore <=0)   
+                        curScore += 1000;
+                    if (curScore > bestScore){
+                        bestScore = curScore;
+                        attackLocation = curEnemy.location;
+                    }
+                }
+            }
+            if (attackLocation != null){
+                rc.attack(attackLocation);
+                carrierStatus = Status.ATTACKING;
+                return;
+            }
+        }
     }
 
     private static void setWellDestination(MapLocation loc){
