@@ -51,18 +51,22 @@ echo "========Grepping results========="
 # grep -E "vs. |wins" logs/log.log >> logs/detailed_results.log
 # grep -E "Warning,|vs. " logs/log.log >> logs/warnings.log
 # grep -E "Birth |vs. " logs/log.log >> logs/freezing.log
+grep -E "Warning,|vs. " logs/log1.log >> logs/warnings.log
+echo -e "===========\n" >> logs/warnings.log
+grep -E "Warning,|vs. " logs/log2.log >> logs/warnings.log
+
+grep -E "Birth |vs. " logs/log1.log >> logs/freezing.log
+echo -e "===========\n" >> logs/freezing.log
+grep -E "Birth |vs. " logs/log2.log >> logs/freezing.log 
+
 grep -F "wins" logs/log1.log >> logs/results.log
 echo -e "===========\n" >> logs/results.log
 grep -F "wins" logs/log2.log >> logs/results.log
+
 grep -E "vs. |wins" logs/log1.log >> logs/detailed_results.log
-echo -e "===========\n" >> logs/results.log
+echo -e "===========\n" >> logs/detailed_results.log
 grep -E "vs. |wins" logs/log2.log >> logs/detailed_results.log
-grep -E "Warning,|vs. " logs/log1.log >> logs/warnings.log
-echo -e "===========\n" >> logs/results.log
-grep -E "Warning,|vs. " logs/log2.log >> logs/warnings.log
-grep -E "Birth |vs. " logs/log1.log >> logs/freezing.log
-echo -e "===========\n" >> logs/results.log
-grep -E "Birth |vs. " logs/log2.log >> logs/freezing.log 
+
 elapsed=$(( SECONDS - start_time ))
 eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
 ##1: maptestsmall  : 20 x 20 : 400

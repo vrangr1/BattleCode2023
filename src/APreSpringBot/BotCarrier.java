@@ -626,12 +626,16 @@ public class BotCarrier extends Utils{
         else desperationIndex = 0;
     }
 
-    private static void endOfTurnUpdate(){
+    private static void endOfTurnUpdate() throws GameActionException{
         returnEarly = false;
         if (carrierStatus == Status.TRANSIT_TO_WELL || carrierStatus == Status.TRANSIT_TO_ISLAND)
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
         else
             rc.setIndicatorString(carrierStatus.toString());
+            if (Clock.getBytecodesLeft() > 700){
+                RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
+                CombatUtils.sendGenericCombatLocation(visibleEnemies);
+            }
     }
 
     public static void runCarrier() throws GameActionException{

@@ -73,6 +73,29 @@ public class CombatUtils extends Utils{
 		else return closestUnit;
 	}
 
+    public static RobotInfo getClosestNonHQUnitWithCombatPriority(RobotInfo[] units) {
+        if (units.length == 0) return null;
+		RobotInfo closestUnit = null;
+        RobotInfo closestCombatUnit = null;
+		int minDistSq = Integer.MAX_VALUE;
+        int minCombatDistSq = Integer.MAX_VALUE;
+        int distSq = 0;
+        MapLocation lCR = rc.getLocation();
+		for (int i = units.length; --i >= 0;) {
+            if (units[i].type == RobotType.HEADQUARTERS) continue;
+			distSq = lCR.distanceSquaredTo(units[i].location);
+			if (distSq < minDistSq) {
+				minDistSq = distSq;
+				closestUnit = units[i];
+			}
+            if (isMilitaryUnit(units[i].getType()) && distSq < minCombatDistSq) {
+				minCombatDistSq = distSq;
+				closestCombatUnit = units[i];
+			}
+		}
+        if (closestCombatUnit != null) return closestCombatUnit;
+		else return closestUnit;
+	}
 
     public static RobotInfo getClosestMilitaryUnit(RobotInfo[] units) {
         RobotInfo closestCombatUnit = null;
@@ -91,8 +114,8 @@ public class CombatUtils extends Utils{
 	}
 
     public static boolean sendGenericCombatLocation(RobotInfo[] visibleEnemies) throws GameActionException{
-			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
-            if (closestHostile == null || closestHostile.type == RobotType.HEADQUARTERS) return false;
+			RobotInfo closestHostile = getClosestNonHQUnitWithCombatPriority(visibleEnemies);
+            if (closestHostile == null) return false;
             currentDestination = closestHostile.getLocation();
             if (rc.canWriteSharedArray(0, 0)){
                 Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);

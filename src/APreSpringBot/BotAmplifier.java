@@ -29,7 +29,7 @@ public class BotAmplifier extends Explore{
     public static void runAmplifier() throws GameActionException{
         closestEnemyLocation = null;
         updateVision();
-        sendCombatLocation(visibleEnemies);
+        CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
             exploreDir = exploreDir.opposite();
@@ -149,19 +149,6 @@ public class BotAmplifier extends Explore{
                 vNonHQCombatAllies++;
             }
         }
-    }
-
-    private static boolean sendCombatLocation(RobotInfo[] visibleHostiles) throws GameActionException{
-        if (vNonHQEnemies > 0){
-			RobotInfo closestHostile = CombatUtils.getClosestUnitWithCombatPriority(visibleHostiles);
-            if (closestHostile != null){
-                closestEnemyLocation = closestHostile.getLocation();
-                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
-                amplifierState = Status.BATTLE_COMM;
-                return true;
-            }
-        }
-        return false;
     }
 
 }
