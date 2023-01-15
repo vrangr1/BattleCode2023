@@ -23,6 +23,7 @@ public class BotLauncher extends CombatUtils{
 
     private static RobotInfo[] visibleEnemies;
     private static RobotInfo[] inRangeEnemies;
+    private static RobotInfo[] visibleAllies;
     private static int vNonHQEnemies = 0;
     private static int inRNonHQEnemies = 0;
     private static int enemyHQInVision = 0;
@@ -55,8 +56,11 @@ public class BotLauncher extends CombatUtils{
             findNewCombatLocation();
         }
         moveAfterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE] (Only works with [MARCHING|ISLAND_WORK|EXPLORE])
-        if (rc.isActionReady() && inRNonHQEnemies > 0) {
-            chooseTargetAndAttack(inRangeEnemies);
+        if (rc.isActionReady()) {
+            updateInRangeEnemiesVision();
+            if (inRNonHQEnemies > 0) {
+                chooseTargetAndAttack(inRangeEnemies);
+            }
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
     }
@@ -120,7 +124,7 @@ public class BotLauncher extends CombatUtils{
 
     private static void moveAfterNonMovingCombat() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.isMovementReady()) {
-            if (pathing.getCurrentDestination() != currentDestination && currentDestination != null) {
+            if (currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
             }
             if (launcherState == Status.MARCHING || launcherState == Status.ISLAND_WORK) {
@@ -137,10 +141,13 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void updateVision() throws GameActionException {
+        updateVisibleEnemiesVision();
+        updateInRangeEnemiesVision();
+    }
+    
+    private static void updateVisibleEnemiesVision() throws GameActionException{
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
-        inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
         vNonHQEnemies = 0;
-        inRNonHQEnemies = 0;
         enemyHQInVision = 0;
         for (int i = visibleEnemies.length; --i >= 0;) {
             if (visibleEnemies[i].type != RobotType.HEADQUARTERS) {
@@ -151,6 +158,11 @@ public class BotLauncher extends CombatUtils{
                 enemyHQLocation = visibleEnemies[i].location;
             }
         }
+    }
+
+    private static void updateInRangeEnemiesVision() throws GameActionException{
+        inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
+        inRNonHQEnemies = 0;
         for (int i = inRangeEnemies.length; --i >= 0;) {
             if (inRangeEnemies[i].type != RobotType.HEADQUARTERS) {
                 inRNonHQEnemies++;
@@ -423,7 +435,6 @@ public class BotLauncher extends CombatUtils{
         if (circleEnemyHQ()) return;
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (currentDestination == null && nearestCombatLocation == null){
-            currentDestination = Explore.explore();
             launcherState = Status.EXPLORE;
         }
         else if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
