@@ -33,7 +33,10 @@ public class BotAmplifier extends Explore{
             tryToBackUpToMaintainMaxRangeAmplifier();
             if (amplifierState == Status.FLEEING){
             }
-        } 
+        }
+        // else if (rc.getRoundNum() - BIRTH_ROUND < 25){
+        //     pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
+        // } 
         else if (vNonHQEnemies == 0 && commAllyRobots > 0){
             Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
             if (away!=null && Movement.tryMoveInDirection(explore(away))){

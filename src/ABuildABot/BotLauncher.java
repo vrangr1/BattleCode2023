@@ -32,11 +32,9 @@ public class BotLauncher extends CombatUtils{
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
-        // if (currentDestination == null) {
-        //     currentDestination = CENTER_OF_THE_MAP;
-        //     launcherState = Status.MARCHING;
-        // }
+        setToCenter();
     }
+
 
     public static void runLauncher() throws GameActionException{
         if (TRACKING_LAUNCHER_COUNT) Comms.incrementRobotCount(RobotType.LAUNCHER);
@@ -56,11 +54,19 @@ public class BotLauncher extends CombatUtils{
         else {
             findNewCombatLocation();
         }
-        afterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE] (Only works with [MARCHING|ISLAND_WORK|EXPLORE])
+        moveAfterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE] (Only works with [MARCHING|ISLAND_WORK|EXPLORE])
         if (rc.isActionReady() && inRNonHQEnemies > 0) {
             chooseTargetAndAttack(inRangeEnemies);
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
+    }
+
+    private static void setToCenter() throws GameActionException {
+        if (rc.getRoundNum() < 60) {
+            currentDestination = CENTER_OF_THE_MAP;
+            pathing.setNewDestination(CENTER_OF_THE_MAP);
+            launcherState = Status.MARCHING;
+        }
     }
 
     private static boolean seekEnemyIslandInVision() throws GameActionException {
@@ -112,7 +118,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void afterNonMovingCombat() throws GameActionException {
+    private static void moveAfterNonMovingCombat() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.isMovementReady()) {
             if (pathing.getCurrentDestination() != currentDestination && currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
@@ -395,8 +401,10 @@ public class BotLauncher extends CombatUtils{
         if (circleEnemyHQ()) return true;
         if (currentDestination == null || (vNonHQEnemies == 0 && launcherState != Status.ISLAND_WORK && 
             rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
+            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-            if (combatLocation != null) currentDestination = combatLocation;
+            if (combatLocation != null) 
+                currentDestination = combatLocation;
             pathing.setNewDestination(currentDestination);
             launcherState = Status.MARCHING;
             return true;
@@ -410,11 +418,11 @@ public class BotLauncher extends CombatUtils{
     private static void closerCombatDestination() throws GameActionException{
         if (circleEnemyHQ()) return;
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-        if (nearestCombatLocation == null){
+        if (currentDestination == null && nearestCombatLocation == null){
             currentDestination = Explore.explore();
             launcherState = Status.EXPLORE;
         }
-        else if (currentDestination == null || (!rc.canSenseLocation(currentDestination) && 
+        else if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
             rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
                 currentDestination = nearestCombatLocation;
                 launcherState = Status.MARCHING;
