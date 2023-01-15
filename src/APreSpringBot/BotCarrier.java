@@ -632,10 +632,10 @@ public class BotCarrier extends Utils{
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
         else
             rc.setIndicatorString(carrierStatus.toString());
-            if (Clock.getBytecodesLeft() > 700){
-                RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
-                CombatUtils.sendGenericCombatLocation(visibleEnemies);
-            }
+        if (Clock.getBytecodesLeft() > 700){
+            RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
+            CombatUtils.sendGenericCombatLocation(visibleEnemies);
+        }
     }
 
     public static void runCarrier() throws GameActionException{

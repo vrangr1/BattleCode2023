@@ -1,7 +1,7 @@
 #!/bin/bash
 start_time=$SECONDS
 team1=APreSpringBot
-team2=OBuildABot
+team2=OTCBot
 
 mkdir -p logs
 if test -f "logs/results.log"; then
@@ -31,7 +31,7 @@ fi
 
 count=0
 for i in SmallElements AllElements DefaultMap \
-    OctDoors GrandRing
+    OctDoors GrandRing CloudyOctDoors
 do
   count=$[count+1]
   if test $count -eq 1; then
@@ -61,7 +61,7 @@ grep -E "Birth |vs. " logs/log2.log >> logs/freezing.log
 
 grep -F "wins" logs/log1.log >> logs/results.log
 echo -e "===========\n" >> logs/results.log
-grep -F "wins" logs/log2.log >> logs/results.log
+grep -F --line-buffered "wins" logs/log2.log >> logs/results.log
 
 grep -E "vs. |wins" logs/log1.log >> logs/detailed_results.log
 echo -e "===========\n" >> logs/detailed_results.log
@@ -75,3 +75,4 @@ eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M 
 #4: DefaultMap    : 32 x 32 : 1024
 #5: OctDoors      : 45 x 45 : 2025
 #6: GrandRing     : 60 x 60 : 3600
+#7: CloudyOctDoors: 45 x 45 : 2025
