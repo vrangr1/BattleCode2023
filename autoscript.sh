@@ -1,7 +1,7 @@
 #!/bin/bash
 start_time=$SECONDS
-team1=ABuildABot
-team2=OTCBot
+team1=APreSpringBot
+team2=OBuildABot
 
 mkdir -p logs
 if test -f "logs/results.log"; then
@@ -41,7 +41,7 @@ do
   fi
   (trap 'kill 0' SIGINT;
 #   ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=$i -PenableProfiler=false run >> logs/log1.log &
-  ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=$i -PenableProfiler=false run >> logs/log1.log
+  ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=$i -PenableProfiler=false run >> logs/log1.log &
   ./gradlew -PteamA=$team2 -PteamB=$team1 -Pmaps=$i -PenableProfiler=false run >> logs/log2.log
   )
   wait
