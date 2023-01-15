@@ -400,7 +400,7 @@ public class BotCarrier extends Utils{
         }
         MapLocation islandLoc = getMeAnIslandLocation();
         if (islandLoc == null){
-            // rc.setIndicatorString("can't find an island in vision or in comms. Exploring...");
+            rc.setIndicatorString("can't find an island in vision or in comms. Exploring...");
             // pathing.setAndMoveToDestination(explore());
             carrierStatus = Status.EXPLORE_FOR_ISLANDS;
             movementWrapper();
@@ -547,7 +547,7 @@ public class BotCarrier extends Utils{
             desperationIndex = 12;
         // If outside of action radius
         if (!rc.canActLocation(movementDestination)){
-            // rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
+            rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
             // pathing.setAndMoveToDestination(movementDestination);
             carrierStatus = Status.TRANSIT_TO_WELL;
             movementWrapper(movementDestination);
@@ -602,10 +602,10 @@ public class BotCarrier extends Utils{
 
     private static void endOfTurnUpdate(){
         returnEarly = false;
-        // if (carrierStatus == Status.TRANSIT_TO_WELL)
-        //     rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
-        // else
-        //     rc.setIndicatorString(carrierStatus.toString());
+        if (carrierStatus == Status.TRANSIT_TO_WELL)
+            rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
+        else
+            rc.setIndicatorString(carrierStatus.toString());
     }
 
     public static void runCarrier() throws GameActionException{

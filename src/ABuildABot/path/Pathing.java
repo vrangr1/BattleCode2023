@@ -90,7 +90,6 @@ public class Pathing extends Utils {
             Nav.goTo(target);
             addVisited(rc.getLocation());
         } else {
-            rc.setIndicatorString("Pure move");
             moveTo(dir);
         }
     }

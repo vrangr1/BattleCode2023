@@ -2224,8 +2224,6 @@ public class BotCarrierPathing implements UnitPathing {
             cost = d146;
         }
 
-        rc.setIndicatorString("Cost is " + cost + " " +  ans);
-
         if (cost > 150){
             Nav.goTo(target);
             return null;

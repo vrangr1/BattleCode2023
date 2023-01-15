@@ -209,13 +209,15 @@ public class Nav extends Utils {
         }
     }
 
-    public static void goTo(MapLocation theDest) throws GameActionException {
+    public static boolean goTo(MapLocation theDest) throws GameActionException {
+        if (!rc.isActionReady()) return false;
         if (!theDest.equals(dest)) {
             dest = theDest;
             bugState = BugState.DIRECT;
         }
 
-        if (rc.getLocation().equals(dest)) return;
+        if (rc.getLocation().equals(dest)) return false;
         bugMove();
+        return !rc.isActionReady();
     }
 }

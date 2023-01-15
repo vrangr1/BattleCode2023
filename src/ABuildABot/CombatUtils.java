@@ -80,6 +80,17 @@ public class CombatUtils extends Utils{
         return closestCombatUnit;
 	}
 
+    public static boolean sendGenericCombatLocation(RobotInfo[] visibleEnemies) throws GameActionException{
+			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
+            if (closestHostile == null || closestHostile.type == RobotType.HEADQUARTERS) return false;
+            currentDestination = closestHostile.getLocation();
+            if (rc.canWriteSharedArray(0, 0)){
+                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
+                return true;
+            }
+        return false;
+    }
+
     public static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
 		int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
