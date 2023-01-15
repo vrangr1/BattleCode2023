@@ -83,13 +83,14 @@ public class Pathing extends Utils {
         }
 
         Direction dir = up.bestDir(target);
-
+        
         if (dir == null || !rc.canMove(dir)) return;
         
         if (isVisited(rc.getLocation().add(dir))) {
-            fuzzyMovesLeft = MAX_FUZZY_MOVES;
-            pathTo(target);
+            Nav.goTo(target);
+            addVisited(rc.getLocation());
         } else {
+            rc.setIndicatorString("Pure move");
             moveTo(dir);
         }
     }

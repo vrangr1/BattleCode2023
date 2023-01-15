@@ -2,8 +2,7 @@ package ABuildABot;
 
 import battlecode.common.*;
 import java.util.Random;
-
-import ABuildABot.path.BugNav;
+import ABuildABot.path.Nav;
 
 public class BotCarrier extends Utils{
 
@@ -80,9 +79,7 @@ public class BotCarrier extends Utils{
             pathing.setAndMoveToDestination(dest);
         }
         if (rc.isMovementReady()){
-            Direction bugDir = BugNav.walkTowards(dest);
-            if (bugDir != null)
-                rc.move(bugDir);
+            Nav.goTo(dest);
         }
     }
 
@@ -91,9 +88,7 @@ public class BotCarrier extends Utils{
             pathing.setAndMoveToDestination(Explore.explore(randomExploration));
         }
         if (rc.isMovementReady()){
-            Direction bugDir = BugNav.walkTowards(Explore.explore(randomExploration));
-            if (bugDir != null)
-                rc.move(bugDir);
+            Nav.goTo(Explore.explore(randomExploration));
         }
     }
 
@@ -405,7 +400,7 @@ public class BotCarrier extends Utils{
         }
         MapLocation islandLoc = getMeAnIslandLocation();
         if (islandLoc == null){
-            rc.setIndicatorString("can't find an island in vision or in comms. Exploring...");
+            // rc.setIndicatorString("can't find an island in vision or in comms. Exploring...");
             // pathing.setAndMoveToDestination(explore());
             carrierStatus = Status.EXPLORE_FOR_ISLANDS;
             movementWrapper();
@@ -552,7 +547,7 @@ public class BotCarrier extends Utils{
             desperationIndex = 12;
         // If outside of action radius
         if (!rc.canActLocation(movementDestination)){
-            rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
+            // rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
             // pathing.setAndMoveToDestination(movementDestination);
             carrierStatus = Status.TRANSIT_TO_WELL;
             movementWrapper(movementDestination);
@@ -607,7 +602,10 @@ public class BotCarrier extends Utils{
 
     private static void endOfTurnUpdate(){
         returnEarly = false;
-        rc.setIndicatorString(carrierStatus.toString());
+        // if (carrierStatus == Status.TRANSIT_TO_WELL)
+        //     rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
+        // else
+        //     rc.setIndicatorString(carrierStatus.toString());
     }
 
     public static void runCarrier() throws GameActionException{

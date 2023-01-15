@@ -2224,8 +2224,11 @@ public class BotCarrierPathing implements UnitPathing {
             cost = d146;
         }
 
+        rc.setIndicatorString("Cost is " + cost + " " +  ans);
+
         if (cost > 150){
-            return BugNav.walkTowards(target);
+            Nav.goTo(target);
+            return null;
         }
         return ans;
     }

@@ -2225,7 +2225,8 @@ public class BotBoosterPathing implements UnitPathing {
         }
 
         if (cost > 150){
-            return BugNav.walkTowards(target);
+            Nav.goTo(target);
+            return null;
         }
         return ans;
     }
