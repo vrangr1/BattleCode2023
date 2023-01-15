@@ -30,8 +30,8 @@ fi
 # rm -f logs/log2.log
 
 count=0
-for i in maptestsmall SmallElements \
-    AllElements DefaultMap OctDoors
+for i in SmallElements AllElements DefaultMap \
+    OctDoors
 do
   count=$[count+1]
   if test $count -eq 1; then
@@ -65,7 +65,7 @@ echo -e "===========\n" >> logs/results.log
 grep -E "Birth |vs. " logs/log2.log >> logs/freezing.log 
 elapsed=$(( SECONDS - start_time ))
 eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
-#1: maptestsmall  : 20 x 20 : 400
+##1: maptestsmall  : 20 x 20 : 400
 #2: SmallElements : 20 x 20 : 400
 #3: AllElements   : 30 x 30 : 900
 #4: DefaultMap    : 32 x 32 : 1024
