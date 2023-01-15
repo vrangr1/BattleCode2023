@@ -436,7 +436,7 @@ public class BotCarrier extends Utils{
         collectedResourcesThisTurn = true;
         desperationIndex = 0;
         
-        if (currentInventoryWeight == GameConstants.CARRIER_CAPACITY){
+        if (currentInventoryWeight >= GameConstants.CARRIER_CAPACITY){
             returnToHQ = true;
             movementDestination = Comms.findNearestHeadquarter();
         }
@@ -444,7 +444,7 @@ public class BotCarrier extends Utils{
 
     private static void attackIfAboutToDie() throws GameActionException{
         // if (returnEarly) return;
-        if (rc.getWeight() == 0) // Can't even attack...
+        if (rc.getWeight() < 5) // Can't even attack...
             return;
         else if (returnToHQ && movementDestination != null && currentLocation.distanceSquaredTo(movementDestination) <= 2)
             return;

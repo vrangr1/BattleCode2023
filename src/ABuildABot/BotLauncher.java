@@ -50,7 +50,7 @@ public class BotLauncher extends CombatUtils{
         tryToMicro();
         updateVision();
 
-        if (sendCombatLocation(visibleEnemies));
+        if (sendCombatLocation());
         else {
             findNewCombatLocation();
         }
@@ -233,12 +233,12 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static boolean tryMoveToEngageOutnumberedEnemy(RobotInfo[] visibleHostiles, RobotInfo closestHostile) throws GameActionException {
+    private static boolean tryMoveToEngageOutnumberedEnemy(RobotInfo closestHostile) throws GameActionException {
         if(closestHostile == null) return false;
         MapLocation closestHostileLocation = closestHostile.location;
         int numNearbyHostiles = 0;
-		for (int i = visibleHostiles.length; --i >= 0;) {
-			if (visibleHostiles[i].type.canAttack()) {
+		for (int i = visibleEnemies.length; --i >= 0;) {
+			if (visibleEnemies[i].type.canAttack()) {
 					numNearbyHostiles += 1;
 			}
 		}
@@ -267,12 +267,12 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static boolean retreatIfOutnumbered(RobotInfo[] visibleHostiles) throws GameActionException {
+    private static boolean retreatIfOutnumbered() throws GameActionException {
 		RobotInfo closestHostileThatAttacksUs = null;
 		int closestDistSq = Integer.MAX_VALUE;
 		int numHostilesThatAttackUs = 0;
-		for (int i = visibleHostiles.length; --i >= 0;) {
-            RobotInfo hostile = visibleHostiles[i];
+		for (int i = visibleEnemies.length; --i >= 0;) {
+            RobotInfo hostile = visibleEnemies[i];
 			if (hostile.type == RobotType.LAUNCHER) {
 				int distSq = hostile.location.distanceSquaredTo(rc.getLocation());
 				if (distSq <= hostile.type.actionRadiusSquared) {
@@ -319,8 +319,8 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		MapLocation retreatTarget = rc.getLocation();
-		for (int i = visibleHostiles.length; --i >= 0;) {
-            RobotInfo hostile = visibleHostiles[i];
+		for (int i = visibleEnemies.length; --i >= 0;) {
+            RobotInfo hostile = visibleEnemies[i];
 			if (!(hostile.type == RobotType.LAUNCHER)) continue;			
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
@@ -338,7 +338,7 @@ public class BotLauncher extends CombatUtils{
             return false;
         }
 
-        if (rc.isMovementReady() && retreatIfOutnumbered(visibleEnemies)){
+        if (rc.isMovementReady() && retreatIfOutnumbered()){
             launcherState = Status.RETREATING;
             return true;
         }
@@ -367,7 +367,7 @@ public class BotLauncher extends CombatUtils{
             if (tryMoveToHelpAlly(closestHostile)) {
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
-            if (tryMoveToEngageOutnumberedEnemy(visibleEnemies, closestHostile)) {
+            if (tryMoveToEngageOutnumberedEnemy(closestHostile)) {
                 return true;
             }
             if (tryMoveToAttackProductionUnit(closestHostile)) {
@@ -377,9 +377,9 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
-    public static boolean sendCombatLocation(RobotInfo[] visibleHostiles) throws GameActionException{
+    public static boolean sendCombatLocation() throws GameActionException{
         if (vNonHQEnemies > 0){
-			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleHostiles);
+			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (closestHostile == null) return false;
 			if (!standOff){ // The idea is to prevent standoffs from flooding comms with local info
                 currentDestination = closestHostile.getLocation();

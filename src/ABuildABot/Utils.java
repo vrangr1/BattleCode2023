@@ -271,7 +271,7 @@ public class Utils extends Globals{
             if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, Comms.SHAFlag.WELL_LOCATION))
                 continue;
             if (rc.canWriteSharedArray(0, 0))
-            Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, Comms.SHAFlag.WELL_LOCATION);
+                Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, Comms.SHAFlag.WELL_LOCATION);
         }
     }
 

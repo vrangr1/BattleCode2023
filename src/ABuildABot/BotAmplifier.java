@@ -9,6 +9,7 @@ public class BotAmplifier extends Explore{
         SPREADING,
         BATTLE_COMM,
         FLEEING,
+        BATTLE_FOLLOWER,
         ANCHOR_FOLLOWER,
     }
 
@@ -31,24 +32,35 @@ public class BotAmplifier extends Explore{
         sendCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
-            if (amplifierState == Status.FLEEING){
-            }
+            amplifierState = Status.FLEEING;
         }
         else if (rc.getRoundNum() < 25){
             pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
         } 
-        else if (vNonHQEnemies == 0 && commAllyRobots > 0){
-            Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
-            if (away!=null && Movement.tryMoveInDirection(explore(away))){
-                amplifierState = Status.SPREADING;
-            }
+        else if (vNonHQEnemies == 0){
+            amplifierMove();
         }
         updateVision();
         if (Clock.getBytecodesLeft() > 700) findAndWriteWellLocationsToComms();
         rc.setIndicatorString(amplifierState.toString() + " " + closestEnemyLocation);
     }
 
-    public static boolean tryToBackUpToMaintainMaxRangeAmplifier() throws GameActionException {
+    private static void amplifierMove() throws GameActionException{
+        if(rc.isMovementReady()){
+            Direction away; 
+            if (commAllyRobots > 0){
+                away = directionAwayFromAmplifierAndHQ(visibleAllies);
+            }
+            else{
+                away = Direction.CENTER;
+            }
+            if (away!=null && Movement.tryMoveInDirection(explore(away))){
+                amplifierState = Status.SPREADING;
+            }
+        }
+    }
+
+    private static boolean tryToBackUpToMaintainMaxRangeAmplifier() throws GameActionException {
 		int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (int i= visibleEnemies.length; --i >= 0;) {
@@ -105,11 +117,12 @@ public class BotAmplifier extends Explore{
     }
 
     private static void getExploreDir(Direction away) throws GameActionException{
-        if (away != null){
+        if (away != null && away != Direction.CENTER){
             assignExplore3Dir(away);
-            return;
         }
-        assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
+        else{
+            assignExplore3Dir(directions[rng.nextInt(2311) % 8]);
+        }
     }
 
     private static MapLocation explore(Direction away) throws GameActionException{
@@ -119,10 +132,12 @@ public class BotAmplifier extends Explore{
     }
 
     private static void updateVision() throws GameActionException {
-        commAllyRobots = 0;
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
         visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+        commAllyRobots = 0;
         vNonHQEnemies = 0;
+        vNonHQCombatEnemies = 0;
+        vNonHQCombatAllies= 0;
         for (int i = visibleEnemies.length; --i >= 0;) {
             if (visibleEnemies[i].type != RobotType.HEADQUARTERS) {
                 vNonHQEnemies++;

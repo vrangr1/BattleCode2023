@@ -18,7 +18,7 @@
 
 ## Launchers
 
-- [ ] Change to Finite State Machine micro.
+- [x] Change to Finite State Machine micro.
 - [ ] Try to shift code to microbattle if possible
 - [ ] Add hiding in clouds and better attacking comms
 

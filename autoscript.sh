@@ -1,7 +1,7 @@
 #!/bin/bash
 start_time=$SECONDS
 team1=ABuildABot
-team2=ORealFirstSubBot
+team2=OTCBot
 
 mkdir -p logs
 if test -f "logs/results.log"; then
