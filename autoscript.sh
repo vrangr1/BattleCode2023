@@ -31,7 +31,7 @@ fi
 
 count=0
 for i in SmallElements AllElements DefaultMap \
-    OctDoors
+    OctDoors GrandRing
 do
   count=$[count+1]
   if test $count -eq 1; then
@@ -70,3 +70,4 @@ eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M 
 #3: AllElements   : 30 x 30 : 900
 #4: DefaultMap    : 32 x 32 : 1024
 #5: OctDoors      : 45 x 45 : 2025
+#6: GrandRing     : 60 x 60 : 3600
