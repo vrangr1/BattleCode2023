@@ -62,13 +62,8 @@ public class BotLauncher extends CombatUtils{
                 chooseTargetAndAttack(inRangeEnemies);
             }
         }
-        if (currentDestination == null){
-            rc.setIndicatorString(launcherState.toString());
-        }
-        else{
-            rc.setIndicatorString(launcherState.toString() + " " + currentDestination.toString());
-        }
-        
+
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination);
     }
 
     private static void setToCenter() throws GameActionException {
