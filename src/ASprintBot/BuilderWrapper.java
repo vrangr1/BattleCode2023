@@ -3,7 +3,8 @@ package ASprintBot;
 import battlecode.common.*;
 
 public class BuilderWrapper extends Utils {
-    private static int headquarterIndex = -1;
+    private static int headquarterMessageIndex = -1;
+    private static int headquarterSpawnIndex = -1;
     public static int adamantium, mana, elixir;
     private static boolean elixirWellFound = false;
 
@@ -71,16 +72,21 @@ public class BuilderWrapper extends Utils {
     }
 
     public static void setHeadquarterIndex(int index){
-        headquarterIndex = index;
+        headquarterMessageIndex = index;
+        headquarterSpawnIndex = (((index - 2) - Comms.START_CHANNEL_BANDS) / Comms.CHANNELS_COUNT_PER_HEADQUARTER) + 1;
+    }
+
+    public static int getHeadquarterSpawnIndex(){
+        return headquarterSpawnIndex;
     }
 
     public static void sendAnchorCollectionCommand() throws GameActionException{
-        MapLocation loc = Comms.readLocationFromMessage(rc.readSharedArray(headquarterIndex - 2));
+        MapLocation loc = Comms.readLocationFromMessage(rc.readSharedArray(headquarterMessageIndex - 2));
         assert loc.equals(currentLocation) : "has to be";
 
         int numAnchors = rc.getNumAnchors(Anchor.STANDARD);
         assert numAnchors != 0 : "num anchor correctness";
-        Comms.writeSHAFlagMessage(numAnchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterIndex);
+        Comms.writeSHAFlagMessage(numAnchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterMessageIndex);
     }
 
     public static ResourceType getPrioritizedResource(){
@@ -94,6 +100,34 @@ public class BuilderWrapper extends Utils {
             return ResourceType.ADAMANTIUM;
         }
         if(elixirWellFound && elixir < 100) return ResourceType.ELIXIR;
+        return null;
+    }
+
+    public static MapLocation findBestSpawnLocationForCarrier() throws GameActionException{
+        MapLocation bestLocation = null;
+        int bestDistance = Integer.MAX_VALUE;
+        for (Direction dir : directions){
+            MapLocation loc = currentLocation.add(dir);
+            if (rc.canSenseLocation(loc) && rc.isLocationOccupied(loc)) continue;
+            int distance = currentLocation.distanceSquaredTo(loc);
+            if (distance < bestDistance){
+                bestDistance = distance;
+                bestLocation = loc;
+            }
+        }
+        return bestLocation;
+    }
+
+    public static MapLocation findBestSpawnLocation(RobotType robotType) throws GameActionException{
+        switch(robotType){
+            case CARRIER: return findBestSpawnLocationForCarrier();
+            case LAUNCHER: return findBestSpawnLocationForCarrier();
+            case BOOSTER: return findBestSpawnLocationForCarrier();
+            case DESTABILIZER: return findBestSpawnLocationForCarrier();
+            case AMPLIFIER: return findBestSpawnLocationForCarrier();
+            default: break;
+        }
+        assert false;
         return null;
     }
 

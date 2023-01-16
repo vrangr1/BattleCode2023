@@ -25,7 +25,7 @@ public class Comms extends Utils{
     private static final int LAUNCHER_COUNT_CHANNEL = 6;
     private static final int AMPLIFIER_COUNT_CHANNEL = 7;
     // private static final int ACCELERATING_ANCHOR_COUNT_CHANNEL = 6;
-    private static final int START_CHANNEL_BANDS = 8;
+    public static final int START_CHANNEL_BANDS = 8;
     private static final int MAX_HEADQUARTERS_CHANNELS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 10;
@@ -50,9 +50,9 @@ public class Comms extends Utils{
         EMPTY_MESSAGE,                      // 0x0
         
         // HEADQUARTERS' MESSAGES' TYPES
-        HEADQUARTER_LOCATION,               // 0x1
-        ENEMY_HEADQUARTER_LOCATION,         // 0x2
-        COLLECT_ANCHOR,                     // 0x3
+        COLLECT_ANCHOR,                     // 0x1 // Don't change the ordinal of this. It is used in the code.
+        HEADQUARTER_LOCATION,               // 0x2
+        ENEMY_HEADQUARTER_LOCATION,         // 0x3
 
         // WELLS CHANNELS MESSAGES' TYPES
         // WELL_LOCATION,                      // 0x4
@@ -123,6 +123,14 @@ public class Comms extends Utils{
         }
         assert false;
         return null;
+    }
+
+    public static void printCOMM_TYPEDetails(COMM_TYPE type){
+        System.out.println("COMM_TYPE: " + type);
+        System.out.println("channelStart: " + type.channelStart);
+        System.out.println("channelStop: " + type.channelStop);
+        // System.out.println("channelHead: " + type.channelHead);
+        // System.out.println("channelHeadArrayLocationIndex: " + type.channelHeadArrayLocationIndex);
     }
 
 
@@ -222,7 +230,7 @@ public class Comms extends Utils{
             SHAFlag flag = readSHAFlagType(i);
             if (flag == SHAFlag.EMPTY_MESSAGE){
                 writeSHAFlagMessage(headquarterLoc, SHAFlag.HEADQUARTER_LOCATION, i);
-                commsHeadquarterCount = (i - START_CHANNEL_BANDS)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
+                commsHeadquarterCount = ((i - START_CHANNEL_BANDS)/CHANNELS_COUNT_PER_HEADQUARTER) + 1;
                 BuilderWrapper.setHeadquarterIndex(i + 2);
                 break;
             }
@@ -301,6 +309,15 @@ public class Comms extends Utils{
         rc.writeSharedArray(channel, (value << SHAFLAG_BITLENGTH) | flag.ordinal());
     }
 
+    private static void writeAnchorCount(int count, int channel) throws GameActionException{
+        int message = rc.readSharedArray(channel);
+        if (count > 0) message |= 0x1;
+        else message &= 0xFFFE;
+        message &= (0xF);
+        message |= (count << 4);
+        rc.writeSharedArray(channel, message);
+    }
+
     /**
      * Writes the given integer message into the given channel. Mostly for non location type messages
      * @param message : integer message that is to be written into the given channel. Must be < 4095 and >= 0
@@ -310,7 +327,8 @@ public class Comms extends Utils{
      * @BytecodeCost : ~75
      */
     public static void writeSHAFlagMessage(int message, SHAFlag flag, int channel) throws GameActionException{
-        rc.writeSharedArray(channel, (message << SHAFLAG_BITLENGTH) | flag.ordinal());
+        if (flag != SHAFlag.COLLECT_ANCHOR) rc.writeSharedArray(channel, (message << SHAFLAG_BITLENGTH) | flag.ordinal());
+        else writeAnchorCount(message, channel);
     }
 
     public static void writeEnemyHeadquarterLocation(MapLocation loc) throws GameActionException{
@@ -593,6 +611,13 @@ public class Comms extends Utils{
             wipeChannel(i);
         type.channelHead = type.channelStart;
         writeSHAFlagMessage(type.channelHead, SHAFlag.ARRAY_HEAD, type.channelHeadArrayLocationIndex);
+    }
+
+    public static void wipeChannelsSHAFlag(COMM_TYPE type, SHAFlag flag) throws GameActionException{
+        for (int i = type.channelStart; i < type.channelStop; ++i){
+            if (readSHAFlagFromMessage(rc.readSharedArray(i)) == flag)
+                wipeChannel(i);
+        }
     }
 
 
@@ -897,24 +922,10 @@ public class Comms extends Utils{
         return false;
     }
 
-    public static MapLocation findIfAnchorProduced() throws GameActionException{
-        if (rc.getRoundNum() < 3) return null;
-        for (int i = COMM_TYPE.HEADQUARTER.channelStart; i < COMM_TYPE.HEADQUARTER.channelStop; i += CHANNELS_COUNT_PER_HEADQUARTER){
-            int message = rc.readSharedArray(i + 2);
-            if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){
-                assert rc.getType() == RobotType.CARRIER;
-                BotCarrier.collectAnchorHQidx = i + 2;
-                return readLocationFromMessage(rc.readSharedArray(i));
-            }
-        }
-        return null;
-    }
-
     public static boolean findIfAnchorProduced(MapLocation hqLoc) throws GameActionException{
         int hqIdx = getHeadquarterIndex(hqLoc);
         int message = rc.readSharedArray(COMM_TYPE.HEADQUARTER.channelStart + hqIdx * CHANNELS_COUNT_PER_HEADQUARTER + 2);
-        if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){
-            assert rc.getType() == RobotType.CARRIER;
+        if ((message & 0x1) == 1){
             BotCarrier.collectAnchorHQidx = COMM_TYPE.HEADQUARTER.channelStart + hqIdx * CHANNELS_COUNT_PER_HEADQUARTER + 2;
             return true;
         }

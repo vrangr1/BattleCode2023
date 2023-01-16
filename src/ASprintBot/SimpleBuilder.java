@@ -185,6 +185,7 @@ public class SimpleBuilder extends Utils{
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource)))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
+                rc.setIndicatorString("building carrier that prioritizes " + prioritizedResource);
                 return true;
             }
         }

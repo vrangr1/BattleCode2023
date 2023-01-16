@@ -16,6 +16,12 @@ public class BotHeadquarters extends Utils{
         }
     }
 
+    private static void printMapLocation(MapLocation[] locations) throws GameActionException{
+        for (int i = 0; i < locations.length; i++){
+            System.out.println("location " + i + " is " + locations[i]);
+        }
+    }
+
     public static void runHeadquarters() throws GameActionException{
         if (rc.getRoundNum() == 2)
             Comms.initCommunicationsArray();

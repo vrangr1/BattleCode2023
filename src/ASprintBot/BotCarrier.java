@@ -50,6 +50,7 @@ public class BotCarrier extends Utils{
 
     public static void initCarrier() throws GameActionException{
         carrierStatus = Status.BORN;
+        rc.setIndicatorString(carrierStatus.toString());
         movingToIsland = false;
         movementDestination = null;
         targetedIslandId = -1;
@@ -223,10 +224,7 @@ public class BotCarrier extends Utils{
             carrierStatus = Status.COLLECTING_ANCHOR;
             rc.takeAnchor(movementDestination, Anchor.STANDARD);
             assert rc.canWriteSharedArray(0, 0) : "canWriteSharedArray";
-            if (count - 1 > 0)
-                Comms.writeSHAFlagMessage(count - 1, Comms.SHAFlag.COLLECT_ANCHOR, collectAnchorHQidx);
-            else
-                Comms.writeSHAFlagMessage(0, Comms.SHAFlag.EMPTY_MESSAGE, collectAnchorHQidx);
+            Comms.writeSHAFlagMessage(count - 1, Comms.SHAFlag.COLLECT_ANCHOR, collectAnchorHQidx);
             System.out.println("Collected anchor from HQ!");
             resetCollectAnchorVariables();
             return false;
