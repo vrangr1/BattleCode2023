@@ -47,6 +47,9 @@ public class BotCarrier extends Utils{
     private static final boolean TRY_TO_FLEE = true;
     private static boolean isFleeing = false;
     private static int fleeCount = 0;
+    private static int[] ignoredIslandLocations;
+    private static final int MAX_IGNORED_ISLAND_COUNT = 100;
+    private static int ignoredIslandLocationsCount = 0;
 
     public static void initCarrier() throws GameActionException{
         carrierStatus = Status.BORN;
@@ -69,6 +72,8 @@ public class BotCarrier extends Utils{
         isFleeing = false;
         fleeCount = 0;
         islandViable = new boolean[ISLAND_COUNT];
+        ignoredIslandLocations = new int[MAX_IGNORED_ISLAND_COUNT];
+        ignoredIslandLocationsCount = 0;
         for (int i = 0; i < ISLAND_COUNT; i++)
             islandViable[i] = true;
         ignoreLocations = new boolean[MAP_HEIGHT * MAP_WIDTH];
@@ -81,9 +86,9 @@ public class BotCarrier extends Utils{
     private static void unFlagAllIslands(){
         for (int i = 0; i < ISLAND_COUNT; i++)
             islandViable[i] = true;
-        int size = MAP_HEIGHT * MAP_WIDTH;
-        for (int i = size; i-->0;)
-            ignoreLocations[i] = false;
+        for (int i = ignoredIslandLocationsCount; --i>=0;)
+            ignoreLocations[ignoredIslandLocations[i]] = false;
+        ignoredIslandLocationsCount = 0;
     }
 
     private static void movementWrapper(MapLocation dest) throws GameActionException{
@@ -381,7 +386,13 @@ public class BotCarrier extends Utils{
         islandViable[islandId - 1] = false;
         if (rc.canWriteSharedArray(0, 0))
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND, loc);
-        else ignoreLocations[hashLocation(loc)] = true;
+        else{
+            int hash = hashLocation(loc);
+            if (!ignoreLocations[hash]) ignoredIslandLocations[ignoredIslandLocationsCount++] = hash;
+            
+            assert ignoredIslandLocationsCount <= MAX_IGNORED_ISLAND_COUNT : "ignoredIslandLocationsCount <= MAX_IGNORED_ISLAND_COUNT";
+            ignoreLocations[hashLocation(loc)] = true;
+        }
     }
 
     private static boolean viableIslandCheck(boolean canSenseDest, MapLocation loc, int islandID) throws GameActionException{
@@ -705,85 +716,85 @@ public class BotCarrier extends Utils{
         int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (RobotInfo hostile : visibleHostiles) {
-			if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
-			int distSq = lCR.distanceSquaredTo(hostile.location);
-			if (distSq < closestHostileDistSq) {
-				closestHostileDistSq = distSq;
-			}
-		}
-		Direction bestRetreatDir = null;
-		int bestDistSq = closestHostileDistSq;
+            if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
+            int distSq = lCR.distanceSquaredTo(hostile.location);
+            if (distSq < closestHostileDistSq) {
+                closestHostileDistSq = distSq;
+            }
+        }
+        Direction bestRetreatDir = null;
+        int bestDistSq = closestHostileDistSq;
         // int bestRubble = rc.senseRubble(rc.getLocation());
 
-		for (Direction dir : directions) {
-			if (!rc.canMove(dir)) continue;
-			MapLocation dirLoc = lCR.add(dir);
+        for (Direction dir : directions) {
+            if (!rc.canMove(dir)) continue;
+            MapLocation dirLoc = lCR.add(dir);
             // int dirLocRubble = rc.senseRubble(dirLoc);
             // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
 
-			int smallestDistSq = Integer.MAX_VALUE;
-			for (RobotInfo hostile : visibleHostiles) {
-				if (!hostile.type.canAttack()) continue;
-				int distSq = hostile.location.distanceSquaredTo(dirLoc);
-				if (distSq < smallestDistSq) {
-					smallestDistSq = distSq;
-				}
-			}
-			if (smallestDistSq > bestDistSq) {
-				bestDistSq = smallestDistSq;
-				bestRetreatDir = dir;
+            int smallestDistSq = Integer.MAX_VALUE;
+            for (RobotInfo hostile : visibleHostiles) {
+                if (!hostile.type.canAttack()) continue;
+                int distSq = hostile.location.distanceSquaredTo(dirLoc);
+                if (distSq < smallestDistSq) {
+                    smallestDistSq = distSq;
+                }
+            }
+            if (smallestDistSq > bestDistSq) {
+                bestDistSq = smallestDistSq;
+                bestRetreatDir = dir;
                 // bestRubble = dirLocRubble;
-			}
-		}
-		return bestRetreatDir;
+            }
+        }
+        return bestRetreatDir;
     }
 
     private static boolean tryToFlee(RobotInfo[] visibleHostiles) throws GameActionException {
-		int closestHostileDistSq = Integer.MAX_VALUE;
+        int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (RobotInfo hostile : visibleHostiles) {
-			if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
-			int distSq = lCR.distanceSquaredTo(hostile.location);
-			if (distSq < closestHostileDistSq) {
-				closestHostileDistSq = distSq;
-			}
-		}
-		
+            if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
+            int distSq = lCR.distanceSquaredTo(hostile.location);
+            if (distSq < closestHostileDistSq) {
+                closestHostileDistSq = distSq;
+            }
+        }
+        
         // We don't want to get out of our max range
-		// if (closestHostileDistSq > rc.getType().actionRadiusSquared) return false;
-		
-		Direction bestRetreatDir = null;
-		int bestDistSq = closestHostileDistSq;
+        // if (closestHostileDistSq > rc.getType().actionRadiusSquared) return false;
+        
+        Direction bestRetreatDir = null;
+        int bestDistSq = closestHostileDistSq;
         // int bestRubble = rc.senseRubble(rc.getLocation());
 
-		for (Direction dir : directions) {
-			if (!rc.canMove(dir)) continue;
-			MapLocation dirLoc = lCR.add(dir);
+        for (Direction dir : directions) {
+            if (!rc.canMove(dir)) continue;
+            MapLocation dirLoc = lCR.add(dir);
             // int dirLocRubble = rc.senseRubble(dirLoc);
             // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
 
-			int smallestDistSq = Integer.MAX_VALUE;
-			for (RobotInfo hostile : visibleHostiles) {
-				if (!hostile.type.canAttack()) continue;
-				int distSq = hostile.location.distanceSquaredTo(dirLoc);
-				if (distSq < smallestDistSq) {
-					smallestDistSq = distSq;
-				}
-			}
-			if (smallestDistSq > bestDistSq) {
-				bestDistSq = smallestDistSq;
-				bestRetreatDir = dir;
+            int smallestDistSq = Integer.MAX_VALUE;
+            for (RobotInfo hostile : visibleHostiles) {
+                if (!hostile.type.canAttack()) continue;
+                int distSq = hostile.location.distanceSquaredTo(dirLoc);
+                if (distSq < smallestDistSq) {
+                    smallestDistSq = distSq;
+                }
+            }
+            if (smallestDistSq > bestDistSq) {
+                bestDistSq = smallestDistSq;
+                bestRetreatDir = dir;
                 // bestRubble = dirLocRubble;
-			}
-		}
-		if (bestRetreatDir != null) {
+            }
+        }
+        if (bestRetreatDir != null) {
             // rc.setIndicatorString("Backing: " + bestRetreatDir);
             carrierStatus = Status.FLEEING;
-			rc.move(bestRetreatDir);
-			return true;
-		}
-		return false;
-	}
+            rc.move(bestRetreatDir);
+            return true;
+        }
+        return false;
+    }
 
     private static void fleeIfNeedTo() throws GameActionException{
         if (!TRY_TO_FLEE || !isFleeing) return;
