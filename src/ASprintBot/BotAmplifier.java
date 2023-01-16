@@ -1,12 +1,13 @@
 package ASprintBot;
 
 import battlecode.common.*;
+import ASprintBot.path.Nav;
 
 public class BotAmplifier extends Explore{
 
     private enum Status{
         BORN,
-        SPREADING,
+        EXPLORING,
         BATTLE_COMM,
         FLEEING,
         BATTLE_FOLLOWER,
@@ -20,7 +21,7 @@ public class BotAmplifier extends Explore{
     private static int vNonHQEnemies = 0;
     private static int vNonHQCombatEnemies = 0;
     private static int vNonHQCombatAllies = 0;  
-    private static MapLocation closestEnemyLocation;
+    private static MapLocation currentDestination;
 
     public static void initAmplifier() throws GameActionException{
         amplifierState = Status.BORN;
@@ -28,30 +29,34 @@ public class BotAmplifier extends Explore{
 
     public static void runAmplifier() throws GameActionException{
         if (TRACKING_AMPLIFIER_COUNT) Comms.incrementRobotCount(RobotType.AMPLIFIER);
-        closestEnemyLocation = null;
         updateVision();
         findAndWriteWellLocationsToComms();
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
-            exploreDir = exploreDir.opposite();
             amplifierState = Status.FLEEING;
         }
         else if (rc.getRoundNum() < 25){
             pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
+            currentDestination = CENTER_OF_THE_MAP;
         } 
         else if (vNonHQEnemies == 0){
             amplifierMove();
         }
-        rc.setIndicatorString(amplifierState.toString() + " " + closestEnemyLocation);
+        rc.setIndicatorString(amplifierState.toString() + " " + currentDestination);
     }
 
     private static void amplifierMove() throws GameActionException{
         if(rc.isMovementReady()){
-            Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
-            if (Movement.tryMoveInDirection(explore(away))){
-                amplifierState = Status.SPREADING;
+            if (rc.getRoundNum()%25 == 0){
+                Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
+                if (away != null){
+                    assignExplore3Dir(away);
+                }
             }
+            currentDestination = explore();
+            Nav.goTo(currentDestination);
+            amplifierState = Status.EXPLORING;
         }
     }
 
@@ -91,9 +96,9 @@ public class BotAmplifier extends Explore{
 			}
 		}
 		if (bestRetreatDir != null) {
-			rc.move(bestRetreatDir);
-            currentLocation = rc.getLocation();
-			explore(bestRetreatDir);
+			assignExplore3Dir(bestRetreatDir);
+            currentDestination = explore();
+            Nav.goTo(currentDestination);
             amplifierState = Status.FLEEING;
 			return true;
 		}
@@ -109,21 +114,6 @@ public class BotAmplifier extends Explore{
             }
         }
         return rc.getLocation().directionTo(currentTarget);
-    }
-
-    private static void getExploreDir(Direction away) throws GameActionException{
-        if (away != null && away != Direction.CENTER){
-            assignExplore3Dir(away);
-        }
-        else{
-            assignExplore3Dir(directions[rng.nextInt(2311) % 8]);
-        }
-    }
-
-    private static MapLocation explore(Direction away) throws GameActionException{
-        if (exploreDir != away)
-            getExploreDir(away);
-        return getExplore3Target();
     }
 
     private static void updateVision() throws GameActionException {
