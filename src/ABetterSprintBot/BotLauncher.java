@@ -224,7 +224,7 @@ public class BotLauncher extends CombatUtils{
 				bestTarget = targets[i];
 			}
 		}
-		if (bestTarget != null) {
+		if (bestTarget != null && rc.canAttack(bestTarget.location)) {
             rc.attack(bestTarget.location);
             prevTurnHostile = bestTarget;
             launcherState = Status.ATTACKING;

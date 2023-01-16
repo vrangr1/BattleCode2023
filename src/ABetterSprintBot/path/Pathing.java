@@ -6,7 +6,7 @@ import battlecode.common.*;
 public class Pathing extends Utils {
     UnitPathing up;
     MapLocation destination = null;
-
+    static final int BYTECODE_REMAINING = 4500;
     int[] tracker = new int[113];
 
     int fuzzyMovesLeft = 0;
@@ -77,7 +77,7 @@ public class Pathing extends Utils {
         }
 
         int nearbyRobotcount = rc.senseNearbyRobots().length;
-        if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15) {
+        if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15 || Clock.getBytecodesLeft() < BYTECODE_REMAINING) {
             Nav.goTo(target);
             return;
         }
