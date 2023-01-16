@@ -64,22 +64,20 @@ public class Pathing extends Utils {
     public void pathTo(MapLocation target) throws GameActionException {
         if (!rc.isMovementReady()) return;
 
-        if (getMapInfo(rc.getLocation()).hasCloud()){
-            fuzzyMovesLeft += 1;
-        }
-
         if (fuzzyMovesLeft > 0) {
             fuzzyMove(target);
             return;
         }
 
         if (rc.getLocation().distanceSquaredTo(target) <= 2) {
-            // if (!rc.isLocationOccupied(target)) {
-                if (rc.canMove(rc.getLocation().directionTo(target))) {
-                    moveTo(rc.getLocation().directionTo(target));
-                }
-            // }
+            if (rc.canMove(rc.getLocation().directionTo(target))) {
+                moveTo(rc.getLocation().directionTo(target));
+            }
             return;
+        }
+
+        if (rc.getRoundNum() - BIRTH_ROUND > 1){
+            Nav.goTo(target);
         }
 
         Direction dir = up.bestDir(target);

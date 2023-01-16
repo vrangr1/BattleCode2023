@@ -87,25 +87,26 @@ public class Globals {
     public static final boolean TRACKING_AMPLIFIER_COUNT = false;
     public static int MAX_AMPLIFIER_COUNT;
 
+    // public static final Direction droidVisionDirs[] = new Direction[]{
+    //     Direction.NORTHWEST, Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, 
+    //     Direction.NORTH, Direction.NORTH, Direction.NORTHEAST, Direction.NORTHEAST, 
+    //     Direction.EAST, Direction.EAST, Direction.EAST, Direction.EAST, 
+    //     Direction.SOUTHEAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTH, 
+    //     Direction.SOUTH, Direction.SOUTH, Direction.SOUTHWEST, Direction.SOUTHWEST, 
+    //     Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTHWEST, 
+    //     Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, Direction.NORTH, 
+    //     Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.EAST, 
+    //     Direction.EAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, 
+    //     Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTHWEST, 
+    //     Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTHWEST, 
+    //     Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, 
+    //     Direction.EAST, Direction.EAST, Direction.EAST, Direction.EAST, 
+    //     Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, 
+    //     Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTH, 
+    //     Direction.NORTH, Direction.NORTH, Direction.EAST, Direction.EAST,
+    //     Direction.SOUTH, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.CENTER};
 
-    public static final Direction droidVisionDirs[] = new Direction[]{
-        Direction.NORTHWEST, Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, 
-        Direction.NORTH, Direction.NORTH, Direction.NORTHEAST, Direction.NORTHEAST, 
-        Direction.EAST, Direction.EAST, Direction.EAST, Direction.EAST, 
-        Direction.SOUTHEAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTH, 
-        Direction.SOUTH, Direction.SOUTH, Direction.SOUTHWEST, Direction.SOUTHWEST, 
-        Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTHWEST, 
-        Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, Direction.NORTH, 
-        Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.EAST, 
-        Direction.EAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, 
-        Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTHWEST, 
-        Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTHWEST, 
-        Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, 
-        Direction.EAST, Direction.EAST, Direction.EAST, Direction.EAST, 
-        Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, Direction.SOUTH, 
-        Direction.WEST, Direction.WEST, Direction.WEST, Direction.NORTH, 
-        Direction.NORTH, Direction.NORTH, Direction.EAST, Direction.EAST,
-        Direction.SOUTH, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.CENTER};
+    public static int bytecodeCounter = 0;
 
     public static void initGlobals(RobotController rc1) throws GameActionException{
         rc = rc1;
@@ -142,6 +143,7 @@ public class Globals {
 
     public static void updateGlobals() throws GameActionException{
         currentLocation = rc.getLocation();
+        bytecodeCounter = 0;
         MAX_HEALTH = UNIT_TYPE.getMaxHealth();
         int curRound = rc.getRoundNum();
 

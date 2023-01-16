@@ -44,26 +44,28 @@ public class BotLauncher extends CombatUtils{
         updateVision();
         standOff = false;
         previousTurnResolution();
+        bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
             seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
             closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
         }
-
+        bytecodeCheck(); //1
         tryToMicro();
         updateVision();
-
+        bytecodeCheck(); //2
         if (sendCombatLocation());
         else {
             findNewCombatLocation();
         }
+        bytecodeCheck(); //3
         moveAfterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE] (Only works with [MARCHING|ISLAND_WORK|EXPLORE])
         if (rc.isActionReady()) {
             updateInRangeEnemiesVision();
+            bytecodeCheck(); //6
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
         }
-
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination);
     }
 
@@ -144,6 +146,7 @@ public class BotLauncher extends CombatUtils{
             if (currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
             }
+            bytecodeCheck(); //4
             if (launcherState == Status.MARCHING || launcherState == Status.ISLAND_WORK) {
                 pathing.moveToDestination();
                 if (rc.isMovementReady()){
@@ -153,7 +156,7 @@ public class BotLauncher extends CombatUtils{
             else if (launcherState == Status.EXPLORE) {
                 pathing.setAndMoveToDestination(Explore.explore());
             }
-            updateVision();
+            bytecodeCheck(); //5
         }
     }
 

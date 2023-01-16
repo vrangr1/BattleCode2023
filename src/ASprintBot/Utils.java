@@ -277,4 +277,10 @@ public class Utils extends Globals{
         }
     }
 
+    public static void bytecodeCheck(){
+        int bytecodesLeft = Clock.getBytecodesLeft();
+        rc.setIndicatorString("Bytecode " + bytecodesLeft +" at counter " + bytecodeCounter);
+        bytecodeCounter++;
+    }
+
 }
