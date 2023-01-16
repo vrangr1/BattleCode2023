@@ -86,7 +86,7 @@ public class Pathing extends Utils {
         
         if (dir == null || !rc.canMove(dir)) return;
         
-        if (isVisited(rc.getLocation().add(dir))) {
+        if (isVisited(rc.getLocation().add(dir)) || rc.isLocationOccupied(rc.getLocation().add(dir))) {
             Nav.goTo(target);
             addVisited(rc.getLocation());
         } else {

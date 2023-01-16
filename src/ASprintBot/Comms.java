@@ -26,7 +26,7 @@ public class Comms extends Utils{
     private static final int AMPLIFIER_COUNT_CHANNEL = 7;
     // private static final int ACCELERATING_ANCHOR_COUNT_CHANNEL = 6;
     private static final int START_CHANNEL_BANDS = 8;
-    private static final int MAX_HEADQUARTERS_CHANNLS_COUNT = 12;
+    private static final int MAX_HEADQUARTERS_CHANNELS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 10;
     private static final int ISLAND_CHANNELS_COUNT = 10;
@@ -65,8 +65,8 @@ public class Comms extends Utils{
         UNOCCUPIED_ISLAND,                  // 0x9
 
         // COMBAT CHANNELS MESSAGES' TYPES
-        COMBAT_LOCATION,                    // 0xA
-        ISLAND_DEFENSE_NEEDED,              // 0xB
+        CLOUD_COMBAT_LOCATION,              // 0xA
+        COMBAT_LOCATION,                    // 0xB
 
         // AMPLIFIER CHANNELS MESSAGES' TYPES
         AMPLIFIER_LOCATION,                 // 0xC
@@ -218,7 +218,7 @@ public class Comms extends Utils{
     public static void writeHeadquarterLocation(MapLocation headquarterLoc) throws GameActionException{
         if (rc.getRoundNum() != 1)
             throw new GameActionException(GameActionExceptionType.ROUND_OUT_OF_RANGE, "round number has to be 1 here.");
-        for (int i = START_CHANNEL_BANDS; i < START_CHANNEL_BANDS + MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
+        for (int i = START_CHANNEL_BANDS; i < START_CHANNEL_BANDS + MAX_HEADQUARTERS_CHANNELS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
             SHAFlag flag = readSHAFlagType(i);
             if (flag == SHAFlag.EMPTY_MESSAGE){
                 writeSHAFlagMessage(headquarterLoc, SHAFlag.HEADQUARTER_LOCATION, i);
@@ -621,7 +621,7 @@ public class Comms extends Utils{
         if (commsHeadquarterCount != -1 && rc.getRoundNum() > 1) return commsHeadquarterCount;
         MapLocation[] tempLocs = new MapLocation[GameConstants.MAX_STARTING_HEADQUARTERS];
         int count = 0;
-        for (int i = START_CHANNEL_BANDS; i < START_CHANNEL_BANDS + MAX_HEADQUARTERS_CHANNLS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
+        for (int i = START_CHANNEL_BANDS; i < START_CHANNEL_BANDS + MAX_HEADQUARTERS_CHANNELS_COUNT; i += CHANNELS_COUNT_PER_HEADQUARTER){
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) == SHAFlag.HEADQUARTER_LOCATION){
                 count++;

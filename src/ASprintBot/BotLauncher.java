@@ -15,7 +15,7 @@ public class BotLauncher extends CombatUtils{
         GUARDING,
         ISLAND_WORK,
         RETREATING,
-        HIDING, // In the clouds
+        CLOUD_WORK, // In the clouds
         STANDOFF,
     }
 
@@ -30,6 +30,7 @@ public class BotLauncher extends CombatUtils{
     private static MapLocation enemyHQLocation = null;
     private static boolean standOff = false;
     private static RobotInfo prevTurnHostile = null;
+    private static MapLocation prevTurnLocation = null;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -120,6 +121,7 @@ public class BotLauncher extends CombatUtils{
         }
         else{
             prevTurnHostile = null;
+            prevTurnLocation = null;
         }
     }
 
@@ -454,4 +456,16 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
+    public static void coverInCloud() throws GameActionException{
+        if (rc.senseCloud(rc.getLocation())) return;
+        for (int i = 0; i < 8; i++){
+            Direction dir = directions[i];
+            if (rc.senseCloud(rc.getLocation().add(dir))){
+                if (rc.isMovementReady()){
+                    prevTurnLocation = rc.getLocation();
+                    rc.move(dir);
+                }
+            }
+        }
+    }
 }

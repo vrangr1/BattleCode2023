@@ -11,6 +11,9 @@ public class BotHeadquarters extends Utils{
 
     public static void updateEveryTurn() throws GameActionException{
         Comms.wipeCountChannels();
+        if (rc.getRoundNum() % 2 == 0){
+            // Comms.wipeChannelsCOMMTYPE();
+        }
     }
 
     public static void runHeadquarters() throws GameActionException{

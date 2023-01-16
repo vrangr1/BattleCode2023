@@ -23,10 +23,10 @@ public class Movement extends Utils{
             int currentDistSq = lCR.distanceSquaredTo(dest);
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
-                if (!rc.onTheMap(dirLoc)) continue; // The location will always be in vision
+                if (!rc.canMove(direction)) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
                 double rubble = 0.0; // rc.senseRubble(dirLoc);
-                if ((rubble < bestRubble || rubble == 0) && rc.canMove(direction)) {
+                if ((rubble < bestRubble || rubble == 0)) {
                     bestRubble = rubble;
                     bestDir = direction;
                 }
@@ -64,10 +64,10 @@ public class Movement extends Utils{
             int currentDistSq = lCR.distanceSquaredTo(dest);
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
-                if (!rc.onTheMap(dirLoc)) continue; // The location will always be in vision
+                if (!rc.canMove(direction)) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
                 double rubble = 0.0; // rc.senseRubble(dirLoc);
-                if ((rubble <= bestRubble || rubble == 0) && rc.canMove(direction)) {
+                if ((rubble <= bestRubble || rubble == 0)) {
                     bestRubble = rubble;
                     bestDir = direction;
                 }
@@ -116,10 +116,10 @@ public class Movement extends Utils{
             int currentDistSq = lCR.distanceSquaredTo(dest);
             for (Direction dir : dirs) {
                 MapLocation dirLoc = lCR.add(dir);
-                if (!rc.onTheMap(dirLoc)) continue; // The 5 directions around you are in vision
+                if (!rc.canMove(dir)) continue; // The 5 directions around you are in vision
                 if (bestDir!= null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
                 double rubble = 0.0; //rc.senseRubble(dirLoc);
-                if (rubble < bestRubble && rc.canMove(dir)) {
+                if (rubble < bestRubble) {
                     bestRubble = rubble;
                     bestDir = dir;
                 }
