@@ -254,16 +254,18 @@ public class Utils extends Globals{
     }
 
     public static void findAndWriteWellLocationsToComms() throws GameActionException{
-        WellInfo[] nearbyWells = rc.senseNearbyWells();
-        MapLocation loc;
-        Comms.SHAFlag flag;
-        for (WellInfo well : nearbyWells){
-            loc = well.getMapLocation();
-            flag = Comms.resourceFlag(well.getResourceType());
-            if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, flag))
-                continue;
-            if (rc.canWriteSharedArray(0, 0))
+        if (rc.canWriteSharedArray(0, 0)){
+            WellInfo[] nearbyWells = rc.senseNearbyWells();
+            MapLocation loc;
+            Comms.SHAFlag flag;
+            for (int i = nearbyWells.length; --i >= 0;){
+                WellInfo well = nearbyWells[i];
+                loc = well.getMapLocation();
+                flag = Comms.resourceFlag(well.getResourceType());
+                if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, flag))
+                    continue;
                 Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, flag);
+            }
         }
     }
 

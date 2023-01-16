@@ -1,6 +1,6 @@
 #!/bin/bash
 start_time=$SECONDS
-team1=APreSprintProdBot
+team1=ASprintBot
 team2=OTCBot
 
 mkdir -p logs
@@ -22,12 +22,6 @@ fi
 if test -f "logs/log2.log"; then
   mv logs/log2.log logs/log2_old.log
 fi
-# rm -f logs/results.log
-# rm -f logs/warnings.log
-# rm -f logs/freezing.log
-# rm -f logs/detailed_results.log
-# rm -f logs/log1.log
-# rm -f logs/log2.log
 
 count=0
 for i in SmallElements AllElements DefaultMap \
@@ -47,10 +41,7 @@ do
   wait
 done
 echo "========Grepping results========="
-# grep -F "wins" logs/log.log >> logs/results.log
-# grep -E "vs. |wins" logs/log.log >> logs/detailed_results.log
-# grep -E "Warning,|vs. " logs/log.log >> logs/warnings.log
-# grep -E "Birth |vs. " logs/log.log >> logs/freezing.log
+
 grep -E "Warning,|vs. " logs/log1.log >> logs/warnings.log
 echo -e "===========\n" >> logs/warnings.log
 grep -E "Warning,|vs. " logs/log2.log >> logs/warnings.log
@@ -65,6 +56,7 @@ grep -E "vs. |wins" logs/log2.log >> logs/detailed_results.log
 
 sleep 1
 
+echo -e "===========\n" >> logs/results.log
 grep -F "wins" logs/log1.log >> logs/results.log
 echo -e "===========\n" >> logs/results.log
 grep -F "wins" logs/log2.log >> logs/results.log

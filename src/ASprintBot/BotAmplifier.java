@@ -30,6 +30,7 @@ public class BotAmplifier extends Explore{
         if (TRACKING_AMPLIFIER_COUNT) Comms.incrementRobotCount(RobotType.AMPLIFIER);
         closestEnemyLocation = null;
         updateVision();
+        findAndWriteWellLocationsToComms();
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
@@ -42,8 +43,7 @@ public class BotAmplifier extends Explore{
         else if (vNonHQEnemies == 0){
             amplifierMove();
         }
-        updateVision();
-        if (Clock.getBytecodesLeft() > 700) findAndWriteWellLocationsToComms();
+        // updateVision();
         rc.setIndicatorString(amplifierState.toString() + " " + closestEnemyLocation);
     }
 
