@@ -7,6 +7,9 @@ public class BuilderWrapper extends Utils {
     private static int headquarterSpawnIndex = -1;
     public static int adamantium, mana, elixir;
     private static boolean elixirWellFound = false;
+    private static ResourceType prioritizedResource;
+    private static ResourceType writePrioritizedResource = ResourceType.NO_RESOURCE;
+    private static boolean carrierBuilt = true;
 
     private enum BUILDERS{
         CWBUILDER,
@@ -20,6 +23,9 @@ public class BuilderWrapper extends Utils {
         adamantium = 0;
         mana = 0;
         elixir = 0;
+        prioritizedResource = ResourceType.ADAMANTIUM;
+        writePrioritizedResource = ResourceType.NO_RESOURCE;
+        carrierBuilt = true;
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.initBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.initBuilder(); break;
@@ -32,6 +38,17 @@ public class BuilderWrapper extends Utils {
         adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         mana = rc.getResourceAmount(ResourceType.MANA);
         elixir = rc.getResourceAmount(ResourceType.ELIXIR);
+        if (writePrioritizedResource != ResourceType.NO_RESOURCE){
+            assert rc.getRoundNum() > 1 : "round num correctness";
+            assert headquarterMessageIndex != -1 : "headquarter message index correctness";
+            assert carrierBuilt : "carrier built correctness";
+            Comms.writePrioritizedResource(writePrioritizedResource, headquarterMessageIndex);
+            writePrioritizedResource = ResourceType.NO_RESOURCE;
+        }
+        else if (!carrierBuilt){
+            updatePrioritizedResource();
+            carrierBuilt = true;
+        }
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.updateBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.updateBuilder(); break;
@@ -89,8 +106,21 @@ public class BuilderWrapper extends Utils {
         Comms.writeSHAFlagMessage(numAnchors, Comms.SHAFlag.COLLECT_ANCHOR, headquarterMessageIndex);
     }
 
+    // Resource Prioritization
+
+    private static void updatePrioritizedResource(){
+        prioritizedResource = (prioritizedResource == ResourceType.ADAMANTIUM) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+    }
+
+    public static void setPrioritizedResource(ResourceType resource){
+        carrierBuilt = true;
+        writePrioritizedResource = prioritizedResource;
+    }
+
     public static ResourceType getPrioritizedResource(){
-        return (rc.getRoundNum() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA;
+        carrierBuilt = false;
+        updatePrioritizedResource();
+        return prioritizedResource;
     }
 
     public static ResourceType mostNeedOfResource() throws GameActionException{

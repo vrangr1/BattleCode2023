@@ -1,7 +1,5 @@
 package ABetterSprintBot;
 
-import org.hibernate.loader.custom.Return;
-
 import battlecode.common.*;
 
 // Ivan Geffner's code. All hail Ivan Geffner!
@@ -185,6 +183,7 @@ public class SimpleBuilder extends Utils{
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource)))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
+                BuilderWrapper.setPrioritizedResource(prioritizedResource);
                 rc.setIndicatorString("building carrier that prioritizes " + prioritizedResource);
                 return true;
             }

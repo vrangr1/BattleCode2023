@@ -25,7 +25,7 @@ public class BotHeadquarters extends Utils{
     public static void runHeadquarters() throws GameActionException{
         if (rc.getRoundNum() == 2)
             Comms.initCommunicationsArray();
-        updateEveryTurn();
         BuilderWrapper.buildUnits();
+        updateEveryTurn();
     }
 }

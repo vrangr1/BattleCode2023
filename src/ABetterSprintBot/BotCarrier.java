@@ -50,6 +50,13 @@ public class BotCarrier extends Utils{
     private static int[] ignoredIslandLocations;
     private static final int MAX_IGNORED_ISLAND_COUNT = 100;
     private static int ignoredIslandLocationsCount = 0;
+    private static int hqIndex;
+
+    private static void initSpawningHeadquarterIndex() throws GameActionException{
+        MapLocation loc = Comms.findNearestHeadquarter();
+        hqIndex = Comms.getHeadquarterIndex(loc);
+        hqIndex = Comms.START_CHANNEL_BANDS + hqIndex * Comms.CHANNELS_COUNT_PER_HEADQUARTER + 2;
+    }
 
     public static void initCarrier() throws GameActionException{
         carrierStatus = Status.BORN;
@@ -68,7 +75,9 @@ public class BotCarrier extends Utils{
         collectAnchorHQidx = -1;
         returnEarly = false;
         rng = new Random(rc.getRoundNum() + 6147);
-        prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
+        // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
+        initSpawningHeadquarterIndex();
+        prioritizedResource = Comms.getPrioritizedResource(hqIndex);
         isFleeing = false;
         fleeCount = 0;
         islandViable = new boolean[ISLAND_COUNT];

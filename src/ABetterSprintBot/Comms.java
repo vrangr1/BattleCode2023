@@ -89,17 +89,26 @@ public class Comms extends Utils{
         }
     }
 
-    public static SHAFlag[] SHAFlags = SHAFlag.values();
+    private static SHAFlag[] SHAFlags = SHAFlag.values();
 
     public static enum COMM_TYPE{
-        WELLS,          // 0x1
-        COMBAT,         // 0x2
-        ISLAND,         // 0x3
-        HEADQUARTER,    // 0x4
-        AMPLIFIER;      // 0x5
+        WELLS,          // 0x0
+        COMBAT,         // 0x1
+        ISLAND,         // 0x2
+        HEADQUARTER,    // 0x3
+        AMPLIFIER;      // 0x4
 
         public int channelStart, channelStop, channelHead, channelHeadArrayLocationIndex;
     }
+
+    public static enum RESOURCE_PRIORITIZATION{
+        NOTHING,        // 0x0
+        ADAMANTIUM,     // 0x1
+        MANA,           // 0x2
+        ELIXIR;         // 0x3
+    }
+
+    private static RESOURCE_PRIORITIZATION[] resourcePrioritizations = RESOURCE_PRIORITIZATION.values();
 
 
 
@@ -561,6 +570,39 @@ public class Comms extends Utils{
 
     public static int getRobotScore(Anchor anchor) throws GameActionException{
         return rc.readSharedArray(getRobotScoreChannel(anchor));
+    }
+
+    private static RESOURCE_PRIORITIZATION getResourcePrioritization(ResourceType resourceType){
+        switch(resourceType){
+            case ADAMANTIUM: return RESOURCE_PRIORITIZATION.ADAMANTIUM;
+            case MANA: return RESOURCE_PRIORITIZATION.MANA;
+            default: break;
+        }
+        assert false;
+        return null;
+    }
+
+    public static void writePrioritizedResource(ResourceType resourceType, int channel) throws GameActionException{
+        if (!rc.canWriteSharedArray(0, 0)) return;
+        int message = rc.readSharedArray(channel);
+        message &= 0xFFF1;
+        message |= getResourcePrioritization(resourceType).ordinal() << 1;
+        rc.writeSharedArray(channel, message);
+    }
+
+    private static ResourceType getResourceType(RESOURCE_PRIORITIZATION rPrioritization){
+        switch(rPrioritization){
+            case ADAMANTIUM: return ResourceType.ADAMANTIUM;
+            case MANA: return ResourceType.MANA;
+            default: break;
+        }
+        assert false;
+        return null;
+    }
+
+    public static ResourceType getPrioritizedResource(int channel) throws GameActionException{
+        int message = rc.readSharedArray(channel);
+        return getResourceType(resourcePrioritizations[(message >> 1) & 0x3]);
     }
 
 
