@@ -65,8 +65,8 @@ public class Comms extends Utils{
         UNOCCUPIED_ISLAND,                  // 0x9
 
         // COMBAT CHANNELS MESSAGES' TYPES
-        CLOUD_COMBAT_LOCATION,              // 0xA
-        COMBAT_LOCATION,                    // 0xB
+        COMBAT_LOCATION,                    // 0xA
+        CLOUD_COMBAT_LOCATION,              // 0xB
 
         // AMPLIFIER CHANNELS MESSAGES' TYPES
         AMPLIFIER_LOCATION,                 // 0xC

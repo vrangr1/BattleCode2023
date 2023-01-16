@@ -75,6 +75,34 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
+    private static void previousTurnResolution() throws GameActionException {
+        cloudCentral();
+        simplePursuit();
+        if (launcherState != Status.PURSUING){
+            prevTurnHostile = null;
+            prevTurnLocation = null;
+        }
+    }
+
+    private static void cloudCentral() throws GameActionException {
+        boolean currentlyInCloud = rc.senseCloud(rc.getLocation());
+        if (!currentlyInCloud || launcherState != Status.CLOUD_WORK) return;
+        if (currentlyInCloud && (launcherState == Status.MARCHING || launcherState == Status.EXPLORE)) {
+            launcherState = Status.CLOUD_WORK;
+            return;
+        }
+    }
+
+    private static void simplePursuit() throws GameActionException{
+        if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
+            launcherState = Status.GUARDING;
+            boolean willDieIfPursuit = prevTurnHostile.getType().canAttack() && rc.getHealth() <= prevTurnHostile.getType().damage;
+            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryMoveInDirection(prevTurnHostile.location)){
+                launcherState = Status.PURSUING;
+            }
+        }
+    }
+
     private static boolean seekEnemyIslandInVision() throws GameActionException {
         if (launcherState == Status.ISLAND_WORK && (rc.senseIsland(rc.getLocation()) != -1)) {
             return true;
@@ -108,20 +136,6 @@ public class BotLauncher extends CombatUtils{
         else{
             launcherState = Status.MARCHING;
             return false;
-        }
-    }
-
-    private static void previousTurnResolution() throws GameActionException {
-        if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
-            launcherState = Status.GUARDING;
-            boolean willDieIfPursuit = prevTurnHostile.getType().canAttack() && rc.getHealth() <= prevTurnHostile.getType().damage;
-            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryMoveInDirection(prevTurnHostile.location)){
-                launcherState = Status.PURSUING;
-            }
-        }
-        else{
-            prevTurnHostile = null;
-            prevTurnLocation = null;
         }
     }
 

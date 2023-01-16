@@ -253,6 +253,14 @@ public class Utils extends Globals{
         return optLoc;
     }
 
+    public static int senseRubbleFriend(MapLocation loc) throws GameActionException{
+        return (int) (1+rc.senseMapInfo(loc).getCooldownMultiplier(MY_TEAM)) * 10;
+    }
+
+    public static int senseRubbleEnemy(MapLocation loc) throws GameActionException{
+        return (int) (1+rc.senseMapInfo(loc).getCooldownMultiplier(ENEMY_TEAM)) * 10;
+    }
+
     public static void findAndWriteWellLocationsToComms() throws GameActionException{
         if (rc.canWriteSharedArray(0, 0)){
             WellInfo[] nearbyWells = rc.senseNearbyWells();
