@@ -19,7 +19,7 @@ public class CombatUtils extends Utils{
         return isMilitaryUnit(bot.type);
     }
 
-    public static boolean hasMilitarUnit(RobotInfo[] bots){
+    public static boolean hasMilitaryUnit(RobotInfo[] bots){
         for (int i = bots.length; --i >= 0;)
             if (isMilitaryUnit(bots[i])) return true;
         return false;

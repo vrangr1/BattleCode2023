@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd src
-rm -rvf OTCBot/
+rm -rf OTCBot/
 old_bot="$(basename A*)"
 new_bot="OTCBot"
 cp -r $old_bot $new_bot
