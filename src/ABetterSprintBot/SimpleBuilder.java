@@ -170,18 +170,18 @@ public class SimpleBuilder extends Utils{
 
     private static boolean tryBuildCarrier() throws GameActionException{
         // Too much unused resources, stop making more miners & boost score to reflect that knowledge
-        if (BuilderWrapper.adamantium >= MIN_ADAMANTIUM_STOP_CARRIERS && BuilderWrapper.mana >= MIN_ADAMANTIUM_STOP_CARRIERS){
-            if (carrierScore < launcherScore){
-                Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore + getMinCarriers()));
-            }
-            return false;
-        }
+        // if (BuilderWrapper.adamantium >= MIN_ADAMANTIUM_STOP_CARRIERS && BuilderWrapper.mana >= MIN_ADAMANTIUM_STOP_CARRIERS){
+        //     if (carrierScore < launcherScore){
+        //         Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore + getMinCarriers()));
+        //     }
+        //     return false;
+        // }
 
         // TODO: Explore resource
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1)) {
             return false;
         }
-        if (carrierScore < launcherScore){
+        if (carrierScore < launcherScore || BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource)))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
@@ -204,7 +204,7 @@ public class SimpleBuilder extends Utils{
     private static boolean tryBuildStandardAnchor() throws GameActionException{
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
         if (rc.getRoundNum() < 40) return false;
-        if (carrierScore + launcherScore < standardAnchorScore) return false;
+        if (carrierScore + launcherScore < standardAnchorScore + 10) return false;
         System.out.println("Trying to build standard anchor");
         if (rc.canBuildAnchor(Anchor.STANDARD)){
             System.out.println("built standard anchor");
@@ -243,8 +243,8 @@ public class SimpleBuilder extends Utils{
             tryBuildLauncher();
         }
 
-        if (tryBuildCarrier()) return;
         if (tryBuildStandardAnchor()) return;
+        if (tryBuildCarrier()) return;
         if (tryBuildAmplifier()) return;
         if (tryBuildLauncher()) return;
         // if (tryBuildAcceleratingAnchor()) return;
