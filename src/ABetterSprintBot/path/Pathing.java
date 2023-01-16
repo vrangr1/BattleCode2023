@@ -76,8 +76,10 @@ public class Pathing extends Utils {
             return;
         }
 
-        if (rc.getRoundNum() - BIRTH_ROUND > 1){
+        int nearbyRobotcount = rc.senseNearbyRobots().length;
+        if (rc.getRoundNum() - BIRTH_ROUND > 1 || nearbyRobotcount > 15) {
             Nav.goTo(target);
+            return;
         }
 
         Direction dir = up.bestDir(target);

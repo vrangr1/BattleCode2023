@@ -28,39 +28,9 @@ public class Nav extends Utils {
         return true;
     }
 
-    // private static boolean tryMoveDirect() throws GameActionException {
-    //     if (rc.getType() == RobotType.DRONE) return tryMoveDirectDrone();
-
-    //     Direction toDest = rc.getLocation().directionTo(dest);
-
-    //     if (canMove(toDest)) {
-    //         move(toDest);
-    //         return true;
-    //     }
-
-    //     Direction[] dirs = new Direction[2];
-    //     Direction dirLeft = toDest.rotateLeft();
-    //     Direction dirRight = toDest.rotateRight();
-    //     if (rc.getLocation().add(dirLeft).distanceSquaredTo(dest) < rc.getLocation().add(dirRight).distanceSquaredTo(dest)) {
-    //         dirs[0] = dirLeft;
-    //         dirs[1] = dirRight;
-    //     } else {
-    //         dirs[0] = dirRight;
-    //         dirs[1] = dirLeft;
-    //     }
-    //     for (Direction dir : dirs) {
-    //         if (canMove(dir)) {
-    //             move(dir);
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
     private static boolean tryMoveDirect() throws GameActionException {
         Direction dirAhead = rc.getLocation().directionTo(dest);
-        MapLocation locAhead = rc.getLocation().add(dirAhead);
-        if(rc.canMove(dirAhead) && rc.sensePassability(locAhead)) {
+        if(rc.canMove(dirAhead)) {
             move(dirAhead);
             return true;
         }
@@ -80,10 +50,8 @@ public class Nav extends Utils {
 
         for(Direction dir : dirs) {
             if(rc.canMove(dir)) {
-                if(rc.sensePassability(rc.getLocation().add(dir))) {
-                    move(dir);
-                    return true;
-                }
+                move(dir);
+                return true;
             }
         }
         
