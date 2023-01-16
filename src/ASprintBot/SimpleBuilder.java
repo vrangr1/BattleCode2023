@@ -193,7 +193,7 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean shouldBuildAmplifier() throws GameActionException{
-        return Math.min(carrierScore, launcherScore) >= 10 && rc.getRoundNum() >= 20;
+        return Math.min(carrierScore, launcherScore) >= 10 && rc.getRoundNum() >= 15;
     }
 
     private static boolean shouldBuildAnchor() throws GameActionException{
