@@ -169,7 +169,7 @@ public class Nav extends Utils {
             reverseBugWallFollowDir();
         }
         Direction dir = findBugMoveDir();
-        if (dir != null) {
+        if (dir != null && rc.canMove(dir)) {
             bugMove(dir);
         }
     }

@@ -68,7 +68,7 @@ def gen_bfs(radius):
             for y in range(-7, 8):
                 if dist(x, y) == r2:
                     out += f"""
-        if (rc.onTheMap(l{encode(x,y)})) {{ // check ({x}, {y})"""
+        if (rc.canSenseLocation(l{encode(x,y)}) && rc.sensePassability(l{encode(x,y)})) {{ // check ({x}, {y})"""
                     indent = ""
                     if r2 <= 2:
                         out += f"""
@@ -84,7 +84,7 @@ def gen_bfs(radius):
                 {indent}dir{encode(x,y)} = {DIRECTIONS[(-dx, -dy)] if (x+dx,y+dy) == (0, 0) else f'dir{encode(x+dx,y+dy)}'};
             {indent}}}"""
                     out += f"""
-            {indent}d{encode(x,y)} += locationScore(l{encode(x,y)}) + 10;"""
+            {indent}d{encode(x,y)} += locationScore(l{encode(x,y)});"""
                     if r2 <= 2:
                         out += f"""
             }}"""
@@ -172,6 +172,7 @@ def gen_full(bot, unit):
 package {bot}.path;
 
 import battlecode.common.*;
+import {bot}.Utils;
 
 public class Bot{unit}Pathing implements UnitPathing {{
     
@@ -183,10 +184,7 @@ public class Bot{unit}Pathing implements UnitPathing {{
     }}
 
     public int locationScore(MapLocation loc) throws GameActionException {{
-        if (rc.canSenseLocation(loc) && rc.sensePassability(loc)) 
-            return 10;
-        else
-            return 10000;
+        return Utils.senseRubbleFriend(loc);
     }}
 
     public Direction bestDir(MapLocation target) throws GameActionException {{

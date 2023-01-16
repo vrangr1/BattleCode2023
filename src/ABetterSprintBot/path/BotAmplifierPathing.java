@@ -5,6 +5,7 @@
 package ABetterSprintBot.path;
 
 import battlecode.common.*;
+import ABetterSprintBot.Utils;
 
 public class BotAmplifierPathing implements UnitPathing {
     
@@ -340,10 +341,7 @@ public class BotAmplifierPathing implements UnitPathing {
     }
 
     public int locationScore(MapLocation loc) throws GameActionException {
-        if (rc.canSenseLocation(loc) && rc.sensePassability(loc)) 
-            return 10;
-        else
-            return 10000;
+        return Utils.senseRubbleFriend(loc);
     }
 
     public Direction bestDir(MapLocation target) throws GameActionException {
@@ -674,17 +672,17 @@ public class BotAmplifierPathing implements UnitPathing {
 
 
 
-        if (rc.onTheMap(l111)) { // check (-1, 0)
+        if (rc.canSenseLocation(l111) && rc.sensePassability(l111)) { // check (-1, 0)
             if (!rc.isLocationOccupied(l111)) { 
                 if (d111 > d112) { // from (0, 0)
                     d111 = d112;
                     dir111 = Direction.WEST;
                 }
-                d111 += locationScore(l111) + 10;
+                d111 += locationScore(l111);
             }
         }
 
-        if (rc.onTheMap(l97)) { // check (0, -1)
+        if (rc.canSenseLocation(l97) && rc.sensePassability(l97)) { // check (0, -1)
             if (!rc.isLocationOccupied(l97)) { 
                 if (d97 > d112) { // from (0, 0)
                     d97 = d112;
@@ -694,11 +692,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d97 = d111;
                     dir97 = dir111;
                 }
-                d97 += locationScore(l97) + 10;
+                d97 += locationScore(l97);
             }
         }
 
-        if (rc.onTheMap(l127)) { // check (0, 1)
+        if (rc.canSenseLocation(l127) && rc.sensePassability(l127)) { // check (0, 1)
             if (!rc.isLocationOccupied(l127)) { 
                 if (d127 > d112) { // from (0, 0)
                     d127 = d112;
@@ -708,11 +706,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d127 = d111;
                     dir127 = dir111;
                 }
-                d127 += locationScore(l127) + 10;
+                d127 += locationScore(l127);
             }
         }
 
-        if (rc.onTheMap(l113)) { // check (1, 0)
+        if (rc.canSenseLocation(l113) && rc.sensePassability(l113)) { // check (1, 0)
             if (!rc.isLocationOccupied(l113)) { 
                 if (d113 > d112) { // from (0, 0)
                     d113 = d112;
@@ -726,11 +724,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d113 = d127;
                     dir113 = dir127;
                 }
-                d113 += locationScore(l113) + 10;
+                d113 += locationScore(l113);
             }
         }
 
-        if (rc.onTheMap(l96)) { // check (-1, -1)
+        if (rc.canSenseLocation(l96) && rc.sensePassability(l96)) { // check (-1, -1)
             if (!rc.isLocationOccupied(l96)) { 
                 if (d96 > d112) { // from (0, 0)
                     d96 = d112;
@@ -744,11 +742,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d96 = d97;
                     dir96 = dir97;
                 }
-                d96 += locationScore(l96) + 10;
+                d96 += locationScore(l96);
             }
         }
 
-        if (rc.onTheMap(l126)) { // check (-1, 1)
+        if (rc.canSenseLocation(l126) && rc.sensePassability(l126)) { // check (-1, 1)
             if (!rc.isLocationOccupied(l126)) { 
                 if (d126 > d112) { // from (0, 0)
                     d126 = d112;
@@ -762,11 +760,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d126 = d127;
                     dir126 = dir127;
                 }
-                d126 += locationScore(l126) + 10;
+                d126 += locationScore(l126);
             }
         }
 
-        if (rc.onTheMap(l98)) { // check (1, -1)
+        if (rc.canSenseLocation(l98) && rc.sensePassability(l98)) { // check (1, -1)
             if (!rc.isLocationOccupied(l98)) { 
                 if (d98 > d112) { // from (0, 0)
                     d98 = d112;
@@ -780,11 +778,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d98 = d113;
                     dir98 = dir113;
                 }
-                d98 += locationScore(l98) + 10;
+                d98 += locationScore(l98);
             }
         }
 
-        if (rc.onTheMap(l128)) { // check (1, 1)
+        if (rc.canSenseLocation(l128) && rc.sensePassability(l128)) { // check (1, 1)
             if (!rc.isLocationOccupied(l128)) { 
                 if (d128 > d112) { // from (0, 0)
                     d128 = d112;
@@ -798,11 +796,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d128 = d113;
                     dir128 = dir113;
                 }
-                d128 += locationScore(l128) + 10;
+                d128 += locationScore(l128);
             }
         }
 
-        if (rc.onTheMap(l110)) { // check (-2, 0)
+        if (rc.canSenseLocation(l110) && rc.sensePassability(l110)) { // check (-2, 0)
             if (d110 > d111) { // from (-1, 0)
                 d110 = d111;
                 dir110 = dir111;
@@ -815,10 +813,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d110 = d126;
                 dir110 = dir126;
             }
-            d110 += locationScore(l110) + 10;
+            d110 += locationScore(l110);
         }
 
-        if (rc.onTheMap(l82)) { // check (0, -2)
+        if (rc.canSenseLocation(l82) && rc.sensePassability(l82)) { // check (0, -2)
             if (d82 > d97) { // from (0, -1)
                 d82 = d97;
                 dir82 = dir97;
@@ -831,10 +829,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d82 = d98;
                 dir82 = dir98;
             }
-            d82 += locationScore(l82) + 10;
+            d82 += locationScore(l82);
         }
 
-        if (rc.onTheMap(l142)) { // check (0, 2)
+        if (rc.canSenseLocation(l142) && rc.sensePassability(l142)) { // check (0, 2)
             if (d142 > d127) { // from (0, 1)
                 d142 = d127;
                 dir142 = dir127;
@@ -847,10 +845,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d142 = d128;
                 dir142 = dir128;
             }
-            d142 += locationScore(l142) + 10;
+            d142 += locationScore(l142);
         }
 
-        if (rc.onTheMap(l114)) { // check (2, 0)
+        if (rc.canSenseLocation(l114) && rc.sensePassability(l114)) { // check (2, 0)
             if (d114 > d113) { // from (1, 0)
                 d114 = d113;
                 dir114 = dir113;
@@ -863,10 +861,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d114 = d128;
                 dir114 = dir128;
             }
-            d114 += locationScore(l114) + 10;
+            d114 += locationScore(l114);
         }
 
-        if (rc.onTheMap(l95)) { // check (-2, -1)
+        if (rc.canSenseLocation(l95) && rc.sensePassability(l95)) { // check (-2, -1)
             if (d95 > d111) { // from (-1, 0)
                 d95 = d111;
                 dir95 = dir111;
@@ -879,10 +877,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d95 = d110;
                 dir95 = dir110;
             }
-            d95 += locationScore(l95) + 10;
+            d95 += locationScore(l95);
         }
 
-        if (rc.onTheMap(l125)) { // check (-2, 1)
+        if (rc.canSenseLocation(l125) && rc.sensePassability(l125)) { // check (-2, 1)
             if (d125 > d111) { // from (-1, 0)
                 d125 = d111;
                 dir125 = dir111;
@@ -895,10 +893,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d125 = d110;
                 dir125 = dir110;
             }
-            d125 += locationScore(l125) + 10;
+            d125 += locationScore(l125);
         }
 
-        if (rc.onTheMap(l81)) { // check (-1, -2)
+        if (rc.canSenseLocation(l81) && rc.sensePassability(l81)) { // check (-1, -2)
             if (d81 > d97) { // from (0, -1)
                 d81 = d97;
                 dir81 = dir97;
@@ -915,10 +913,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d81 = d95;
                 dir81 = dir95;
             }
-            d81 += locationScore(l81) + 10;
+            d81 += locationScore(l81);
         }
 
-        if (rc.onTheMap(l141)) { // check (-1, 2)
+        if (rc.canSenseLocation(l141) && rc.sensePassability(l141)) { // check (-1, 2)
             if (d141 > d127) { // from (0, 1)
                 d141 = d127;
                 dir141 = dir127;
@@ -935,10 +933,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d141 = d125;
                 dir141 = dir125;
             }
-            d141 += locationScore(l141) + 10;
+            d141 += locationScore(l141);
         }
 
-        if (rc.onTheMap(l83)) { // check (1, -2)
+        if (rc.canSenseLocation(l83) && rc.sensePassability(l83)) { // check (1, -2)
             if (d83 > d97) { // from (0, -1)
                 d83 = d97;
                 dir83 = dir97;
@@ -951,10 +949,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d83 = d82;
                 dir83 = dir82;
             }
-            d83 += locationScore(l83) + 10;
+            d83 += locationScore(l83);
         }
 
-        if (rc.onTheMap(l143)) { // check (1, 2)
+        if (rc.canSenseLocation(l143) && rc.sensePassability(l143)) { // check (1, 2)
             if (d143 > d127) { // from (0, 1)
                 d143 = d127;
                 dir143 = dir127;
@@ -967,10 +965,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d143 = d142;
                 dir143 = dir142;
             }
-            d143 += locationScore(l143) + 10;
+            d143 += locationScore(l143);
         }
 
-        if (rc.onTheMap(l99)) { // check (2, -1)
+        if (rc.canSenseLocation(l99) && rc.sensePassability(l99)) { // check (2, -1)
             if (d99 > d113) { // from (1, 0)
                 d99 = d113;
                 dir99 = dir113;
@@ -987,10 +985,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d99 = d83;
                 dir99 = dir83;
             }
-            d99 += locationScore(l99) + 10;
+            d99 += locationScore(l99);
         }
 
-        if (rc.onTheMap(l129)) { // check (2, 1)
+        if (rc.canSenseLocation(l129) && rc.sensePassability(l129)) { // check (2, 1)
             if (d129 > d113) { // from (1, 0)
                 d129 = d113;
                 dir129 = dir113;
@@ -1007,10 +1005,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d129 = d143;
                 dir129 = dir143;
             }
-            d129 += locationScore(l129) + 10;
+            d129 += locationScore(l129);
         }
 
-        if (rc.onTheMap(l80)) { // check (-2, -2)
+        if (rc.canSenseLocation(l80) && rc.sensePassability(l80)) { // check (-2, -2)
             if (d80 > d96) { // from (-1, -1)
                 d80 = d96;
                 dir80 = dir96;
@@ -1023,10 +1021,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d80 = d81;
                 dir80 = dir81;
             }
-            d80 += locationScore(l80) + 10;
+            d80 += locationScore(l80);
         }
 
-        if (rc.onTheMap(l140)) { // check (-2, 2)
+        if (rc.canSenseLocation(l140) && rc.sensePassability(l140)) { // check (-2, 2)
             if (d140 > d126) { // from (-1, 1)
                 d140 = d126;
                 dir140 = dir126;
@@ -1039,10 +1037,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d140 = d141;
                 dir140 = dir141;
             }
-            d140 += locationScore(l140) + 10;
+            d140 += locationScore(l140);
         }
 
-        if (rc.onTheMap(l84)) { // check (2, -2)
+        if (rc.canSenseLocation(l84) && rc.sensePassability(l84)) { // check (2, -2)
             if (d84 > d98) { // from (1, -1)
                 d84 = d98;
                 dir84 = dir98;
@@ -1055,10 +1053,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d84 = d99;
                 dir84 = dir99;
             }
-            d84 += locationScore(l84) + 10;
+            d84 += locationScore(l84);
         }
 
-        if (rc.onTheMap(l144)) { // check (2, 2)
+        if (rc.canSenseLocation(l144) && rc.sensePassability(l144)) { // check (2, 2)
             if (d144 > d128) { // from (1, 1)
                 d144 = d128;
                 dir144 = dir128;
@@ -1071,10 +1069,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d144 = d129;
                 dir144 = dir129;
             }
-            d144 += locationScore(l144) + 10;
+            d144 += locationScore(l144);
         }
 
-        if (rc.onTheMap(l109)) { // check (-3, 0)
+        if (rc.canSenseLocation(l109) && rc.sensePassability(l109)) { // check (-3, 0)
             if (d109 > d110) { // from (-2, 0)
                 d109 = d110;
                 dir109 = dir110;
@@ -1087,10 +1085,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d109 = d125;
                 dir109 = dir125;
             }
-            d109 += locationScore(l109) + 10;
+            d109 += locationScore(l109);
         }
 
-        if (rc.onTheMap(l67)) { // check (0, -3)
+        if (rc.canSenseLocation(l67) && rc.sensePassability(l67)) { // check (0, -3)
             if (d67 > d82) { // from (0, -2)
                 d67 = d82;
                 dir67 = dir82;
@@ -1103,10 +1101,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d67 = d83;
                 dir67 = dir83;
             }
-            d67 += locationScore(l67) + 10;
+            d67 += locationScore(l67);
         }
 
-        if (rc.onTheMap(l157)) { // check (0, 3)
+        if (rc.canSenseLocation(l157) && rc.sensePassability(l157)) { // check (0, 3)
             if (d157 > d142) { // from (0, 2)
                 d157 = d142;
                 dir157 = dir142;
@@ -1119,10 +1117,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d157 = d143;
                 dir157 = dir143;
             }
-            d157 += locationScore(l157) + 10;
+            d157 += locationScore(l157);
         }
 
-        if (rc.onTheMap(l115)) { // check (3, 0)
+        if (rc.canSenseLocation(l115) && rc.sensePassability(l115)) { // check (3, 0)
             if (d115 > d114) { // from (2, 0)
                 d115 = d114;
                 dir115 = dir114;
@@ -1135,10 +1133,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d115 = d129;
                 dir115 = dir129;
             }
-            d115 += locationScore(l115) + 10;
+            d115 += locationScore(l115);
         }
 
-        if (rc.onTheMap(l94)) { // check (-3, -1)
+        if (rc.canSenseLocation(l94) && rc.sensePassability(l94)) { // check (-3, -1)
             if (d94 > d110) { // from (-2, 0)
                 d94 = d110;
                 dir94 = dir110;
@@ -1155,10 +1153,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d94 = d109;
                 dir94 = dir109;
             }
-            d94 += locationScore(l94) + 10;
+            d94 += locationScore(l94);
         }
 
-        if (rc.onTheMap(l124)) { // check (-3, 1)
+        if (rc.canSenseLocation(l124) && rc.sensePassability(l124)) { // check (-3, 1)
             if (d124 > d110) { // from (-2, 0)
                 d124 = d110;
                 dir124 = dir110;
@@ -1175,10 +1173,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d124 = d109;
                 dir124 = dir109;
             }
-            d124 += locationScore(l124) + 10;
+            d124 += locationScore(l124);
         }
 
-        if (rc.onTheMap(l66)) { // check (-1, -3)
+        if (rc.canSenseLocation(l66) && rc.sensePassability(l66)) { // check (-1, -3)
             if (d66 > d82) { // from (0, -2)
                 d66 = d82;
                 dir66 = dir82;
@@ -1195,10 +1193,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d66 = d67;
                 dir66 = dir67;
             }
-            d66 += locationScore(l66) + 10;
+            d66 += locationScore(l66);
         }
 
-        if (rc.onTheMap(l156)) { // check (-1, 3)
+        if (rc.canSenseLocation(l156) && rc.sensePassability(l156)) { // check (-1, 3)
             if (d156 > d142) { // from (0, 2)
                 d156 = d142;
                 dir156 = dir142;
@@ -1215,10 +1213,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d156 = d157;
                 dir156 = dir157;
             }
-            d156 += locationScore(l156) + 10;
+            d156 += locationScore(l156);
         }
 
-        if (rc.onTheMap(l68)) { // check (1, -3)
+        if (rc.canSenseLocation(l68) && rc.sensePassability(l68)) { // check (1, -3)
             if (d68 > d82) { // from (0, -2)
                 d68 = d82;
                 dir68 = dir82;
@@ -1235,10 +1233,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d68 = d67;
                 dir68 = dir67;
             }
-            d68 += locationScore(l68) + 10;
+            d68 += locationScore(l68);
         }
 
-        if (rc.onTheMap(l158)) { // check (1, 3)
+        if (rc.canSenseLocation(l158) && rc.sensePassability(l158)) { // check (1, 3)
             if (d158 > d142) { // from (0, 2)
                 d158 = d142;
                 dir158 = dir142;
@@ -1255,10 +1253,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d158 = d157;
                 dir158 = dir157;
             }
-            d158 += locationScore(l158) + 10;
+            d158 += locationScore(l158);
         }
 
-        if (rc.onTheMap(l100)) { // check (3, -1)
+        if (rc.canSenseLocation(l100) && rc.sensePassability(l100)) { // check (3, -1)
             if (d100 > d114) { // from (2, 0)
                 d100 = d114;
                 dir100 = dir114;
@@ -1275,10 +1273,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d100 = d115;
                 dir100 = dir115;
             }
-            d100 += locationScore(l100) + 10;
+            d100 += locationScore(l100);
         }
 
-        if (rc.onTheMap(l130)) { // check (3, 1)
+        if (rc.canSenseLocation(l130) && rc.sensePassability(l130)) { // check (3, 1)
             if (d130 > d114) { // from (2, 0)
                 d130 = d114;
                 dir130 = dir114;
@@ -1295,10 +1293,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d130 = d115;
                 dir130 = dir115;
             }
-            d130 += locationScore(l130) + 10;
+            d130 += locationScore(l130);
         }
 
-        if (rc.onTheMap(l79)) { // check (-3, -2)
+        if (rc.canSenseLocation(l79) && rc.sensePassability(l79)) { // check (-3, -2)
             if (d79 > d95) { // from (-2, -1)
                 d79 = d95;
                 dir79 = dir95;
@@ -1311,10 +1309,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d79 = d94;
                 dir79 = dir94;
             }
-            d79 += locationScore(l79) + 10;
+            d79 += locationScore(l79);
         }
 
-        if (rc.onTheMap(l139)) { // check (-3, 2)
+        if (rc.canSenseLocation(l139) && rc.sensePassability(l139)) { // check (-3, 2)
             if (d139 > d125) { // from (-2, 1)
                 d139 = d125;
                 dir139 = dir125;
@@ -1327,10 +1325,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d139 = d124;
                 dir139 = dir124;
             }
-            d139 += locationScore(l139) + 10;
+            d139 += locationScore(l139);
         }
 
-        if (rc.onTheMap(l65)) { // check (-2, -3)
+        if (rc.canSenseLocation(l65) && rc.sensePassability(l65)) { // check (-2, -3)
             if (d65 > d81) { // from (-1, -2)
                 d65 = d81;
                 dir65 = dir81;
@@ -1347,10 +1345,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d65 = d79;
                 dir65 = dir79;
             }
-            d65 += locationScore(l65) + 10;
+            d65 += locationScore(l65);
         }
 
-        if (rc.onTheMap(l155)) { // check (-2, 3)
+        if (rc.canSenseLocation(l155) && rc.sensePassability(l155)) { // check (-2, 3)
             if (d155 > d141) { // from (-1, 2)
                 d155 = d141;
                 dir155 = dir141;
@@ -1367,10 +1365,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d155 = d139;
                 dir155 = dir139;
             }
-            d155 += locationScore(l155) + 10;
+            d155 += locationScore(l155);
         }
 
-        if (rc.onTheMap(l69)) { // check (2, -3)
+        if (rc.canSenseLocation(l69) && rc.sensePassability(l69)) { // check (2, -3)
             if (d69 > d83) { // from (1, -2)
                 d69 = d83;
                 dir69 = dir83;
@@ -1383,10 +1381,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d69 = d68;
                 dir69 = dir68;
             }
-            d69 += locationScore(l69) + 10;
+            d69 += locationScore(l69);
         }
 
-        if (rc.onTheMap(l159)) { // check (2, 3)
+        if (rc.canSenseLocation(l159) && rc.sensePassability(l159)) { // check (2, 3)
             if (d159 > d143) { // from (1, 2)
                 d159 = d143;
                 dir159 = dir143;
@@ -1399,10 +1397,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d159 = d158;
                 dir159 = dir158;
             }
-            d159 += locationScore(l159) + 10;
+            d159 += locationScore(l159);
         }
 
-        if (rc.onTheMap(l85)) { // check (3, -2)
+        if (rc.canSenseLocation(l85) && rc.sensePassability(l85)) { // check (3, -2)
             if (d85 > d99) { // from (2, -1)
                 d85 = d99;
                 dir85 = dir99;
@@ -1419,10 +1417,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d85 = d69;
                 dir85 = dir69;
             }
-            d85 += locationScore(l85) + 10;
+            d85 += locationScore(l85);
         }
 
-        if (rc.onTheMap(l145)) { // check (3, 2)
+        if (rc.canSenseLocation(l145) && rc.sensePassability(l145)) { // check (3, 2)
             if (d145 > d129) { // from (2, 1)
                 d145 = d129;
                 dir145 = dir129;
@@ -1439,10 +1437,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d145 = d159;
                 dir145 = dir159;
             }
-            d145 += locationScore(l145) + 10;
+            d145 += locationScore(l145);
         }
 
-        if (rc.onTheMap(l108)) { // check (-4, 0)
+        if (rc.canSenseLocation(l108) && rc.sensePassability(l108)) { // check (-4, 0)
             if (d108 > d109) { // from (-3, 0)
                 d108 = d109;
                 dir108 = dir109;
@@ -1455,10 +1453,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d108 = d124;
                 dir108 = dir124;
             }
-            d108 += locationScore(l108) + 10;
+            d108 += locationScore(l108);
         }
 
-        if (rc.onTheMap(l52)) { // check (0, -4)
+        if (rc.canSenseLocation(l52) && rc.sensePassability(l52)) { // check (0, -4)
             if (d52 > d67) { // from (0, -3)
                 d52 = d67;
                 dir52 = dir67;
@@ -1471,10 +1469,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d52 = d68;
                 dir52 = dir68;
             }
-            d52 += locationScore(l52) + 10;
+            d52 += locationScore(l52);
         }
 
-        if (rc.onTheMap(l172)) { // check (0, 4)
+        if (rc.canSenseLocation(l172) && rc.sensePassability(l172)) { // check (0, 4)
             if (d172 > d157) { // from (0, 3)
                 d172 = d157;
                 dir172 = dir157;
@@ -1487,10 +1485,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d172 = d158;
                 dir172 = dir158;
             }
-            d172 += locationScore(l172) + 10;
+            d172 += locationScore(l172);
         }
 
-        if (rc.onTheMap(l116)) { // check (4, 0)
+        if (rc.canSenseLocation(l116) && rc.sensePassability(l116)) { // check (4, 0)
             if (d116 > d115) { // from (3, 0)
                 d116 = d115;
                 dir116 = dir115;
@@ -1503,10 +1501,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d116 = d130;
                 dir116 = dir130;
             }
-            d116 += locationScore(l116) + 10;
+            d116 += locationScore(l116);
         }
 
-        if (rc.onTheMap(l93)) { // check (-4, -1)
+        if (rc.canSenseLocation(l93) && rc.sensePassability(l93)) { // check (-4, -1)
             if (d93 > d109) { // from (-3, 0)
                 d93 = d109;
                 dir93 = dir109;
@@ -1523,10 +1521,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d93 = d108;
                 dir93 = dir108;
             }
-            d93 += locationScore(l93) + 10;
+            d93 += locationScore(l93);
         }
 
-        if (rc.onTheMap(l123)) { // check (-4, 1)
+        if (rc.canSenseLocation(l123) && rc.sensePassability(l123)) { // check (-4, 1)
             if (d123 > d109) { // from (-3, 0)
                 d123 = d109;
                 dir123 = dir109;
@@ -1543,10 +1541,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d123 = d108;
                 dir123 = dir108;
             }
-            d123 += locationScore(l123) + 10;
+            d123 += locationScore(l123);
         }
 
-        if (rc.onTheMap(l51)) { // check (-1, -4)
+        if (rc.canSenseLocation(l51) && rc.sensePassability(l51)) { // check (-1, -4)
             if (d51 > d67) { // from (0, -3)
                 d51 = d67;
                 dir51 = dir67;
@@ -1563,10 +1561,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d51 = d52;
                 dir51 = dir52;
             }
-            d51 += locationScore(l51) + 10;
+            d51 += locationScore(l51);
         }
 
-        if (rc.onTheMap(l171)) { // check (-1, 4)
+        if (rc.canSenseLocation(l171) && rc.sensePassability(l171)) { // check (-1, 4)
             if (d171 > d157) { // from (0, 3)
                 d171 = d157;
                 dir171 = dir157;
@@ -1583,10 +1581,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d171 = d172;
                 dir171 = dir172;
             }
-            d171 += locationScore(l171) + 10;
+            d171 += locationScore(l171);
         }
 
-        if (rc.onTheMap(l53)) { // check (1, -4)
+        if (rc.canSenseLocation(l53) && rc.sensePassability(l53)) { // check (1, -4)
             if (d53 > d67) { // from (0, -3)
                 d53 = d67;
                 dir53 = dir67;
@@ -1603,10 +1601,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d53 = d52;
                 dir53 = dir52;
             }
-            d53 += locationScore(l53) + 10;
+            d53 += locationScore(l53);
         }
 
-        if (rc.onTheMap(l173)) { // check (1, 4)
+        if (rc.canSenseLocation(l173) && rc.sensePassability(l173)) { // check (1, 4)
             if (d173 > d157) { // from (0, 3)
                 d173 = d157;
                 dir173 = dir157;
@@ -1623,10 +1621,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d173 = d172;
                 dir173 = dir172;
             }
-            d173 += locationScore(l173) + 10;
+            d173 += locationScore(l173);
         }
 
-        if (rc.onTheMap(l101)) { // check (4, -1)
+        if (rc.canSenseLocation(l101) && rc.sensePassability(l101)) { // check (4, -1)
             if (d101 > d115) { // from (3, 0)
                 d101 = d115;
                 dir101 = dir115;
@@ -1643,10 +1641,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d101 = d116;
                 dir101 = dir116;
             }
-            d101 += locationScore(l101) + 10;
+            d101 += locationScore(l101);
         }
 
-        if (rc.onTheMap(l131)) { // check (4, 1)
+        if (rc.canSenseLocation(l131) && rc.sensePassability(l131)) { // check (4, 1)
             if (d131 > d115) { // from (3, 0)
                 d131 = d115;
                 dir131 = dir115;
@@ -1663,10 +1661,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d131 = d116;
                 dir131 = dir116;
             }
-            d131 += locationScore(l131) + 10;
+            d131 += locationScore(l131);
         }
 
-        if (rc.onTheMap(l64)) { // check (-3, -3)
+        if (rc.canSenseLocation(l64) && rc.sensePassability(l64)) { // check (-3, -3)
             if (d64 > d80) { // from (-2, -2)
                 d64 = d80;
                 dir64 = dir80;
@@ -1679,10 +1677,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d64 = d65;
                 dir64 = dir65;
             }
-            d64 += locationScore(l64) + 10;
+            d64 += locationScore(l64);
         }
 
-        if (rc.onTheMap(l154)) { // check (-3, 3)
+        if (rc.canSenseLocation(l154) && rc.sensePassability(l154)) { // check (-3, 3)
             if (d154 > d140) { // from (-2, 2)
                 d154 = d140;
                 dir154 = dir140;
@@ -1695,10 +1693,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d154 = d155;
                 dir154 = dir155;
             }
-            d154 += locationScore(l154) + 10;
+            d154 += locationScore(l154);
         }
 
-        if (rc.onTheMap(l70)) { // check (3, -3)
+        if (rc.canSenseLocation(l70) && rc.sensePassability(l70)) { // check (3, -3)
             if (d70 > d84) { // from (2, -2)
                 d70 = d84;
                 dir70 = dir84;
@@ -1711,10 +1709,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d70 = d85;
                 dir70 = dir85;
             }
-            d70 += locationScore(l70) + 10;
+            d70 += locationScore(l70);
         }
 
-        if (rc.onTheMap(l160)) { // check (3, 3)
+        if (rc.canSenseLocation(l160) && rc.sensePassability(l160)) { // check (3, 3)
             if (d160 > d144) { // from (2, 2)
                 d160 = d144;
                 dir160 = dir144;
@@ -1727,10 +1725,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d160 = d145;
                 dir160 = dir145;
             }
-            d160 += locationScore(l160) + 10;
+            d160 += locationScore(l160);
         }
 
-        if (rc.onTheMap(l78)) { // check (-4, -2)
+        if (rc.canSenseLocation(l78) && rc.sensePassability(l78)) { // check (-4, -2)
             if (d78 > d94) { // from (-3, -1)
                 d78 = d94;
                 dir78 = dir94;
@@ -1747,10 +1745,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d78 = d64;
                 dir78 = dir64;
             }
-            d78 += locationScore(l78) + 10;
+            d78 += locationScore(l78);
         }
 
-        if (rc.onTheMap(l138)) { // check (-4, 2)
+        if (rc.canSenseLocation(l138) && rc.sensePassability(l138)) { // check (-4, 2)
             if (d138 > d124) { // from (-3, 1)
                 d138 = d124;
                 dir138 = dir124;
@@ -1767,10 +1765,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d138 = d154;
                 dir138 = dir154;
             }
-            d138 += locationScore(l138) + 10;
+            d138 += locationScore(l138);
         }
 
-        if (rc.onTheMap(l50)) { // check (-2, -4)
+        if (rc.canSenseLocation(l50) && rc.sensePassability(l50)) { // check (-2, -4)
             if (d50 > d66) { // from (-1, -3)
                 d50 = d66;
                 dir50 = dir66;
@@ -1787,10 +1785,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d50 = d64;
                 dir50 = dir64;
             }
-            d50 += locationScore(l50) + 10;
+            d50 += locationScore(l50);
         }
 
-        if (rc.onTheMap(l170)) { // check (-2, 4)
+        if (rc.canSenseLocation(l170) && rc.sensePassability(l170)) { // check (-2, 4)
             if (d170 > d156) { // from (-1, 3)
                 d170 = d156;
                 dir170 = dir156;
@@ -1807,10 +1805,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d170 = d154;
                 dir170 = dir154;
             }
-            d170 += locationScore(l170) + 10;
+            d170 += locationScore(l170);
         }
 
-        if (rc.onTheMap(l54)) { // check (2, -4)
+        if (rc.canSenseLocation(l54) && rc.sensePassability(l54)) { // check (2, -4)
             if (d54 > d68) { // from (1, -3)
                 d54 = d68;
                 dir54 = dir68;
@@ -1827,10 +1825,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d54 = d70;
                 dir54 = dir70;
             }
-            d54 += locationScore(l54) + 10;
+            d54 += locationScore(l54);
         }
 
-        if (rc.onTheMap(l174)) { // check (2, 4)
+        if (rc.canSenseLocation(l174) && rc.sensePassability(l174)) { // check (2, 4)
             if (d174 > d158) { // from (1, 3)
                 d174 = d158;
                 dir174 = dir158;
@@ -1847,10 +1845,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d174 = d160;
                 dir174 = dir160;
             }
-            d174 += locationScore(l174) + 10;
+            d174 += locationScore(l174);
         }
 
-        if (rc.onTheMap(l86)) { // check (4, -2)
+        if (rc.canSenseLocation(l86) && rc.sensePassability(l86)) { // check (4, -2)
             if (d86 > d100) { // from (3, -1)
                 d86 = d100;
                 dir86 = dir100;
@@ -1867,10 +1865,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d86 = d70;
                 dir86 = dir70;
             }
-            d86 += locationScore(l86) + 10;
+            d86 += locationScore(l86);
         }
 
-        if (rc.onTheMap(l146)) { // check (4, 2)
+        if (rc.canSenseLocation(l146) && rc.sensePassability(l146)) { // check (4, 2)
             if (d146 > d130) { // from (3, 1)
                 d146 = d130;
                 dir146 = dir130;
@@ -1887,10 +1885,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d146 = d160;
                 dir146 = dir160;
             }
-            d146 += locationScore(l146) + 10;
+            d146 += locationScore(l146);
         }
 
-        if (rc.onTheMap(l107)) { // check (-5, 0)
+        if (rc.canSenseLocation(l107) && rc.sensePassability(l107)) { // check (-5, 0)
             if (d107 > d108) { // from (-4, 0)
                 d107 = d108;
                 dir107 = dir108;
@@ -1903,10 +1901,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d107 = d123;
                 dir107 = dir123;
             }
-            d107 += locationScore(l107) + 10;
+            d107 += locationScore(l107);
         }
 
-        if (rc.onTheMap(l63)) { // check (-4, -3)
+        if (rc.canSenseLocation(l63) && rc.sensePassability(l63)) { // check (-4, -3)
             if (d63 > d79) { // from (-3, -2)
                 d63 = d79;
                 dir63 = dir79;
@@ -1919,10 +1917,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d63 = d78;
                 dir63 = dir78;
             }
-            d63 += locationScore(l63) + 10;
+            d63 += locationScore(l63);
         }
 
-        if (rc.onTheMap(l153)) { // check (-4, 3)
+        if (rc.canSenseLocation(l153) && rc.sensePassability(l153)) { // check (-4, 3)
             if (d153 > d139) { // from (-3, 2)
                 d153 = d139;
                 dir153 = dir139;
@@ -1935,10 +1933,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d153 = d138;
                 dir153 = dir138;
             }
-            d153 += locationScore(l153) + 10;
+            d153 += locationScore(l153);
         }
 
-        if (rc.onTheMap(l49)) { // check (-3, -4)
+        if (rc.canSenseLocation(l49) && rc.sensePassability(l49)) { // check (-3, -4)
             if (d49 > d65) { // from (-2, -3)
                 d49 = d65;
                 dir49 = dir65;
@@ -1955,10 +1953,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d49 = d63;
                 dir49 = dir63;
             }
-            d49 += locationScore(l49) + 10;
+            d49 += locationScore(l49);
         }
 
-        if (rc.onTheMap(l169)) { // check (-3, 4)
+        if (rc.canSenseLocation(l169) && rc.sensePassability(l169)) { // check (-3, 4)
             if (d169 > d155) { // from (-2, 3)
                 d169 = d155;
                 dir169 = dir155;
@@ -1975,10 +1973,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d169 = d153;
                 dir169 = dir153;
             }
-            d169 += locationScore(l169) + 10;
+            d169 += locationScore(l169);
         }
 
-        if (rc.onTheMap(l37)) { // check (0, -5)
+        if (rc.canSenseLocation(l37) && rc.sensePassability(l37)) { // check (0, -5)
             if (d37 > d52) { // from (0, -4)
                 d37 = d52;
                 dir37 = dir52;
@@ -1991,10 +1989,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d37 = d53;
                 dir37 = dir53;
             }
-            d37 += locationScore(l37) + 10;
+            d37 += locationScore(l37);
         }
 
-        if (rc.onTheMap(l187)) { // check (0, 5)
+        if (rc.canSenseLocation(l187) && rc.sensePassability(l187)) { // check (0, 5)
             if (d187 > d172) { // from (0, 4)
                 d187 = d172;
                 dir187 = dir172;
@@ -2007,10 +2005,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d187 = d173;
                 dir187 = dir173;
             }
-            d187 += locationScore(l187) + 10;
+            d187 += locationScore(l187);
         }
 
-        if (rc.onTheMap(l55)) { // check (3, -4)
+        if (rc.canSenseLocation(l55) && rc.sensePassability(l55)) { // check (3, -4)
             if (d55 > d69) { // from (2, -3)
                 d55 = d69;
                 dir55 = dir69;
@@ -2023,10 +2021,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d55 = d54;
                 dir55 = dir54;
             }
-            d55 += locationScore(l55) + 10;
+            d55 += locationScore(l55);
         }
 
-        if (rc.onTheMap(l175)) { // check (3, 4)
+        if (rc.canSenseLocation(l175) && rc.sensePassability(l175)) { // check (3, 4)
             if (d175 > d159) { // from (2, 3)
                 d175 = d159;
                 dir175 = dir159;
@@ -2039,10 +2037,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d175 = d174;
                 dir175 = dir174;
             }
-            d175 += locationScore(l175) + 10;
+            d175 += locationScore(l175);
         }
 
-        if (rc.onTheMap(l71)) { // check (4, -3)
+        if (rc.canSenseLocation(l71) && rc.sensePassability(l71)) { // check (4, -3)
             if (d71 > d85) { // from (3, -2)
                 d71 = d85;
                 dir71 = dir85;
@@ -2059,10 +2057,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d71 = d55;
                 dir71 = dir55;
             }
-            d71 += locationScore(l71) + 10;
+            d71 += locationScore(l71);
         }
 
-        if (rc.onTheMap(l161)) { // check (4, 3)
+        if (rc.canSenseLocation(l161) && rc.sensePassability(l161)) { // check (4, 3)
             if (d161 > d145) { // from (3, 2)
                 d161 = d145;
                 dir161 = dir145;
@@ -2079,10 +2077,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d161 = d175;
                 dir161 = dir175;
             }
-            d161 += locationScore(l161) + 10;
+            d161 += locationScore(l161);
         }
 
-        if (rc.onTheMap(l117)) { // check (5, 0)
+        if (rc.canSenseLocation(l117) && rc.sensePassability(l117)) { // check (5, 0)
             if (d117 > d116) { // from (4, 0)
                 d117 = d116;
                 dir117 = dir116;
@@ -2095,7 +2093,7 @@ public class BotAmplifierPathing implements UnitPathing {
                 d117 = d131;
                 dir117 = dir131;
             }
-            d117 += locationScore(l117) + 10;
+            d117 += locationScore(l117);
         }
 
 

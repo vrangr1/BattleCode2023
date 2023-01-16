@@ -240,7 +240,7 @@ public class SimpleBuilder extends Utils{
 
     public static void buildUnits() throws GameActionException{
         if (endangered()){
-            tryBuildLauncher();
+            if (tryBuildLauncher()) return;
         }
 
         if (tryBuildStandardAnchor()) return;
