@@ -13,7 +13,7 @@ public class BotAmplifier extends Explore{
         ANCHOR_FOLLOWER,
     }
 
-    private static Status amplifierState = Status.BORN;
+    private static Status amplifierState;
     private static RobotInfo[] visibleEnemies;
     private static RobotInfo[] visibleAllies;
     private static int commAllyRobots = 0;
@@ -23,7 +23,7 @@ public class BotAmplifier extends Explore{
     private static MapLocation closestEnemyLocation;
 
     public static void initAmplifier() throws GameActionException{
-        updateVision();
+        amplifierState = Status.BORN;
     }
 
     public static void runAmplifier() throws GameActionException{
@@ -43,7 +43,6 @@ public class BotAmplifier extends Explore{
         else if (vNonHQEnemies == 0){
             amplifierMove();
         }
-        // updateVision();
         rc.setIndicatorString(amplifierState.toString() + " " + closestEnemyLocation);
     }
 

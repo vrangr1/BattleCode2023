@@ -5,8 +5,8 @@ def encode(x, y):
     return (x+7) + 15*(y+7)
 
 # Modify as feasible in bytecode restrictions
-
-RADII = {'Carrier': 20, 'Launcher': 20, 'Destabilizer': 20, 'Booster': 20, 'Headquarter': 34, 'Amplifier': 34}
+# Amplifies is 34 but set to 25 for bytecode reasons
+RADII = {'Carrier': 20, 'Launcher': 20, 'Destabilizer': 20, 'Booster': 20, 'Headquarter': 34, 'Amplifier': 25}
 SMALLER_RADII = {'Carrier': 10, 'Launcher': 10, 'Destabilizer': 10, 'Booster': 10, 'Headquarter': 20, 'Amplifier': 20}
 
 DIRECTIONS = {

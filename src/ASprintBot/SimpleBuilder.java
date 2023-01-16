@@ -56,7 +56,7 @@ public class SimpleBuilder extends Utils{
 
     public static int getMinCarriers(){
         if (minCarriers != null) return minCarriers;
-        minCarriers = (MAP_HEIGHT * MAP_WIDTH)/150;
+        minCarriers = (MAP_HEIGHT * MAP_WIDTH)/125;
         if (minCarriers > INITIAL_CARRIERS) minCarriers = INITIAL_CARRIERS;
         return minCarriers;
     }
@@ -193,7 +193,7 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean shouldBuildAmplifier() throws GameActionException{
-        return Math.min(carrierScore, launcherScore) >= 10;
+        return Math.min(carrierScore, launcherScore) >= 10 && rc.getRoundNum() >= 20;
     }
 
     private static boolean shouldBuildAnchor() throws GameActionException{
@@ -229,7 +229,7 @@ public class SimpleBuilder extends Utils{
 
     public static void buildUnits() throws GameActionException{
         // if (endangered()){
-        //     tryBuildSoldier();
+        //     tryBuildLauncher();
         // }
 
         if (tryBuildCarrier()) return;

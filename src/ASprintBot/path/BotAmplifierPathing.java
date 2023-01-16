@@ -10,37 +10,9 @@ public class BotAmplifierPathing implements UnitPathing {
     
     RobotController rc;
 
-    static MapLocation l62; // location representing relative coordinate (-5, -3)
-    static int d62; // shortest distance to location from current location
-    static Direction dir62; // best direction to take now to optimally get to location
-
-    static MapLocation l77; // location representing relative coordinate (-5, -2)
-    static int d77; // shortest distance to location from current location
-    static Direction dir77; // best direction to take now to optimally get to location
-
-    static MapLocation l92; // location representing relative coordinate (-5, -1)
-    static int d92; // shortest distance to location from current location
-    static Direction dir92; // best direction to take now to optimally get to location
-
     static MapLocation l107; // location representing relative coordinate (-5, 0)
     static int d107; // shortest distance to location from current location
     static Direction dir107; // best direction to take now to optimally get to location
-
-    static MapLocation l122; // location representing relative coordinate (-5, 1)
-    static int d122; // shortest distance to location from current location
-    static Direction dir122; // best direction to take now to optimally get to location
-
-    static MapLocation l137; // location representing relative coordinate (-5, 2)
-    static int d137; // shortest distance to location from current location
-    static Direction dir137; // best direction to take now to optimally get to location
-
-    static MapLocation l152; // location representing relative coordinate (-5, 3)
-    static int d152; // shortest distance to location from current location
-    static Direction dir152; // best direction to take now to optimally get to location
-
-    static MapLocation l48; // location representing relative coordinate (-4, -4)
-    static int d48; // shortest distance to location from current location
-    static Direction dir48; // best direction to take now to optimally get to location
 
     static MapLocation l63; // location representing relative coordinate (-4, -3)
     static int d63; // shortest distance to location from current location
@@ -69,14 +41,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static MapLocation l153; // location representing relative coordinate (-4, 3)
     static int d153; // shortest distance to location from current location
     static Direction dir153; // best direction to take now to optimally get to location
-
-    static MapLocation l168; // location representing relative coordinate (-4, 4)
-    static int d168; // shortest distance to location from current location
-    static Direction dir168; // best direction to take now to optimally get to location
-
-    static MapLocation l34; // location representing relative coordinate (-3, -5)
-    static int d34; // shortest distance to location from current location
-    static Direction dir34; // best direction to take now to optimally get to location
 
     static MapLocation l49; // location representing relative coordinate (-3, -4)
     static int d49; // shortest distance to location from current location
@@ -114,14 +78,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static int d169; // shortest distance to location from current location
     static Direction dir169; // best direction to take now to optimally get to location
 
-    static MapLocation l184; // location representing relative coordinate (-3, 5)
-    static int d184; // shortest distance to location from current location
-    static Direction dir184; // best direction to take now to optimally get to location
-
-    static MapLocation l35; // location representing relative coordinate (-2, -5)
-    static int d35; // shortest distance to location from current location
-    static Direction dir35; // best direction to take now to optimally get to location
-
     static MapLocation l50; // location representing relative coordinate (-2, -4)
     static int d50; // shortest distance to location from current location
     static Direction dir50; // best direction to take now to optimally get to location
@@ -158,14 +114,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static int d170; // shortest distance to location from current location
     static Direction dir170; // best direction to take now to optimally get to location
 
-    static MapLocation l185; // location representing relative coordinate (-2, 5)
-    static int d185; // shortest distance to location from current location
-    static Direction dir185; // best direction to take now to optimally get to location
-
-    static MapLocation l36; // location representing relative coordinate (-1, -5)
-    static int d36; // shortest distance to location from current location
-    static Direction dir36; // best direction to take now to optimally get to location
-
     static MapLocation l51; // location representing relative coordinate (-1, -4)
     static int d51; // shortest distance to location from current location
     static Direction dir51; // best direction to take now to optimally get to location
@@ -201,10 +149,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static MapLocation l171; // location representing relative coordinate (-1, 4)
     static int d171; // shortest distance to location from current location
     static Direction dir171; // best direction to take now to optimally get to location
-
-    static MapLocation l186; // location representing relative coordinate (-1, 5)
-    static int d186; // shortest distance to location from current location
-    static Direction dir186; // best direction to take now to optimally get to location
 
     static MapLocation l37; // location representing relative coordinate (0, -5)
     static int d37; // shortest distance to location from current location
@@ -250,10 +194,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static int d187; // shortest distance to location from current location
     static Direction dir187; // best direction to take now to optimally get to location
 
-    static MapLocation l38; // location representing relative coordinate (1, -5)
-    static int d38; // shortest distance to location from current location
-    static Direction dir38; // best direction to take now to optimally get to location
-
     static MapLocation l53; // location representing relative coordinate (1, -4)
     static int d53; // shortest distance to location from current location
     static Direction dir53; // best direction to take now to optimally get to location
@@ -289,14 +229,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static MapLocation l173; // location representing relative coordinate (1, 4)
     static int d173; // shortest distance to location from current location
     static Direction dir173; // best direction to take now to optimally get to location
-
-    static MapLocation l188; // location representing relative coordinate (1, 5)
-    static int d188; // shortest distance to location from current location
-    static Direction dir188; // best direction to take now to optimally get to location
-
-    static MapLocation l39; // location representing relative coordinate (2, -5)
-    static int d39; // shortest distance to location from current location
-    static Direction dir39; // best direction to take now to optimally get to location
 
     static MapLocation l54; // location representing relative coordinate (2, -4)
     static int d54; // shortest distance to location from current location
@@ -334,14 +266,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static int d174; // shortest distance to location from current location
     static Direction dir174; // best direction to take now to optimally get to location
 
-    static MapLocation l189; // location representing relative coordinate (2, 5)
-    static int d189; // shortest distance to location from current location
-    static Direction dir189; // best direction to take now to optimally get to location
-
-    static MapLocation l40; // location representing relative coordinate (3, -5)
-    static int d40; // shortest distance to location from current location
-    static Direction dir40; // best direction to take now to optimally get to location
-
     static MapLocation l55; // location representing relative coordinate (3, -4)
     static int d55; // shortest distance to location from current location
     static Direction dir55; // best direction to take now to optimally get to location
@@ -378,14 +302,6 @@ public class BotAmplifierPathing implements UnitPathing {
     static int d175; // shortest distance to location from current location
     static Direction dir175; // best direction to take now to optimally get to location
 
-    static MapLocation l190; // location representing relative coordinate (3, 5)
-    static int d190; // shortest distance to location from current location
-    static Direction dir190; // best direction to take now to optimally get to location
-
-    static MapLocation l56; // location representing relative coordinate (4, -4)
-    static int d56; // shortest distance to location from current location
-    static Direction dir56; // best direction to take now to optimally get to location
-
     static MapLocation l71; // location representing relative coordinate (4, -3)
     static int d71; // shortest distance to location from current location
     static Direction dir71; // best direction to take now to optimally get to location
@@ -414,37 +330,9 @@ public class BotAmplifierPathing implements UnitPathing {
     static int d161; // shortest distance to location from current location
     static Direction dir161; // best direction to take now to optimally get to location
 
-    static MapLocation l176; // location representing relative coordinate (4, 4)
-    static int d176; // shortest distance to location from current location
-    static Direction dir176; // best direction to take now to optimally get to location
-
-    static MapLocation l72; // location representing relative coordinate (5, -3)
-    static int d72; // shortest distance to location from current location
-    static Direction dir72; // best direction to take now to optimally get to location
-
-    static MapLocation l87; // location representing relative coordinate (5, -2)
-    static int d87; // shortest distance to location from current location
-    static Direction dir87; // best direction to take now to optimally get to location
-
-    static MapLocation l102; // location representing relative coordinate (5, -1)
-    static int d102; // shortest distance to location from current location
-    static Direction dir102; // best direction to take now to optimally get to location
-
     static MapLocation l117; // location representing relative coordinate (5, 0)
     static int d117; // shortest distance to location from current location
     static Direction dir117; // best direction to take now to optimally get to location
-
-    static MapLocation l132; // location representing relative coordinate (5, 1)
-    static int d132; // shortest distance to location from current location
-    static Direction dir132; // best direction to take now to optimally get to location
-
-    static MapLocation l147; // location representing relative coordinate (5, 2)
-    static int d147; // shortest distance to location from current location
-    static Direction dir147; // best direction to take now to optimally get to location
-
-    static MapLocation l162; // location representing relative coordinate (5, 3)
-    static int d162; // shortest distance to location from current location
-    static Direction dir162; // best direction to take now to optimally get to location
 
 
     public BotAmplifierPathing(RobotController rc) {
@@ -783,118 +671,6 @@ public class BotAmplifierPathing implements UnitPathing {
         l117 = l116.add(Direction.EAST); // (5, 0) from (4, 0)
         d117 = 99999;
         dir117 = null;
-
-        l92 = l108.add(Direction.SOUTHWEST); // (-5, -1) from (-4, 0)
-        d92 = 99999;
-        dir92 = null;
-
-        l122 = l108.add(Direction.NORTHWEST); // (-5, 1) from (-4, 0)
-        d122 = 99999;
-        dir122 = null;
-
-        l36 = l52.add(Direction.SOUTHWEST); // (-1, -5) from (0, -4)
-        d36 = 99999;
-        dir36 = null;
-
-        l186 = l172.add(Direction.NORTHWEST); // (-1, 5) from (0, 4)
-        d186 = 99999;
-        dir186 = null;
-
-        l38 = l52.add(Direction.SOUTHEAST); // (1, -5) from (0, -4)
-        d38 = 99999;
-        dir38 = null;
-
-        l188 = l172.add(Direction.NORTHEAST); // (1, 5) from (0, 4)
-        d188 = 99999;
-        dir188 = null;
-
-        l102 = l116.add(Direction.SOUTHEAST); // (5, -1) from (4, 0)
-        d102 = 99999;
-        dir102 = null;
-
-        l132 = l116.add(Direction.NORTHEAST); // (5, 1) from (4, 0)
-        d132 = 99999;
-        dir132 = null;
-
-        l77 = l93.add(Direction.SOUTHWEST); // (-5, -2) from (-4, -1)
-        d77 = 99999;
-        dir77 = null;
-
-        l137 = l123.add(Direction.NORTHWEST); // (-5, 2) from (-4, 1)
-        d137 = 99999;
-        dir137 = null;
-
-        l35 = l51.add(Direction.SOUTHWEST); // (-2, -5) from (-1, -4)
-        d35 = 99999;
-        dir35 = null;
-
-        l185 = l171.add(Direction.NORTHWEST); // (-2, 5) from (-1, 4)
-        d185 = 99999;
-        dir185 = null;
-
-        l39 = l53.add(Direction.SOUTHEAST); // (2, -5) from (1, -4)
-        d39 = 99999;
-        dir39 = null;
-
-        l189 = l173.add(Direction.NORTHEAST); // (2, 5) from (1, 4)
-        d189 = 99999;
-        dir189 = null;
-
-        l87 = l101.add(Direction.SOUTHEAST); // (5, -2) from (4, -1)
-        d87 = 99999;
-        dir87 = null;
-
-        l147 = l131.add(Direction.NORTHEAST); // (5, 2) from (4, 1)
-        d147 = 99999;
-        dir147 = null;
-
-        l48 = l64.add(Direction.SOUTHWEST); // (-4, -4) from (-3, -3)
-        d48 = 99999;
-        dir48 = null;
-
-        l168 = l154.add(Direction.NORTHWEST); // (-4, 4) from (-3, 3)
-        d168 = 99999;
-        dir168 = null;
-
-        l56 = l70.add(Direction.SOUTHEAST); // (4, -4) from (3, -3)
-        d56 = 99999;
-        dir56 = null;
-
-        l176 = l160.add(Direction.NORTHEAST); // (4, 4) from (3, 3)
-        d176 = 99999;
-        dir176 = null;
-
-        l62 = l78.add(Direction.SOUTHWEST); // (-5, -3) from (-4, -2)
-        d62 = 99999;
-        dir62 = null;
-
-        l152 = l138.add(Direction.NORTHWEST); // (-5, 3) from (-4, 2)
-        d152 = 99999;
-        dir152 = null;
-
-        l34 = l50.add(Direction.SOUTHWEST); // (-3, -5) from (-2, -4)
-        d34 = 99999;
-        dir34 = null;
-
-        l184 = l170.add(Direction.NORTHWEST); // (-3, 5) from (-2, 4)
-        d184 = 99999;
-        dir184 = null;
-
-        l40 = l54.add(Direction.SOUTHEAST); // (3, -5) from (2, -4)
-        d40 = 99999;
-        dir40 = null;
-
-        l190 = l174.add(Direction.NORTHEAST); // (3, 5) from (2, 4)
-        d190 = 99999;
-        dir190 = null;
-
-        l72 = l86.add(Direction.SOUTHEAST); // (5, -3) from (4, -2)
-        d72 = 99999;
-        dir72 = null;
-
-        l162 = l146.add(Direction.NORTHEAST); // (5, 3) from (4, 2)
-        d162 = 99999;
-        dir162 = null;
 
 
 
@@ -2322,601 +2098,43 @@ public class BotAmplifierPathing implements UnitPathing {
             d117 += locationScore(l117) + 10;
         }
 
-        if (rc.onTheMap(l92)) { // check (-5, -1)
-            if (d92 > d108) { // from (-4, 0)
-                d92 = d108;
-                dir92 = dir108;
-            }
-            if (d92 > d93) { // from (-4, -1)
-                d92 = d93;
-                dir92 = dir93;
-            }
-            if (d92 > d78) { // from (-4, -2)
-                d92 = d78;
-                dir92 = dir78;
-            }
-            if (d92 > d107) { // from (-5, 0)
-                d92 = d107;
-                dir92 = dir107;
-            }
-            d92 += locationScore(l92) + 10;
-        }
-
-        if (rc.onTheMap(l122)) { // check (-5, 1)
-            if (d122 > d108) { // from (-4, 0)
-                d122 = d108;
-                dir122 = dir108;
-            }
-            if (d122 > d123) { // from (-4, 1)
-                d122 = d123;
-                dir122 = dir123;
-            }
-            if (d122 > d138) { // from (-4, 2)
-                d122 = d138;
-                dir122 = dir138;
-            }
-            if (d122 > d107) { // from (-5, 0)
-                d122 = d107;
-                dir122 = dir107;
-            }
-            d122 += locationScore(l122) + 10;
-        }
-
-        if (rc.onTheMap(l36)) { // check (-1, -5)
-            if (d36 > d52) { // from (0, -4)
-                d36 = d52;
-                dir36 = dir52;
-            }
-            if (d36 > d51) { // from (-1, -4)
-                d36 = d51;
-                dir36 = dir51;
-            }
-            if (d36 > d50) { // from (-2, -4)
-                d36 = d50;
-                dir36 = dir50;
-            }
-            if (d36 > d37) { // from (0, -5)
-                d36 = d37;
-                dir36 = dir37;
-            }
-            d36 += locationScore(l36) + 10;
-        }
-
-        if (rc.onTheMap(l186)) { // check (-1, 5)
-            if (d186 > d172) { // from (0, 4)
-                d186 = d172;
-                dir186 = dir172;
-            }
-            if (d186 > d171) { // from (-1, 4)
-                d186 = d171;
-                dir186 = dir171;
-            }
-            if (d186 > d170) { // from (-2, 4)
-                d186 = d170;
-                dir186 = dir170;
-            }
-            if (d186 > d187) { // from (0, 5)
-                d186 = d187;
-                dir186 = dir187;
-            }
-            d186 += locationScore(l186) + 10;
-        }
-
-        if (rc.onTheMap(l38)) { // check (1, -5)
-            if (d38 > d52) { // from (0, -4)
-                d38 = d52;
-                dir38 = dir52;
-            }
-            if (d38 > d53) { // from (1, -4)
-                d38 = d53;
-                dir38 = dir53;
-            }
-            if (d38 > d54) { // from (2, -4)
-                d38 = d54;
-                dir38 = dir54;
-            }
-            if (d38 > d37) { // from (0, -5)
-                d38 = d37;
-                dir38 = dir37;
-            }
-            d38 += locationScore(l38) + 10;
-        }
-
-        if (rc.onTheMap(l188)) { // check (1, 5)
-            if (d188 > d172) { // from (0, 4)
-                d188 = d172;
-                dir188 = dir172;
-            }
-            if (d188 > d173) { // from (1, 4)
-                d188 = d173;
-                dir188 = dir173;
-            }
-            if (d188 > d174) { // from (2, 4)
-                d188 = d174;
-                dir188 = dir174;
-            }
-            if (d188 > d187) { // from (0, 5)
-                d188 = d187;
-                dir188 = dir187;
-            }
-            d188 += locationScore(l188) + 10;
-        }
-
-        if (rc.onTheMap(l102)) { // check (5, -1)
-            if (d102 > d116) { // from (4, 0)
-                d102 = d116;
-                dir102 = dir116;
-            }
-            if (d102 > d101) { // from (4, -1)
-                d102 = d101;
-                dir102 = dir101;
-            }
-            if (d102 > d86) { // from (4, -2)
-                d102 = d86;
-                dir102 = dir86;
-            }
-            if (d102 > d117) { // from (5, 0)
-                d102 = d117;
-                dir102 = dir117;
-            }
-            d102 += locationScore(l102) + 10;
-        }
-
-        if (rc.onTheMap(l132)) { // check (5, 1)
-            if (d132 > d116) { // from (4, 0)
-                d132 = d116;
-                dir132 = dir116;
-            }
-            if (d132 > d131) { // from (4, 1)
-                d132 = d131;
-                dir132 = dir131;
-            }
-            if (d132 > d146) { // from (4, 2)
-                d132 = d146;
-                dir132 = dir146;
-            }
-            if (d132 > d117) { // from (5, 0)
-                d132 = d117;
-                dir132 = dir117;
-            }
-            d132 += locationScore(l132) + 10;
-        }
-
-        if (rc.onTheMap(l77)) { // check (-5, -2)
-            if (d77 > d93) { // from (-4, -1)
-                d77 = d93;
-                dir77 = dir93;
-            }
-            if (d77 > d78) { // from (-4, -2)
-                d77 = d78;
-                dir77 = dir78;
-            }
-            if (d77 > d63) { // from (-4, -3)
-                d77 = d63;
-                dir77 = dir63;
-            }
-            if (d77 > d92) { // from (-5, -1)
-                d77 = d92;
-                dir77 = dir92;
-            }
-            d77 += locationScore(l77) + 10;
-        }
-
-        if (rc.onTheMap(l137)) { // check (-5, 2)
-            if (d137 > d123) { // from (-4, 1)
-                d137 = d123;
-                dir137 = dir123;
-            }
-            if (d137 > d138) { // from (-4, 2)
-                d137 = d138;
-                dir137 = dir138;
-            }
-            if (d137 > d153) { // from (-4, 3)
-                d137 = d153;
-                dir137 = dir153;
-            }
-            if (d137 > d122) { // from (-5, 1)
-                d137 = d122;
-                dir137 = dir122;
-            }
-            d137 += locationScore(l137) + 10;
-        }
-
-        if (rc.onTheMap(l35)) { // check (-2, -5)
-            if (d35 > d51) { // from (-1, -4)
-                d35 = d51;
-                dir35 = dir51;
-            }
-            if (d35 > d50) { // from (-2, -4)
-                d35 = d50;
-                dir35 = dir50;
-            }
-            if (d35 > d49) { // from (-3, -4)
-                d35 = d49;
-                dir35 = dir49;
-            }
-            if (d35 > d36) { // from (-1, -5)
-                d35 = d36;
-                dir35 = dir36;
-            }
-            d35 += locationScore(l35) + 10;
-        }
-
-        if (rc.onTheMap(l185)) { // check (-2, 5)
-            if (d185 > d171) { // from (-1, 4)
-                d185 = d171;
-                dir185 = dir171;
-            }
-            if (d185 > d170) { // from (-2, 4)
-                d185 = d170;
-                dir185 = dir170;
-            }
-            if (d185 > d169) { // from (-3, 4)
-                d185 = d169;
-                dir185 = dir169;
-            }
-            if (d185 > d186) { // from (-1, 5)
-                d185 = d186;
-                dir185 = dir186;
-            }
-            d185 += locationScore(l185) + 10;
-        }
-
-        if (rc.onTheMap(l39)) { // check (2, -5)
-            if (d39 > d53) { // from (1, -4)
-                d39 = d53;
-                dir39 = dir53;
-            }
-            if (d39 > d54) { // from (2, -4)
-                d39 = d54;
-                dir39 = dir54;
-            }
-            if (d39 > d55) { // from (3, -4)
-                d39 = d55;
-                dir39 = dir55;
-            }
-            if (d39 > d38) { // from (1, -5)
-                d39 = d38;
-                dir39 = dir38;
-            }
-            d39 += locationScore(l39) + 10;
-        }
-
-        if (rc.onTheMap(l189)) { // check (2, 5)
-            if (d189 > d173) { // from (1, 4)
-                d189 = d173;
-                dir189 = dir173;
-            }
-            if (d189 > d174) { // from (2, 4)
-                d189 = d174;
-                dir189 = dir174;
-            }
-            if (d189 > d175) { // from (3, 4)
-                d189 = d175;
-                dir189 = dir175;
-            }
-            if (d189 > d188) { // from (1, 5)
-                d189 = d188;
-                dir189 = dir188;
-            }
-            d189 += locationScore(l189) + 10;
-        }
-
-        if (rc.onTheMap(l87)) { // check (5, -2)
-            if (d87 > d101) { // from (4, -1)
-                d87 = d101;
-                dir87 = dir101;
-            }
-            if (d87 > d86) { // from (4, -2)
-                d87 = d86;
-                dir87 = dir86;
-            }
-            if (d87 > d71) { // from (4, -3)
-                d87 = d71;
-                dir87 = dir71;
-            }
-            if (d87 > d102) { // from (5, -1)
-                d87 = d102;
-                dir87 = dir102;
-            }
-            d87 += locationScore(l87) + 10;
-        }
-
-        if (rc.onTheMap(l147)) { // check (5, 2)
-            if (d147 > d131) { // from (4, 1)
-                d147 = d131;
-                dir147 = dir131;
-            }
-            if (d147 > d146) { // from (4, 2)
-                d147 = d146;
-                dir147 = dir146;
-            }
-            if (d147 > d161) { // from (4, 3)
-                d147 = d161;
-                dir147 = dir161;
-            }
-            if (d147 > d132) { // from (5, 1)
-                d147 = d132;
-                dir147 = dir132;
-            }
-            d147 += locationScore(l147) + 10;
-        }
-
-        if (rc.onTheMap(l48)) { // check (-4, -4)
-            if (d48 > d64) { // from (-3, -3)
-                d48 = d64;
-                dir48 = dir64;
-            }
-            if (d48 > d63) { // from (-4, -3)
-                d48 = d63;
-                dir48 = dir63;
-            }
-            if (d48 > d49) { // from (-3, -4)
-                d48 = d49;
-                dir48 = dir49;
-            }
-            d48 += locationScore(l48) + 10;
-        }
-
-        if (rc.onTheMap(l168)) { // check (-4, 4)
-            if (d168 > d154) { // from (-3, 3)
-                d168 = d154;
-                dir168 = dir154;
-            }
-            if (d168 > d153) { // from (-4, 3)
-                d168 = d153;
-                dir168 = dir153;
-            }
-            if (d168 > d169) { // from (-3, 4)
-                d168 = d169;
-                dir168 = dir169;
-            }
-            d168 += locationScore(l168) + 10;
-        }
-
-        if (rc.onTheMap(l56)) { // check (4, -4)
-            if (d56 > d70) { // from (3, -3)
-                d56 = d70;
-                dir56 = dir70;
-            }
-            if (d56 > d55) { // from (3, -4)
-                d56 = d55;
-                dir56 = dir55;
-            }
-            if (d56 > d71) { // from (4, -3)
-                d56 = d71;
-                dir56 = dir71;
-            }
-            d56 += locationScore(l56) + 10;
-        }
-
-        if (rc.onTheMap(l176)) { // check (4, 4)
-            if (d176 > d160) { // from (3, 3)
-                d176 = d160;
-                dir176 = dir160;
-            }
-            if (d176 > d175) { // from (3, 4)
-                d176 = d175;
-                dir176 = dir175;
-            }
-            if (d176 > d161) { // from (4, 3)
-                d176 = d161;
-                dir176 = dir161;
-            }
-            d176 += locationScore(l176) + 10;
-        }
-
-        if (rc.onTheMap(l62)) { // check (-5, -3)
-            if (d62 > d78) { // from (-4, -2)
-                d62 = d78;
-                dir62 = dir78;
-            }
-            if (d62 > d63) { // from (-4, -3)
-                d62 = d63;
-                dir62 = dir63;
-            }
-            if (d62 > d77) { // from (-5, -2)
-                d62 = d77;
-                dir62 = dir77;
-            }
-            if (d62 > d48) { // from (-4, -4)
-                d62 = d48;
-                dir62 = dir48;
-            }
-            d62 += locationScore(l62) + 10;
-        }
-
-        if (rc.onTheMap(l152)) { // check (-5, 3)
-            if (d152 > d138) { // from (-4, 2)
-                d152 = d138;
-                dir152 = dir138;
-            }
-            if (d152 > d153) { // from (-4, 3)
-                d152 = d153;
-                dir152 = dir153;
-            }
-            if (d152 > d137) { // from (-5, 2)
-                d152 = d137;
-                dir152 = dir137;
-            }
-            if (d152 > d168) { // from (-4, 4)
-                d152 = d168;
-                dir152 = dir168;
-            }
-            d152 += locationScore(l152) + 10;
-        }
-
-        if (rc.onTheMap(l34)) { // check (-3, -5)
-            if (d34 > d50) { // from (-2, -4)
-                d34 = d50;
-                dir34 = dir50;
-            }
-            if (d34 > d49) { // from (-3, -4)
-                d34 = d49;
-                dir34 = dir49;
-            }
-            if (d34 > d35) { // from (-2, -5)
-                d34 = d35;
-                dir34 = dir35;
-            }
-            if (d34 > d48) { // from (-4, -4)
-                d34 = d48;
-                dir34 = dir48;
-            }
-            d34 += locationScore(l34) + 10;
-        }
-
-        if (rc.onTheMap(l184)) { // check (-3, 5)
-            if (d184 > d170) { // from (-2, 4)
-                d184 = d170;
-                dir184 = dir170;
-            }
-            if (d184 > d169) { // from (-3, 4)
-                d184 = d169;
-                dir184 = dir169;
-            }
-            if (d184 > d185) { // from (-2, 5)
-                d184 = d185;
-                dir184 = dir185;
-            }
-            if (d184 > d168) { // from (-4, 4)
-                d184 = d168;
-                dir184 = dir168;
-            }
-            d184 += locationScore(l184) + 10;
-        }
-
-        if (rc.onTheMap(l40)) { // check (3, -5)
-            if (d40 > d54) { // from (2, -4)
-                d40 = d54;
-                dir40 = dir54;
-            }
-            if (d40 > d55) { // from (3, -4)
-                d40 = d55;
-                dir40 = dir55;
-            }
-            if (d40 > d39) { // from (2, -5)
-                d40 = d39;
-                dir40 = dir39;
-            }
-            if (d40 > d56) { // from (4, -4)
-                d40 = d56;
-                dir40 = dir56;
-            }
-            d40 += locationScore(l40) + 10;
-        }
-
-        if (rc.onTheMap(l190)) { // check (3, 5)
-            if (d190 > d174) { // from (2, 4)
-                d190 = d174;
-                dir190 = dir174;
-            }
-            if (d190 > d175) { // from (3, 4)
-                d190 = d175;
-                dir190 = dir175;
-            }
-            if (d190 > d189) { // from (2, 5)
-                d190 = d189;
-                dir190 = dir189;
-            }
-            if (d190 > d176) { // from (4, 4)
-                d190 = d176;
-                dir190 = dir176;
-            }
-            d190 += locationScore(l190) + 10;
-        }
-
-        if (rc.onTheMap(l72)) { // check (5, -3)
-            if (d72 > d86) { // from (4, -2)
-                d72 = d86;
-                dir72 = dir86;
-            }
-            if (d72 > d71) { // from (4, -3)
-                d72 = d71;
-                dir72 = dir71;
-            }
-            if (d72 > d87) { // from (5, -2)
-                d72 = d87;
-                dir72 = dir87;
-            }
-            if (d72 > d56) { // from (4, -4)
-                d72 = d56;
-                dir72 = dir56;
-            }
-            d72 += locationScore(l72) + 10;
-        }
-
-        if (rc.onTheMap(l162)) { // check (5, 3)
-            if (d162 > d146) { // from (4, 2)
-                d162 = d146;
-                dir162 = dir146;
-            }
-            if (d162 > d161) { // from (4, 3)
-                d162 = d161;
-                dir162 = dir161;
-            }
-            if (d162 > d147) { // from (5, 2)
-                d162 = d147;
-                dir162 = dir147;
-            }
-            if (d162 > d176) { // from (4, 4)
-                d162 = d176;
-                dir162 = dir176;
-            }
-            d162 += locationScore(l162) + 10;
-        }
-
 
         // System.out.println("LOCAL DISTANCES:");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + d184 + "\t" + d185 + "\t" + d186 + "\t" + d187 + "\t" + d188 + "\t" + d189 + "\t" + d190 + "\t" + "\t" + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + d168 + "\t" + d169 + "\t" + d170 + "\t" + d171 + "\t" + d172 + "\t" + d173 + "\t" + d174 + "\t" + d175 + "\t" + d176 + "\t" + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + d152 + "\t" + d153 + "\t" + d154 + "\t" + d155 + "\t" + d156 + "\t" + d157 + "\t" + d158 + "\t" + d159 + "\t" + d160 + "\t" + d161 + "\t" + d162 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + d137 + "\t" + d138 + "\t" + d139 + "\t" + d140 + "\t" + d141 + "\t" + d142 + "\t" + d143 + "\t" + d144 + "\t" + d145 + "\t" + d146 + "\t" + d147 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + d122 + "\t" + d123 + "\t" + d124 + "\t" + d125 + "\t" + d126 + "\t" + d127 + "\t" + d128 + "\t" + d129 + "\t" + d130 + "\t" + d131 + "\t" + d132 + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + d187 + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + d169 + "\t" + d170 + "\t" + d171 + "\t" + d172 + "\t" + d173 + "\t" + d174 + "\t" + d175 + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + d153 + "\t" + d154 + "\t" + d155 + "\t" + d156 + "\t" + d157 + "\t" + d158 + "\t" + d159 + "\t" + d160 + "\t" + d161 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + d138 + "\t" + d139 + "\t" + d140 + "\t" + d141 + "\t" + d142 + "\t" + d143 + "\t" + d144 + "\t" + d145 + "\t" + d146 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + d123 + "\t" + d124 + "\t" + d125 + "\t" + d126 + "\t" + d127 + "\t" + d128 + "\t" + d129 + "\t" + d130 + "\t" + d131 + "\t" + "\t" + "\t");
         // System.out.println("\t" + "\t" + "\t" + d107 + "\t" + d108 + "\t" + d109 + "\t" + d110 + "\t" + d111 + "\t" + d112 + "\t" + d113 + "\t" + d114 + "\t" + d115 + "\t" + d116 + "\t" + d117 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + d92 + "\t" + d93 + "\t" + d94 + "\t" + d95 + "\t" + d96 + "\t" + d97 + "\t" + d98 + "\t" + d99 + "\t" + d100 + "\t" + d101 + "\t" + d102 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + d77 + "\t" + d78 + "\t" + d79 + "\t" + d80 + "\t" + d81 + "\t" + d82 + "\t" + d83 + "\t" + d84 + "\t" + d85 + "\t" + d86 + "\t" + d87 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + d62 + "\t" + d63 + "\t" + d64 + "\t" + d65 + "\t" + d66 + "\t" + d67 + "\t" + d68 + "\t" + d69 + "\t" + d70 + "\t" + d71 + "\t" + d72 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + d48 + "\t" + d49 + "\t" + d50 + "\t" + d51 + "\t" + d52 + "\t" + d53 + "\t" + d54 + "\t" + d55 + "\t" + d56 + "\t" + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + d34 + "\t" + d35 + "\t" + d36 + "\t" + d37 + "\t" + d38 + "\t" + d39 + "\t" + d40 + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + d93 + "\t" + d94 + "\t" + d95 + "\t" + d96 + "\t" + d97 + "\t" + d98 + "\t" + d99 + "\t" + d100 + "\t" + d101 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + d78 + "\t" + d79 + "\t" + d80 + "\t" + d81 + "\t" + d82 + "\t" + d83 + "\t" + d84 + "\t" + d85 + "\t" + d86 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + d63 + "\t" + d64 + "\t" + d65 + "\t" + d66 + "\t" + d67 + "\t" + d68 + "\t" + d69 + "\t" + d70 + "\t" + d71 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + d49 + "\t" + d50 + "\t" + d51 + "\t" + d52 + "\t" + d53 + "\t" + d54 + "\t" + d55 + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + d37 + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t");
         // System.out.println("DIRECTIONS:");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + dir184 + "\t" + dir185 + "\t" + dir186 + "\t" + dir187 + "\t" + dir188 + "\t" + dir189 + "\t" + dir190 + "\t" + "\t" + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + dir168 + "\t" + dir169 + "\t" + dir170 + "\t" + dir171 + "\t" + dir172 + "\t" + dir173 + "\t" + dir174 + "\t" + dir175 + "\t" + dir176 + "\t" + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + dir152 + "\t" + dir153 + "\t" + dir154 + "\t" + dir155 + "\t" + dir156 + "\t" + dir157 + "\t" + dir158 + "\t" + dir159 + "\t" + dir160 + "\t" + dir161 + "\t" + dir162 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + dir137 + "\t" + dir138 + "\t" + dir139 + "\t" + dir140 + "\t" + dir141 + "\t" + dir142 + "\t" + dir143 + "\t" + dir144 + "\t" + dir145 + "\t" + dir146 + "\t" + dir147 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + dir122 + "\t" + dir123 + "\t" + dir124 + "\t" + dir125 + "\t" + dir126 + "\t" + dir127 + "\t" + dir128 + "\t" + dir129 + "\t" + dir130 + "\t" + dir131 + "\t" + dir132 + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + dir187 + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + dir169 + "\t" + dir170 + "\t" + dir171 + "\t" + dir172 + "\t" + dir173 + "\t" + dir174 + "\t" + dir175 + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + dir153 + "\t" + dir154 + "\t" + dir155 + "\t" + dir156 + "\t" + dir157 + "\t" + dir158 + "\t" + dir159 + "\t" + dir160 + "\t" + dir161 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + dir138 + "\t" + dir139 + "\t" + dir140 + "\t" + dir141 + "\t" + dir142 + "\t" + dir143 + "\t" + dir144 + "\t" + dir145 + "\t" + dir146 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + dir123 + "\t" + dir124 + "\t" + dir125 + "\t" + dir126 + "\t" + dir127 + "\t" + dir128 + "\t" + dir129 + "\t" + dir130 + "\t" + dir131 + "\t" + "\t" + "\t");
         // System.out.println("\t" + "\t" + "\t" + dir107 + "\t" + dir108 + "\t" + dir109 + "\t" + dir110 + "\t" + dir111 + "\t" + dir112 + "\t" + dir113 + "\t" + dir114 + "\t" + dir115 + "\t" + dir116 + "\t" + dir117 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + dir92 + "\t" + dir93 + "\t" + dir94 + "\t" + dir95 + "\t" + dir96 + "\t" + dir97 + "\t" + dir98 + "\t" + dir99 + "\t" + dir100 + "\t" + dir101 + "\t" + dir102 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + dir77 + "\t" + dir78 + "\t" + dir79 + "\t" + dir80 + "\t" + dir81 + "\t" + dir82 + "\t" + dir83 + "\t" + dir84 + "\t" + dir85 + "\t" + dir86 + "\t" + dir87 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + dir62 + "\t" + dir63 + "\t" + dir64 + "\t" + dir65 + "\t" + dir66 + "\t" + dir67 + "\t" + dir68 + "\t" + dir69 + "\t" + dir70 + "\t" + dir71 + "\t" + dir72 + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + dir48 + "\t" + dir49 + "\t" + dir50 + "\t" + dir51 + "\t" + dir52 + "\t" + dir53 + "\t" + dir54 + "\t" + dir55 + "\t" + dir56 + "\t" + "\t" + "\t");
-        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + dir34 + "\t" + dir35 + "\t" + dir36 + "\t" + dir37 + "\t" + dir38 + "\t" + dir39 + "\t" + dir40 + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + dir93 + "\t" + dir94 + "\t" + dir95 + "\t" + dir96 + "\t" + dir97 + "\t" + dir98 + "\t" + dir99 + "\t" + dir100 + "\t" + dir101 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + dir78 + "\t" + dir79 + "\t" + dir80 + "\t" + dir81 + "\t" + dir82 + "\t" + dir83 + "\t" + dir84 + "\t" + dir85 + "\t" + dir86 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + dir63 + "\t" + dir64 + "\t" + dir65 + "\t" + dir66 + "\t" + dir67 + "\t" + dir68 + "\t" + dir69 + "\t" + dir70 + "\t" + dir71 + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + dir49 + "\t" + dir50 + "\t" + dir51 + "\t" + dir52 + "\t" + dir53 + "\t" + dir54 + "\t" + dir55 + "\t" + "\t" + "\t" + "\t");
+        // System.out.println("\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + dir37 + "\t" + "\t" + "\t" + "\t" + "\t" + "\t" + "\t");
 
         int target_dx = target.x - l112.x;
         int target_dy = target.y - l112.y;
         switch (target_dx) {
                 case -5:
                     switch (target_dy) {
-                        case -3:
-                            return dir62; // destination is at relative location (-5, -3)
-                        case -2:
-                            return dir77; // destination is at relative location (-5, -2)
-                        case -1:
-                            return dir92; // destination is at relative location (-5, -1)
                         case 0:
                             return dir107; // destination is at relative location (-5, 0)
-                        case 1:
-                            return dir122; // destination is at relative location (-5, 1)
-                        case 2:
-                            return dir137; // destination is at relative location (-5, 2)
-                        case 3:
-                            return dir152; // destination is at relative location (-5, 3)
                     }
                     break;
                 case -4:
                     switch (target_dy) {
-                        case -4:
-                            return dir48; // destination is at relative location (-4, -4)
                         case -3:
                             return dir63; // destination is at relative location (-4, -3)
                         case -2:
@@ -2931,14 +2149,10 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir138; // destination is at relative location (-4, 2)
                         case 3:
                             return dir153; // destination is at relative location (-4, 3)
-                        case 4:
-                            return dir168; // destination is at relative location (-4, 4)
                     }
                     break;
                 case -3:
                     switch (target_dy) {
-                        case -5:
-                            return dir34; // destination is at relative location (-3, -5)
                         case -4:
                             return dir49; // destination is at relative location (-3, -4)
                         case -3:
@@ -2957,14 +2171,10 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir154; // destination is at relative location (-3, 3)
                         case 4:
                             return dir169; // destination is at relative location (-3, 4)
-                        case 5:
-                            return dir184; // destination is at relative location (-3, 5)
                     }
                     break;
                 case -2:
                     switch (target_dy) {
-                        case -5:
-                            return dir35; // destination is at relative location (-2, -5)
                         case -4:
                             return dir50; // destination is at relative location (-2, -4)
                         case -3:
@@ -2983,14 +2193,10 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir155; // destination is at relative location (-2, 3)
                         case 4:
                             return dir170; // destination is at relative location (-2, 4)
-                        case 5:
-                            return dir185; // destination is at relative location (-2, 5)
                     }
                     break;
                 case -1:
                     switch (target_dy) {
-                        case -5:
-                            return dir36; // destination is at relative location (-1, -5)
                         case -4:
                             return dir51; // destination is at relative location (-1, -4)
                         case -3:
@@ -3009,8 +2215,6 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir156; // destination is at relative location (-1, 3)
                         case 4:
                             return dir171; // destination is at relative location (-1, 4)
-                        case 5:
-                            return dir186; // destination is at relative location (-1, 5)
                     }
                     break;
                 case 0:
@@ -3041,8 +2245,6 @@ public class BotAmplifierPathing implements UnitPathing {
                     break;
                 case 1:
                     switch (target_dy) {
-                        case -5:
-                            return dir38; // destination is at relative location (1, -5)
                         case -4:
                             return dir53; // destination is at relative location (1, -4)
                         case -3:
@@ -3061,14 +2263,10 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir158; // destination is at relative location (1, 3)
                         case 4:
                             return dir173; // destination is at relative location (1, 4)
-                        case 5:
-                            return dir188; // destination is at relative location (1, 5)
                     }
                     break;
                 case 2:
                     switch (target_dy) {
-                        case -5:
-                            return dir39; // destination is at relative location (2, -5)
                         case -4:
                             return dir54; // destination is at relative location (2, -4)
                         case -3:
@@ -3087,14 +2285,10 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir159; // destination is at relative location (2, 3)
                         case 4:
                             return dir174; // destination is at relative location (2, 4)
-                        case 5:
-                            return dir189; // destination is at relative location (2, 5)
                     }
                     break;
                 case 3:
                     switch (target_dy) {
-                        case -5:
-                            return dir40; // destination is at relative location (3, -5)
                         case -4:
                             return dir55; // destination is at relative location (3, -4)
                         case -3:
@@ -3113,14 +2307,10 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir160; // destination is at relative location (3, 3)
                         case 4:
                             return dir175; // destination is at relative location (3, 4)
-                        case 5:
-                            return dir190; // destination is at relative location (3, 5)
                     }
                     break;
                 case 4:
                     switch (target_dy) {
-                        case -4:
-                            return dir56; // destination is at relative location (4, -4)
                         case -3:
                             return dir71; // destination is at relative location (4, -3)
                         case -2:
@@ -3135,26 +2325,12 @@ public class BotAmplifierPathing implements UnitPathing {
                             return dir146; // destination is at relative location (4, 2)
                         case 3:
                             return dir161; // destination is at relative location (4, 3)
-                        case 4:
-                            return dir176; // destination is at relative location (4, 4)
                     }
                     break;
                 case 5:
                     switch (target_dy) {
-                        case -3:
-                            return dir72; // destination is at relative location (5, -3)
-                        case -2:
-                            return dir87; // destination is at relative location (5, -2)
-                        case -1:
-                            return dir102; // destination is at relative location (5, -1)
                         case 0:
                             return dir117; // destination is at relative location (5, 0)
-                        case 1:
-                            return dir132; // destination is at relative location (5, 1)
-                        case 2:
-                            return dir147; // destination is at relative location (5, 2)
-                        case 3:
-                            return dir162; // destination is at relative location (5, 3)
                     }
                     break;
         }
@@ -3164,60 +2340,11 @@ public class BotAmplifierPathing implements UnitPathing {
         double currDist = Math.sqrt(l112.distanceSquaredTo(target));
         double cost = Double.MAX_VALUE;
         
-        double score62 = (currDist - Math.sqrt(l62.distanceSquaredTo(target))) / d62;
-        if (score62 > bestScore) {
-            bestScore = score62;
-            ans = dir62;
-            cost = d62;
-        }
-
-        double score77 = (currDist - Math.sqrt(l77.distanceSquaredTo(target))) / d77;
-        if (score77 > bestScore) {
-            bestScore = score77;
-            ans = dir77;
-            cost = d77;
-        }
-
-        double score92 = (currDist - Math.sqrt(l92.distanceSquaredTo(target))) / d92;
-        if (score92 > bestScore) {
-            bestScore = score92;
-            ans = dir92;
-            cost = d92;
-        }
-
         double score107 = (currDist - Math.sqrt(l107.distanceSquaredTo(target))) / d107;
         if (score107 > bestScore) {
             bestScore = score107;
             ans = dir107;
             cost = d107;
-        }
-
-        double score122 = (currDist - Math.sqrt(l122.distanceSquaredTo(target))) / d122;
-        if (score122 > bestScore) {
-            bestScore = score122;
-            ans = dir122;
-            cost = d122;
-        }
-
-        double score137 = (currDist - Math.sqrt(l137.distanceSquaredTo(target))) / d137;
-        if (score137 > bestScore) {
-            bestScore = score137;
-            ans = dir137;
-            cost = d137;
-        }
-
-        double score152 = (currDist - Math.sqrt(l152.distanceSquaredTo(target))) / d152;
-        if (score152 > bestScore) {
-            bestScore = score152;
-            ans = dir152;
-            cost = d152;
-        }
-
-        double score48 = (currDist - Math.sqrt(l48.distanceSquaredTo(target))) / d48;
-        if (score48 > bestScore) {
-            bestScore = score48;
-            ans = dir48;
-            cost = d48;
         }
 
         double score63 = (currDist - Math.sqrt(l63.distanceSquaredTo(target))) / d63;
@@ -3234,20 +2361,6 @@ public class BotAmplifierPathing implements UnitPathing {
             cost = d153;
         }
 
-        double score168 = (currDist - Math.sqrt(l168.distanceSquaredTo(target))) / d168;
-        if (score168 > bestScore) {
-            bestScore = score168;
-            ans = dir168;
-            cost = d168;
-        }
-
-        double score34 = (currDist - Math.sqrt(l34.distanceSquaredTo(target))) / d34;
-        if (score34 > bestScore) {
-            bestScore = score34;
-            ans = dir34;
-            cost = d34;
-        }
-
         double score49 = (currDist - Math.sqrt(l49.distanceSquaredTo(target))) / d49;
         if (score49 > bestScore) {
             bestScore = score49;
@@ -3260,41 +2373,6 @@ public class BotAmplifierPathing implements UnitPathing {
             bestScore = score169;
             ans = dir169;
             cost = d169;
-        }
-
-        double score184 = (currDist - Math.sqrt(l184.distanceSquaredTo(target))) / d184;
-        if (score184 > bestScore) {
-            bestScore = score184;
-            ans = dir184;
-            cost = d184;
-        }
-
-        double score35 = (currDist - Math.sqrt(l35.distanceSquaredTo(target))) / d35;
-        if (score35 > bestScore) {
-            bestScore = score35;
-            ans = dir35;
-            cost = d35;
-        }
-
-        double score185 = (currDist - Math.sqrt(l185.distanceSquaredTo(target))) / d185;
-        if (score185 > bestScore) {
-            bestScore = score185;
-            ans = dir185;
-            cost = d185;
-        }
-
-        double score36 = (currDist - Math.sqrt(l36.distanceSquaredTo(target))) / d36;
-        if (score36 > bestScore) {
-            bestScore = score36;
-            ans = dir36;
-            cost = d36;
-        }
-
-        double score186 = (currDist - Math.sqrt(l186.distanceSquaredTo(target))) / d186;
-        if (score186 > bestScore) {
-            bestScore = score186;
-            ans = dir186;
-            cost = d186;
         }
 
         double score37 = (currDist - Math.sqrt(l37.distanceSquaredTo(target))) / d37;
@@ -3311,41 +2389,6 @@ public class BotAmplifierPathing implements UnitPathing {
             cost = d187;
         }
 
-        double score38 = (currDist - Math.sqrt(l38.distanceSquaredTo(target))) / d38;
-        if (score38 > bestScore) {
-            bestScore = score38;
-            ans = dir38;
-            cost = d38;
-        }
-
-        double score188 = (currDist - Math.sqrt(l188.distanceSquaredTo(target))) / d188;
-        if (score188 > bestScore) {
-            bestScore = score188;
-            ans = dir188;
-            cost = d188;
-        }
-
-        double score39 = (currDist - Math.sqrt(l39.distanceSquaredTo(target))) / d39;
-        if (score39 > bestScore) {
-            bestScore = score39;
-            ans = dir39;
-            cost = d39;
-        }
-
-        double score189 = (currDist - Math.sqrt(l189.distanceSquaredTo(target))) / d189;
-        if (score189 > bestScore) {
-            bestScore = score189;
-            ans = dir189;
-            cost = d189;
-        }
-
-        double score40 = (currDist - Math.sqrt(l40.distanceSquaredTo(target))) / d40;
-        if (score40 > bestScore) {
-            bestScore = score40;
-            ans = dir40;
-            cost = d40;
-        }
-
         double score55 = (currDist - Math.sqrt(l55.distanceSquaredTo(target))) / d55;
         if (score55 > bestScore) {
             bestScore = score55;
@@ -3358,20 +2401,6 @@ public class BotAmplifierPathing implements UnitPathing {
             bestScore = score175;
             ans = dir175;
             cost = d175;
-        }
-
-        double score190 = (currDist - Math.sqrt(l190.distanceSquaredTo(target))) / d190;
-        if (score190 > bestScore) {
-            bestScore = score190;
-            ans = dir190;
-            cost = d190;
-        }
-
-        double score56 = (currDist - Math.sqrt(l56.distanceSquaredTo(target))) / d56;
-        if (score56 > bestScore) {
-            bestScore = score56;
-            ans = dir56;
-            cost = d56;
         }
 
         double score71 = (currDist - Math.sqrt(l71.distanceSquaredTo(target))) / d71;
@@ -3388,60 +2417,11 @@ public class BotAmplifierPathing implements UnitPathing {
             cost = d161;
         }
 
-        double score176 = (currDist - Math.sqrt(l176.distanceSquaredTo(target))) / d176;
-        if (score176 > bestScore) {
-            bestScore = score176;
-            ans = dir176;
-            cost = d176;
-        }
-
-        double score72 = (currDist - Math.sqrt(l72.distanceSquaredTo(target))) / d72;
-        if (score72 > bestScore) {
-            bestScore = score72;
-            ans = dir72;
-            cost = d72;
-        }
-
-        double score87 = (currDist - Math.sqrt(l87.distanceSquaredTo(target))) / d87;
-        if (score87 > bestScore) {
-            bestScore = score87;
-            ans = dir87;
-            cost = d87;
-        }
-
-        double score102 = (currDist - Math.sqrt(l102.distanceSquaredTo(target))) / d102;
-        if (score102 > bestScore) {
-            bestScore = score102;
-            ans = dir102;
-            cost = d102;
-        }
-
         double score117 = (currDist - Math.sqrt(l117.distanceSquaredTo(target))) / d117;
         if (score117 > bestScore) {
             bestScore = score117;
             ans = dir117;
             cost = d117;
-        }
-
-        double score132 = (currDist - Math.sqrt(l132.distanceSquaredTo(target))) / d132;
-        if (score132 > bestScore) {
-            bestScore = score132;
-            ans = dir132;
-            cost = d132;
-        }
-
-        double score147 = (currDist - Math.sqrt(l147.distanceSquaredTo(target))) / d147;
-        if (score147 > bestScore) {
-            bestScore = score147;
-            ans = dir147;
-            cost = d147;
-        }
-
-        double score162 = (currDist - Math.sqrt(l162.distanceSquaredTo(target))) / d162;
-        if (score162 > bestScore) {
-            bestScore = score162;
-            ans = dir162;
-            cost = d162;
         }
 
         if (cost > 150){
