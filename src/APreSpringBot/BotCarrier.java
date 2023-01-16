@@ -118,23 +118,25 @@ public class BotCarrier extends Utils{
         }
     }
 
+    private static void assertHeadquarterLocation(MapLocation givenLoc) throws GameActionException{
+        assert rc.getRoundNum() > 2 : "rc.getRoundNum() > 2";
+        MapLocation[] locations = Comms.getAlliedHeadquartersLocationsList();
+        MapLocation loc;
+        boolean matched = false;
+        for (int i = locations.length; i-->0;){
+            loc = locations[i];
+            if (loc.equals(givenLoc)){
+                matched = true;
+                break;
+            }
+        }
+        assert matched : "matched; round num: " + rc.getRoundNum() + "; id: " + rc.getID() + "; currentLocation: " + rc.getLocation() + "; targetLoc: " + givenLoc;
+    }
+
     private static void updateOverall() throws GameActionException{
         if (returnEarly) return;
         returnEarly = false;
         updateVision();
-        MapLocation loc = null;
-        if (rc.getAnchor() == null && !goingToCollectAnchor){
-            loc = Comms.findIfAnchorProduced();
-            if (loc != null){
-                returnToHQ = true;
-                movementDestination = loc;
-                // assertNotHeadquarterLocation(loc);
-                goingToCollectAnchor = true;
-                System.out.println("Heeding anchor call from HQ");
-                carrierStatus = Status.TRANSIT_ANCHOR_COLLECTION;
-                assert collectAnchorHQidx != -1 : "collectAnchorHQidx != -1";
-            }
-        }
         if (rc.getRoundNum() % 200 == 0){
             unFlagAllIslands();
             if (Clock.getBytecodesLeft() < 6000){
@@ -160,8 +162,22 @@ public class BotCarrier extends Utils{
         movementDestination = null;
     }
 
-    private static void collectAnchorFromHQ() throws GameActionException{
+    private static boolean isAnchorThereInHQ() throws GameActionException{
+        assert rc.getAnchor() == null;
+        assert movementDestination != null : "movementDestination isAnchorThereInHQ != null";
+        assertHeadquarterLocation(movementDestination);
+        boolean anchorProduced = Comms.findIfAnchorProduced(movementDestination);
+        if (!anchorProduced) return false;
+        returnToHQ = true;
+        goingToCollectAnchor = true;
+        System.out.println("Heeding anchor call from HQ");
+        carrierStatus = Status.TRANSIT_ANCHOR_COLLECTION;
+        return true;
+    }
+
+    private static boolean collectAnchorFromHQ() throws GameActionException{
         // TODO: Add anchor stuff for anchor.accelerating too...
+        if (!isAnchorThereInHQ()) return false;
         int count = Comms.readMessageWithoutSHAFlag(collectAnchorHQidx);
         if (count == 0){
             assert collectAnchorHQidx != -1 : "collectanchorhqidx != -1   2";
@@ -171,7 +187,7 @@ public class BotCarrier extends Utils{
             }
             carrierStatus = Status.ANCHOR_NOT_FOUND;
             resetCollectAnchorVariables();
-            return;
+            return false;
         }
         if (rc.canTakeAnchor(movementDestination, Anchor.STANDARD)){
             carrierStatus = Status.COLLECTING_ANCHOR;
@@ -183,7 +199,9 @@ public class BotCarrier extends Utils{
                 Comms.writeSHAFlagMessage(0, Comms.SHAFlag.EMPTY_MESSAGE, collectAnchorHQidx);
             System.out.println("Collected anchor from HQ!");
             resetCollectAnchorVariables();
+            return false;
         }
+        return true;
     }
 
     private static void transferResourcesToHQ() throws GameActionException{
@@ -206,10 +224,7 @@ public class BotCarrier extends Utils{
             collectedAdamantium = 0;
         }
         currentInventoryWeight = rc.getWeight();
-        if (goingToCollectAnchor){
-            collectAnchorFromHQ();
-            return;
-        }
+        if (collectAnchorFromHQ()) return;
         if (currentInventoryWeight == 0){
             returnToHQ = false;
             movementDestination = null;

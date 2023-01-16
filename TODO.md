@@ -11,15 +11,19 @@
 ## Carriers
 - [x] Carriers need to explore more and avoid overcrowding
 - [ ] Prioritize resource collection based on lack of a resource.
-- [ ] While returning to HQ to collect anchor, periodically check on the anchor count. If reaches zero, go back to resource gathering.
+- [x] While returning to HQ to collect anchor, periodically check on the anchor count. If reaches zero, go back to resource gathering.
 - [ ] Collect anchors when going back to deposit resources..
 - [ ] Write combat locations
 - [ ] Consume less bytecode in highly crowded areas.
+- [ ] Flee from launchers.
+- [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order
 - [ ] If using bot counts for build order prioritization, use amplifier count as a confidence factor on how trustworthy each bot count is.
 - [ ] Pump up anchor production.
+- [ ] Fix amplifier excess production.
+- [ ] verify well designation by hq for carrier.
 
 ## Launchers
 

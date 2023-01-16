@@ -239,6 +239,7 @@ public class CWBuilder extends Utils{
     }
 
     public static boolean tryBuildAmplifier() throws GameActionException{
+        if (TRACKING_AMPLIFIER_COUNT && Comms.getRobotCount(RobotType.AMPLIFIER) > MAX_AMPLIFIER_COUNT) return false;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.AMPLIFIER, 2)) return false;
         
         if (tryConstructEnvelope(RobotType.AMPLIFIER, Comms.findNearestEnemyHeadquarterLocation())){

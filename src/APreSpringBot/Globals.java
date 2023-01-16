@@ -82,7 +82,11 @@ public class Globals {
     public static MapLocation CENTER_OF_THE_MAP;
     public static int ISLAND_COUNT;
 
+    // Bot Production Related
     public static final boolean TRACKING_LAUNCHER_COUNT = true;
+    public static final boolean TRACKING_AMPLIFIER_COUNT = false;
+    public static int MAX_AMPLIFIER_COUNT;
+
 
     public static final Direction droidVisionDirs[] = new Direction[]{
         Direction.NORTHWEST, Direction.NORTHWEST, Direction.NORTH, Direction.NORTH, 
@@ -115,6 +119,7 @@ public class Globals {
         MAP_WIDTH = rc.getMapWidth();
         MAP_HEIGHT = rc.getMapHeight();
         MAP_SIZE = MAP_WIDTH * MAP_HEIGHT;
+        MAX_AMPLIFIER_COUNT = MAP_SIZE / 50;
         MY_TEAM = rc.getTeam();
         ENEMY_TEAM = MY_TEAM.opponent();
         START_LOCATION = rc.getLocation();

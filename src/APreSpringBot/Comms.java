@@ -23,13 +23,14 @@ public class Comms extends Utils{
     private static final int DESTABILIZER_SCORE_CHANNEL = 4;
     private static final int STANDARD_ANCHOR_SCORE_CHANNEL = 5;
     private static final int LAUNCHER_COUNT_CHANNEL = 6;
+    private static final int AMPLIFIER_COUNT_CHANNEL = 7;
     // private static final int ACCELERATING_ANCHOR_COUNT_CHANNEL = 6;
-    private static final int START_CHANNEL_BANDS = 7;
+    private static final int START_CHANNEL_BANDS = 8;
     private static final int MAX_HEADQUARTERS_CHANNLS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 10;
     private static final int ISLAND_CHANNELS_COUNT = 10;
-    private static final int AMPLIFIER_CHANNELS_COUNT = 5;
+    private static final int AMPLIFIER_CHANNELS_COUNT = 4;
     private static final int COMBAT_CHANNELS_COUNT = 20;
 
     // ununsed channels count: 0 (in the case of max count of headquarters (i.e. 4))
@@ -502,6 +503,7 @@ public class Comms extends Utils{
     private static int getRobotCountChannel(RobotType robotType) throws GameActionException{
         switch(robotType){
             case LAUNCHER: return LAUNCHER_COUNT_CHANNEL;
+            case AMPLIFIER: return AMPLIFIER_COUNT_CHANNEL;
             default: break;
         }
         assert false;
@@ -559,6 +561,7 @@ public class Comms extends Utils{
 
     public static void wipeCountChannels() throws GameActionException{
         wipeChannel(LAUNCHER_COUNT_CHANNEL);
+        wipeChannel(AMPLIFIER_COUNT_CHANNEL);
     }
     
     public static void wipeScoreChannels() throws GameActionException{
@@ -643,6 +646,14 @@ public class Comms extends Utils{
             }
         }
         return count;
+    }
+
+    public static int getHeadquarterIndex(MapLocation hqLoc) throws GameActionException{
+        MapLocation[] hqLocations = getAlliedHeadquartersLocationsList();
+        for (int i = 0; i < hqLocations.length; ++i)
+            if (hqLocations[i].equals(hqLoc)) return i;
+        assert false;
+        return -1;
     }
 
     public static MapLocation[] getAlliedHeadquartersLocationsList() throws GameActionException{
@@ -897,6 +908,17 @@ public class Comms extends Utils{
             }
         }
         return null;
+    }
+
+    public static boolean findIfAnchorProduced(MapLocation hqLoc) throws GameActionException{
+        int hqIdx = getHeadquarterIndex(hqLoc);
+        int message = rc.readSharedArray(COMM_TYPE.HEADQUARTER.channelStart + hqIdx * CHANNELS_COUNT_PER_HEADQUARTER + 2);
+        if (readSHAFlagFromMessage(message) == SHAFlag.COLLECT_ANCHOR){
+            assert rc.getType() == RobotType.CARRIER;
+            BotCarrier.collectAnchorHQidx = COMM_TYPE.HEADQUARTER.channelStart + hqIdx * CHANNELS_COUNT_PER_HEADQUARTER + 2;
+            return true;
+        }
+        return false;
     }
 
 

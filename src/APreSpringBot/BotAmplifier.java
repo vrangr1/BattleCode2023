@@ -27,6 +27,7 @@ public class BotAmplifier extends Explore{
     }
 
     public static void runAmplifier() throws GameActionException{
+        if (TRACKING_AMPLIFIER_COUNT) Comms.incrementRobotCount(RobotType.AMPLIFIER);
         closestEnemyLocation = null;
         updateVision();
         CombatUtils.sendGenericCombatLocation(visibleEnemies);

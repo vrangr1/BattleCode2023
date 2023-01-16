@@ -1,7 +1,7 @@
 #!/bin/bash
 start_time=$SECONDS
 team1=APreSpringBot
-team2=OTCBot
+team2=OBuildABot
 
 mkdir -p logs
 if test -f "logs/results.log"; then
@@ -68,7 +68,8 @@ echo -e "===========\n" >> logs/detailed_results.log
 grep -E "vs. |wins" logs/log2.log >> logs/detailed_results.log
 
 elapsed=$(( SECONDS - start_time ))
-eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
+echo "Elapsed time: $elapsed seconds"
+# eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
 ##1: maptestsmall  : 20 x 20 : 400
 #2: SmallElements : 20 x 20 : 400
 #3: AllElements   : 30 x 30 : 900
