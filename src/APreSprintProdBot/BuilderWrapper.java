@@ -9,10 +9,11 @@ public class BuilderWrapper extends Utils {
 
     private enum BUILDERS{
         CWBUILDER,
+        SIMPLEBUILDER,
         SAVVYBUILDER
     };
 
-    private static final BUILDERS CURRENT_BUILDER = BUILDERS.CWBUILDER;
+    private static final BUILDERS CURRENT_BUILDER = BUILDERS.SIMPLEBUILDER;
 
     public static void initBuilder() throws GameActionException{
         adamantium = 0;
@@ -21,6 +22,7 @@ public class BuilderWrapper extends Utils {
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.initBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.initBuilder(); break;
+            case SIMPLEBUILDER: SimpleBuilder.initBuilder(); break;
             default: break;
         }
     }
@@ -32,6 +34,7 @@ public class BuilderWrapper extends Utils {
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.updateBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.updateBuilder(); break;
+            case SIMPLEBUILDER: SimpleBuilder.updateBuilder(); break;
             default: break;
         }
     }
@@ -99,6 +102,7 @@ public class BuilderWrapper extends Utils {
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.buildUnits(); break;
             case SAVVYBUILDER: SavvyBuilder.buildUnits(); break;
+            case SIMPLEBUILDER: SimpleBuilder.buildUnits(); break;
             default: break;
         }
     }
