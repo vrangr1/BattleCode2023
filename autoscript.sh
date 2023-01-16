@@ -1,6 +1,6 @@
 #!/bin/bash
 start_time=$SECONDS
-team1=ASprintBot
+team1=ABetterSprintBot
 team2=OTCBot
 
 mkdir -p logs
