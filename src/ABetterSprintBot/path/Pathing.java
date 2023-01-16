@@ -77,7 +77,7 @@ public class Pathing extends Utils {
         }
 
         int nearbyRobotcount = rc.senseNearbyRobots().length;
-        if (rc.getRoundNum() - BIRTH_ROUND > 1 || nearbyRobotcount > 15) {
+        if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15) {
             Nav.goTo(target);
             return;
         }
