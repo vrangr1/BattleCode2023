@@ -148,9 +148,7 @@ public class BuilderWrapper extends Utils {
             // TODO: Do something
             return null;
         }
-        // if (rc.getRoundNum() == 163 && rc.getID() == 3) System.out.println("here1");
         if (rc.canBuildRobot(RobotType.CARRIER, targetLoc)) return targetLoc;
-        // if (rc.getRoundNum() == 163 && rc.getID() == 3) System.out.println("here2");
         return findNearestActReadyLocation(targetLoc, RobotType.CARRIER);
     }
 

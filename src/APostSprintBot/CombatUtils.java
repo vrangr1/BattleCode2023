@@ -147,9 +147,13 @@ public class CombatUtils extends Utils{
 			MapLocation dirLoc = lCR.add(dir);
             // int dirLocRubble = rc.senseRubble(dirLoc);
             // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
-
+            if (rc.senseCloud(dirLoc)){
+                bestRetreatDir = dir;
+                break;
+            }
 			int smallestDistSq = Integer.MAX_VALUE;
-			for (RobotInfo hostile : visibleHostiles) {
+			for (int j  = visibleHostiles.length; --j >= 0;) {
+                RobotInfo hostile = visibleHostiles[j];
 				if (!hostile.type.canAttack()) continue;
 				int distSq = hostile.location.distanceSquaredTo(dirLoc);
 				if (distSq < smallestDistSq) {

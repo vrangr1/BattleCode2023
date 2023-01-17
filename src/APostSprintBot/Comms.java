@@ -781,11 +781,12 @@ public class Comms extends Utils{
     public static MapLocation findNearestEnemyHeadquarterLocation() throws GameActionException{
         if (rc.getRoundNum() < 2) assert false;
         MapLocation[] enemyHeadquarters = getEnemyHeadquartersLocationsList();
-        if (enemyHeadquarters == null) return null;
+        if (enemyHeadquarters == null) return CENTER_OF_THE_MAP;
         MapLocation optLoc = null, myLoc = rc.getLocation();
         int optDist = -1, enemyHeadquarterCount = getHeadquartersCount(), curDist;
         for (int i = 0; i < enemyHeadquarterCount; ++i){
-            if (enemyHeadquarters[i] == null || enemyHeadquarters[i].x == -1) return optLoc;
+            if (enemyHeadquarters[i] == null || enemyHeadquarters[i].x == -1) 
+                break;
             curDist = myLoc.distanceSquaredTo(enemyHeadquarters[i]);
             if (optLoc == null || curDist < optDist){
                 optLoc = enemyHeadquarters[i];

@@ -21,12 +21,12 @@ public class BotLauncher extends CombatUtils{
 
     private static Status launcherState;
 
-    private static RobotInfo[] visibleEnemies;
-    private static RobotInfo[] inRangeEnemies;
-    private static RobotInfo[] visibleAllies;
-    private static int vNonHQEnemies = 0;
-    private static int inRNonHQEnemies = 0;
-    private static int enemyHQInVision = 0;
+    public static RobotInfo[] visibleEnemies;
+    public static RobotInfo[] inRangeEnemies;
+    public static RobotInfo[] visibleAllies;
+    public static int vNonHQEnemies = 0;
+    public static int inRNonHQEnemies = 0;
+    public static int enemyHQInVision = 0;
     private static MapLocation enemyHQLocation = null;
     private static boolean standOff = false;
     private static RobotInfo prevTurnHostile = null;
@@ -71,7 +71,7 @@ public class BotLauncher extends CombatUtils{
 
     private static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
-        if (currentDestination == CENTER_OF_THE_MAP){
+        if (currentDestination.equals(CENTER_OF_THE_MAP)){
             if (rememberedEnemyHQLocations[2] != null)  
             currentDestination = rememberedEnemyHQLocations[2];
             else if (rememberedEnemyHQLocations[0] != null) 
@@ -169,12 +169,12 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void updateVision() throws GameActionException {
+    public static void updateVision() throws GameActionException {
         updateVisibleEnemiesVision();
         updateInRangeEnemiesVision();
     }
     
-    private static void updateVisibleEnemiesVision() throws GameActionException{
+    public static void updateVisibleEnemiesVision() throws GameActionException{
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
         vNonHQEnemies = 0;
         enemyHQInVision = 0;
@@ -192,7 +192,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void updateInRangeEnemiesVision() throws GameActionException{
+    public static void updateInRangeEnemiesVision() throws GameActionException{
         inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
         inRNonHQEnemies = 0;
         for (int i = inRangeEnemies.length; --i >= 0;) {

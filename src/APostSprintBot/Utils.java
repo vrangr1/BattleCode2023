@@ -200,7 +200,7 @@ public class Utils extends Globals{
         // holder_1[index_i] = temp; // 11 bytecodes (actual is 4/5)
         // temp = holder_2[index_i][index_j]; // 13 bytecodes (actual is 6/7)
         // holder_2[index_i][index_j] = temp; // 13 bytecodes (actual is 6/7)	
-        System.out.println("Bytecodes left after testing area: " + Clock.getBytecodesLeft());
+        // System.out.println("Bytecodes left after testing area: " + Clock.getBytecodesLeft());
     }
 
 

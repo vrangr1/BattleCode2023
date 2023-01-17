@@ -211,7 +211,7 @@ public class SimpleBuilder extends Utils{
         if (carrierScore + launcherScore < standardAnchorScore + 10) return false;
         System.out.println("Trying to build standard anchor");
         if (rc.canBuildAnchor(Anchor.STANDARD)){
-            System.out.println("built standard anchor");
+            System.out.println("Built standard anchor");
             rc.buildAnchor(Anchor.STANDARD);
             Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
             BuilderWrapper.sendAnchorCollectionCommand();
