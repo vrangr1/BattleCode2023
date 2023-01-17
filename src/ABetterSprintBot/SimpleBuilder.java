@@ -88,6 +88,11 @@ public class SimpleBuilder extends Utils{
 
     private static boolean constructRobotGreedy(RobotType t, MapLocation target){
         try {
+            if (t.equals(RobotType.CARRIER) && target != null){
+                assert rc.canBuildRobot(t, target) : "round num : " + rc.getRoundNum() + " id: " + rc.getID() + " target: " + target + " curLoc: " + rc.getLocation();
+                rc.buildRobot(t, target);
+                return true;
+            }
             BuildRobotLoc bestBRL = null;
 
             for (Direction d : directions) {
@@ -181,7 +186,7 @@ public class SimpleBuilder extends Utils{
         }
         if (carrierScore < launcherScore || BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
-            if (tryConstructEnvelope(RobotType.CARRIER, Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource)))) {
+            if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
                 BuilderWrapper.setPrioritizedResource(prioritizedResource);
                 rc.setIndicatorString("building carrier that prioritizes " + prioritizedResource);

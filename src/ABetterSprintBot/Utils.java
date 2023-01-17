@@ -283,4 +283,53 @@ public class Utils extends Globals{
         bytecodeCounter++;
     }
 
+    public static MapLocation interpolate(MapLocation loc, Direction dir){
+        MapLocation lastViableLocation = null;
+        while(currentLocation.distanceSquaredTo(loc) < UNIT_TYPE.actionRadiusSquared){
+            if (rc.canActLocation(loc)) lastViableLocation = loc;
+            loc = loc.add(dir);
+        }
+        return lastViableLocation;
+    }
+
+    // targetLocation is out of action radius
+    public static MapLocation getInterpolatedActionReadyLocation(MapLocation targetLocation) throws GameActionException{
+        currentLocation = rc.getLocation();
+        Direction dir = currentLocation.directionTo(targetLocation);
+        MapLocation loc = currentLocation.add(dir);
+        MapLocation res = interpolate(loc, dir);
+        if (res != null) return res;
+        dir = dir.rotateLeft();
+        loc = currentLocation.add(dir);
+        res = interpolate(loc, dir);
+        if (res != null) return res;
+        dir = dir.rotateRight().rotateRight();
+        loc = currentLocation.add(dir);
+        res = interpolate(loc, dir);
+        if (res != null) return res;
+        return null;
+    }
+
+    public static MapLocation findNearestActReadyLocation(MapLocation targetLocation, RobotType type) throws GameActionException{
+        currentLocation = rc.getLocation();
+        MapLocation[] locations = rc.getAllLocationsWithinRadiusSquared(currentLocation, UNIT_TYPE.actionRadiusSquared);
+        MapLocation optLoc = null;
+        int optDist = -1, curDist;
+        MapLocation loc;
+        for (int i = locations.length; --i>=0;){
+            loc = locations[i];
+            // if (!rc.canActLocation(loc)) continue;
+            if (!rc.canBuildRobot(type, loc)) continue;
+            curDist = loc.distanceSquaredTo(targetLocation);
+            if (optLoc == null || curDist < optDist){
+                optLoc = loc;
+                optDist = curDist;
+                continue;
+            }
+        }
+        return optLoc;
+        // if (currentLocation.distanceSquaredTo(targetLocation) > UNIT_TYPE.actionRadiusSquared) return getInterpolatedActionReadyLocation(targetLocation);
+        // return null;
+    }
+
 }

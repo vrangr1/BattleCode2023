@@ -133,28 +133,59 @@ public class BuilderWrapper extends Utils {
         return null;
     }
 
-    public static MapLocation findBestSpawnLocationForCarrier() throws GameActionException{
-        MapLocation bestLocation = null;
-        int bestDistance = Integer.MAX_VALUE;
-        for (Direction dir : directions){
-            MapLocation loc = currentLocation.add(dir);
-            if (rc.canSenseLocation(loc) && rc.isLocationOccupied(loc)) continue;
-            int distance = currentLocation.distanceSquaredTo(loc);
-            if (distance < bestDistance){
-                bestDistance = distance;
-                bestLocation = loc;
-            }
+    private static MapLocation findNearestWellForCarrier(ResourceType pResourceType) throws GameActionException{
+        currentLocation = rc.getLocation();
+        MapLocation senseLoc = BotCarrier.findNearestWellInVision(prioritizedResource);
+        if (senseLoc != null) return senseLoc;
+        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(pResourceType));
+        if (commsLoc != null) return commsLoc;
+        return null;
+    }
+
+    private static MapLocation findBestSpawnLocationForCarrier(ResourceType pResourceType) throws GameActionException{
+        MapLocation targetLoc = findNearestWellForCarrier(pResourceType);
+        if (targetLoc == null){
+            // TODO: Do something
+            return null;
         }
-        return bestLocation;
+        // if (rc.getRoundNum() == 163 && rc.getID() == 3) System.out.println("here1");
+        if (rc.canBuildRobot(RobotType.CARRIER, targetLoc)) return targetLoc;
+        // if (rc.getRoundNum() == 163 && rc.getID() == 3) System.out.println("here2");
+        return findNearestActReadyLocation(targetLoc, RobotType.CARRIER);
+    }
+
+    private static MapLocation findBestSpawnLocationForLauncher() throws GameActionException{
+        return null;
+    }
+
+    private static MapLocation findBestSpawnLocationForBooster() throws GameActionException{
+        return null;
+    }
+
+    private static MapLocation findBestSpawnLocationForAmplifier() throws GameActionException{
+        return null;
+    }
+
+    private static MapLocation findBestSpawnLocationForDestabilizer() throws GameActionException{
+        return null;
     }
 
     public static MapLocation findBestSpawnLocation(RobotType robotType) throws GameActionException{
         switch(robotType){
-            case CARRIER: return findBestSpawnLocationForCarrier();
-            case LAUNCHER: return findBestSpawnLocationForCarrier();
-            case BOOSTER: return findBestSpawnLocationForCarrier();
-            case DESTABILIZER: return findBestSpawnLocationForCarrier();
-            case AMPLIFIER: return findBestSpawnLocationForCarrier();
+            case CARRIER: assert false; break;
+            case LAUNCHER: return findBestSpawnLocationForLauncher();
+            case BOOSTER: return findBestSpawnLocationForBooster();
+            case DESTABILIZER: return findBestSpawnLocationForDestabilizer();
+            case AMPLIFIER: return findBestSpawnLocationForAmplifier();
+            default: break;
+        }
+        assert false;
+        return null;
+    }
+
+    public static MapLocation findBestSpawnLocation(RobotType robotType, ResourceType pResourceType) throws GameActionException{
+        switch(robotType){
+            case CARRIER: return findBestSpawnLocationForCarrier(pResourceType);
             default: break;
         }
         assert false;

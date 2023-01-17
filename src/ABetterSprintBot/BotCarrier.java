@@ -592,7 +592,7 @@ public class BotCarrier extends Utils{
      * @throws GameActionException
      * @BytecodeCost : ~ 100 + 10 * [well count in vision]
      */
-    private static MapLocation findNearestWellInVision(ResourceType resourceType) throws GameActionException{
+    public static MapLocation findNearestWellInVision(ResourceType resourceType) throws GameActionException{
         WellInfo[] nearbyWells = rc.senseNearbyWells(resourceType);
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
