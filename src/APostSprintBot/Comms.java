@@ -343,6 +343,7 @@ public class Comms extends Utils{
     public static void writeEnemyHeadquarterLocation(MapLocation loc) throws GameActionException{
         boolean empty = false;
         if (rc.getRoundNum() == 1) assert false;
+        if (!rc.canWriteSharedArray(0, 0)) return;
         int headquarterCount = getHeadquartersCount();
         if (commsEnemyHeadquarterCount == headquarterCount)
             return;
@@ -370,7 +371,7 @@ public class Comms extends Utils{
             }
             else if (flag == SHAFlag.EMPTY_MESSAGE && !empty){
                 empty = true;
-                if (((i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER) <= commsEnemyHeadquarterCount)
+                if (((i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER) < commsEnemyHeadquarterCount)
                     throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "enemy hq count. How2222???");
                 commsEnemyHeadquarterCount = (i - COMM_TYPE.HEADQUARTER.channelStart)/CHANNELS_COUNT_PER_HEADQUARTER + 1;
                 if (commsEnemyHeadquarterCount > getHeadquartersCount())

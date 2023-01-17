@@ -130,6 +130,9 @@ public class BotAmplifier extends Explore{
                     vNonHQCombatEnemies++;
                 }
             }
+            else if (rc.canWriteSharedArray(0, 0)){
+                Comms.writeEnemyHeadquarterLocation(visibleEnemies[i].location);
+            }
         }
         for (int i = visibleAllies.length; --i >= 0;) {
             if (visibleAllies[i].type == RobotType.HEADQUARTERS || visibleAllies[i].type == RobotType.AMPLIFIER) {

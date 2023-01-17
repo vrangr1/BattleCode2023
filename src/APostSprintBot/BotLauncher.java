@@ -34,7 +34,7 @@ public class BotLauncher extends CombatUtils{
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
-        setToCenter();
+        setBaseDestination();
     }
 
 
@@ -69,12 +69,21 @@ public class BotLauncher extends CombatUtils{
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination);
     }
 
-    private static void setToCenter() throws GameActionException {
-        if (rc.getRoundNum() < 60) {
-            currentDestination = CENTER_OF_THE_MAP;
-            pathing.setNewDestination(CENTER_OF_THE_MAP);
-            launcherState = Status.MARCHING;
+    private static void setBaseDestination() throws GameActionException {
+        currentDestination = Comms.findNearestEnemyHeadquarterLocation();
+        if (currentDestination == CENTER_OF_THE_MAP){
+            if (rememberedEnemyHQLocations[2] != null)  
+            currentDestination = rememberedEnemyHQLocations[2];
+            else if (rememberedEnemyHQLocations[0] != null) 
+                currentDestination = rememberedEnemyHQLocations[0];
+            else if (rememberedEnemyHQLocations[1] != null) 
+                currentDestination = rememberedEnemyHQLocations[1];
+            else{
+                findNewCombatLocation();
+            }
         }
+        pathing.setNewDestination(currentDestination);
+        launcherState = Status.MARCHING;
     }
 
     private static void previousTurnResolution() throws GameActionException {
@@ -176,6 +185,9 @@ public class BotLauncher extends CombatUtils{
             else{
                 enemyHQInVision++;
                 enemyHQLocation = visibleEnemies[i].location;
+                if (rc.canWriteSharedArray(0, 0)){
+                    Comms.writeEnemyHeadquarterLocation(enemyHQLocation);
+                }
             }
         }
     }

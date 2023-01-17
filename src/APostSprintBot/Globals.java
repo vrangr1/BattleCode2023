@@ -107,6 +107,8 @@ public class Globals {
     //     Direction.SOUTH, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.CENTER};
 
     public static int bytecodeCounter = 0;
+    public static MapLocation parentHQLocation = null;
+    public static MapLocation rememberedEnemyHQLocations[];
 
     public static void initGlobals(RobotController rc1) throws GameActionException{
         rc = rc1;
@@ -138,7 +140,20 @@ public class Globals {
         CENTER_OF_THE_MAP = new MapLocation(MAP_WIDTH/2, MAP_HEIGHT/2);
         ISLAND_COUNT = rc.getIslandCount();
         Comms.initCommunicationsArray();
-        // TODO: Get parent headquarter location
+        getParentHQLocation();
+        rememberedEnemyHQLocations = new MapLocation[4];
+        updateEnemyHQLocation();
+    }
+
+    public static void getParentHQLocation() throws GameActionException{
+        if (UNIT_TYPE == RobotType.HEADQUARTERS) 
+            parentHQLocation = rc.getLocation();
+        else if (rc.getRoundNum() > 1) {
+            parentHQLocation = Comms.findNearestHeadquarter();
+        }
+        if (parentHQLocation == null) {
+            parentHQLocation =  new MapLocation(0,0);
+        }
     }
 
     public static void updateGlobals() throws GameActionException{
@@ -157,5 +172,11 @@ public class Globals {
         if (curHealth < myHealth) underAttack = true;
         else underAttack = false;
         myHealth = curHealth;
+    }
+
+    public static void updateEnemyHQLocation() throws NullPointerException {
+        rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x, parentHQLocation.y);
+        rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
+        rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
     }
 }
