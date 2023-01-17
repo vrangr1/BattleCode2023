@@ -175,4 +175,29 @@ public class CombatUtils extends Utils{
 		return false;
 	}
 
+    public static Direction retreatMoveToSurroundingCloud(RobotInfo[] visibleEnemies) throws GameActionException {
+        if (visibleEnemies.length == 0) return null;
+        MapLocation lCR = rc.getLocation();
+        int attackEnemiesCount = Integer.MAX_VALUE;
+        Direction bestRetreatDir = null;
+        for (Direction dir : directions) {
+            if (!rc.canMove(dir)) continue;
+            MapLocation dirLoc = lCR.add(dir);
+            if (!rc.senseCloud(dirLoc)) continue;
+            int currentEnemies = 0;
+            for (int j  = visibleEnemies.length; --j >= 0;) {
+                RobotInfo hostile = visibleEnemies[j];
+                if (!hostile.type.canAttack()) continue;
+                int distSq = hostile.location.distanceSquaredTo(dirLoc);
+                if (distSq <= hostile.type.actionRadiusSquared) 
+                    currentEnemies++;
+            }
+            if (currentEnemies < attackEnemiesCount) {
+                attackEnemiesCount = currentEnemies;
+                bestRetreatDir = dir;
+            }
+        }
+        return bestRetreatDir;
+    }
+
 }
