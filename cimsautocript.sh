@@ -38,8 +38,7 @@ do
   ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=${maps[$[i+2]]} -PenableProfiler=false run >> logs/log5.log &
   ./gradlew -PteamA=$team2 -PteamB=$team1 -Pmaps=${maps[$[i+2]]} -PenableProfiler=false run >> logs/log6.log &
   ./gradlew -PteamA=$team1 -PteamB=$team2 -Pmaps=${maps[$[i+3]]} -PenableProfiler=false run >> logs/log7.log &
-  ./gradlew -PteamA=$team2 -PteamB=$team1 -Pmaps=${maps[$[i+3]]} -PenableProfiler=false run >> logs/log8.log &
-
+  ./gradlew -PteamA=$team2 -PteamB=$team1 -Pmaps=${maps[$[i+3]]} -PenableProfiler=false run >> logs/log8.log
   )
   wait < <(jobs -p)
 done

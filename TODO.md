@@ -18,7 +18,7 @@
 - [ ] Write combat locations
 - [ ] Work on generation of elixir
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
-- [ ] Opportunistic anchor collection.
+- [x] Opportunistic anchor collection.
 - [ ] Store island and wells locations locally also and write it to comms later on.
 - [ ] Attack carriers by carriers
 
