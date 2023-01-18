@@ -93,7 +93,7 @@ public class BotAmplifier extends Explore{
 			}
 		}
 		if (bestRetreatDir != null) {
-            Nav.goTo(currentDestination);
+            Nav.goTo(rc.getLocation().add(bestRetreatDir));
             amplifierState = Status.FLEEING;
 			return true;
 		}
