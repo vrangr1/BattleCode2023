@@ -175,6 +175,30 @@ public class CombatUtils extends Utils{
 		return false;
 	}
 
+    public static MapLocation tryToBackUpFromEnemyHQ(RobotInfo enemyHQ) throws GameActionException {
+		int closestHostileDistSq = Integer.MAX_VALUE;
+        MapLocation lCR = rc.getLocation();
+		if (enemyHQ.type != RobotType.HEADQUARTERS) return null;
+		closestHostileDistSq = lCR.distanceSquaredTo(enemyHQ.location);
+		
+        // We don't want to get out of our max range
+		if (closestHostileDistSq > rc.getType().actionRadiusSquared) return null;
+		
+		MapLocation bestRetreatLoc = null;
+		int bestDistSq = closestHostileDistSq;
+
+		for (Direction dir : directions) {
+			if (!rc.canMove(dir)) continue;
+			MapLocation dirLoc = lCR.add(dir);
+			int distSq = enemyHQ.location.distanceSquaredTo(dirLoc);
+			if (distSq > bestDistSq) {
+				bestDistSq = distSq;
+				bestRetreatLoc = dirLoc;
+			}
+		}
+		return bestRetreatLoc;
+	}
+
     public static Direction retreatMoveToSurroundingCloud(RobotInfo[] visibleEnemies) throws GameActionException {
         if (visibleEnemies.length == 0) return null;
         MapLocation lCR = rc.getLocation();

@@ -27,7 +27,7 @@ public class BotLauncher extends CombatUtils{
     public static int vNonHQEnemies = 0;
     public static int inRNonHQEnemies = 0;
     public static int enemyHQInVision = 0;
-    private static MapLocation enemyHQLocation = null;
+    private static RobotInfo enemyHQ = null;
     private static boolean standOff = false;
     private static RobotInfo prevTurnHostile = null;
     private static MapLocation prevTurnLocation = null;
@@ -178,15 +178,16 @@ public class BotLauncher extends CombatUtils{
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
         vNonHQEnemies = 0;
         enemyHQInVision = 0;
+        enemyHQ = null;
         for (int i = visibleEnemies.length; --i >= 0;) {
             if (visibleEnemies[i].type != RobotType.HEADQUARTERS) {
                 vNonHQEnemies++;
             }
             else{
                 enemyHQInVision++;
-                enemyHQLocation = visibleEnemies[i].location;
+                enemyHQ = visibleEnemies[i];
                 if (rc.canWriteSharedArray(0, 0)){
-                    Comms.writeEnemyHeadquarterLocation(enemyHQLocation);
+                    Comms.writeEnemyHeadquarterLocation(enemyHQ.location);
                 }
             }
         }
@@ -445,7 +446,7 @@ public class BotLauncher extends CombatUtils{
     
     // If our current destination has no enemies left, move to the nearest new location with combat
     private static boolean findNewCombatLocation() throws GameActionException{
-        if (circleEnemyHQ()) return true;
+        circleEnemyHQ();
         if (currentDestination == null || (vNonHQEnemies == 0 && launcherState != Status.ISLAND_WORK && 
             rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
@@ -464,7 +465,7 @@ public class BotLauncher extends CombatUtils{
     * This will try to update the destination of the soldier so as to not make it go away from closer fights
     */
     private static void closerCombatDestination() throws GameActionException{
-        if (circleEnemyHQ()) return;
+        circleEnemyHQ();
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (currentDestination == null && nearestCombatLocation == null){
             launcherState = Status.EXPLORE;
@@ -476,13 +477,16 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static boolean circleEnemyHQ(){
+    private static void circleEnemyHQ() throws GameActionException{
         if (enemyHQInVision == visibleEnemies.length && enemyHQInVision > 0 && launcherState != Status.ISLAND_WORK){
-            currentDestination = enemyHQLocation;
-            launcherState = Status.MARCHING;
-            return true;
+            if (rc.getLocation().distanceSquaredTo(enemyHQ.location) <= enemyHQ.type.actionRadiusSquared){
+                MapLocation targetLocation = tryToBackUpFromEnemyHQ(enemyHQ);
+                if (targetLocation != null){
+                    currentDestination = targetLocation;
+                    launcherState = Status.MARCHING;
+                }
+            }
         }
-        return false;
     }
 
     public static void coverInCloud() throws GameActionException{

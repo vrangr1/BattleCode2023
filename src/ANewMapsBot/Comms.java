@@ -666,6 +666,7 @@ public class Comms extends Utils{
 
     public static void wipeThisLocationFromChannels(COMM_TYPE type, SHAFlag flag, MapLocation loc) throws GameActionException{
         if (!rc.canWriteSharedArray(0, 0)) return;
+        if (loc == null) return;
         for (int i = type.channelStart; i < type.channelStop; ++i){
             int message = rc.readSharedArray(i);
             if (readSHAFlagFromMessage(message) == flag && readLocationFromMessage(message).equals(loc)){
