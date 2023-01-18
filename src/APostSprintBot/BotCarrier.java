@@ -51,6 +51,7 @@ public class BotCarrier extends Utils{
     private static final int MAX_IGNORED_ISLAND_COUNT = 100;
     private static int ignoredIslandLocationsCount = 0;
     private static int hqIndex;
+    private static MapLocation exploreDest;
 
     private static void initSpawningHeadquarterIndex() throws GameActionException{
         MapLocation loc = Comms.findNearestHeadquarter();
@@ -74,6 +75,7 @@ public class BotCarrier extends Utils{
         goingToCollectAnchor = false;
         collectAnchorHQidx = -1;
         returnEarly = false;
+        exploreDest = null;
         rng = new Random(rc.getRoundNum() + 6147);
         // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
         initSpawningHeadquarterIndex();
@@ -111,10 +113,12 @@ public class BotCarrier extends Utils{
 
     private static void movementWrapper() throws GameActionException{
         if (rc.isMovementReady()){
-            pathing.setAndMoveToDestination(Explore.explore(randomExploration));
+            exploreDest = Explore.explore(randomExploration);
+            pathing.setAndMoveToDestination(exploreDest);
         }
         if (rc.isMovementReady()){
-            Nav.goTo(Explore.explore(randomExploration));
+            exploreDest = Explore.explore(randomExploration);
+            Nav.goTo(exploreDest);
         }
     }
 
@@ -613,22 +617,20 @@ public class BotCarrier extends Utils{
      * @BytecodeCost : ~ 350
      */
     private static void getAndSetWellLocation() throws GameActionException{
+        MapLocation senseLoc = findNearestWellInVision(prioritizedResource);
+        if (senseLoc != null && rc.canWriteSharedArray(0, 0)){
+            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.resourceFlag(prioritizedResource));
+            setWellDestination(senseLoc);
+            return;
+        }
         MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource));
         if (commsLoc != null && rc.canSenseLocation(commsLoc)){
             setWellDestination(commsLoc);
             return;
         }
-        MapLocation senseLoc = findNearestWellInVision(prioritizedResource);
-        if (senseLoc != null && rc.canWriteSharedArray(0, 0))
-            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.resourceFlag(prioritizedResource));
-        if (senseLoc != null && commsLoc != null){
-            if (currentLocation.distanceSquaredTo(commsLoc) <= currentLocation.distanceSquaredTo(senseLoc))
-                setWellDestination(commsLoc);
-            else setWellDestination(senseLoc);
-        }
-        else if (senseLoc != null) setWellDestination(senseLoc);
         else if (commsLoc != null) setWellDestination(commsLoc);
         else{
+            carrierStatus = Status.EXPLORE_FOR_WELLS;
             movementDestination = null;
             inPlaceForCollection = false;
         }
@@ -639,7 +641,12 @@ public class BotCarrier extends Utils{
             collectResources();
             return;
         }
-        if (!rc.isMovementReady() || movementDestination == null) return;
+        if (!rc.isMovementReady()) return;
+        if (movementDestination == null){
+            assert carrierStatus == Status.EXPLORE_FOR_WELLS : "Movement destination is null but status is not explore for wells";
+            movementWrapper();
+            return;
+        }
         int curDist = currentLocation.distanceSquaredTo(movementDestination);
         if (curDist <= 2) { // Reached location
             if (!rc.isLocationOccupied(movementDestination)){
@@ -712,7 +719,9 @@ public class BotCarrier extends Utils{
     private static void endOfTurnUpdate() throws GameActionException{
         returnEarly = false;
         if (carrierStatus == Status.TRANSIT_TO_WELL || carrierStatus == Status.TRANSIT_TO_ISLAND)
-            rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination.toString());
+            rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
+        else if (carrierStatus == Status.EXPLORE_FOR_WELLS || carrierStatus == Status.EXPLORE_FOR_ISLANDS)
+            rc.setIndicatorString(carrierStatus.toString() + " " + exploreDest);
         else
             rc.setIndicatorString(carrierStatus.toString());
         if (Clock.getBytecodesLeft() > 700){

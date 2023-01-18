@@ -17,6 +17,8 @@
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
 - [ ] Opportunistic anchor collection.
 - [ ] Consume less bytecode in highly crowded areas.
+- [ ] Store island and wells locations locally also
+- [ ] Attack carriers by carriers
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order
