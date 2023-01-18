@@ -10,6 +10,9 @@ public class BuilderWrapper extends Utils {
     private static ResourceType prioritizedResource;
     private static ResourceType writePrioritizedResource = ResourceType.NO_RESOURCE;
     private static boolean carrierBuilt = true;
+    private static final double RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
+    private static final double RESOURCE_ELIXIR_NORMAL_RATIO = 1;
+    private static int carrierResourceCount = 0;
 
     private enum BUILDERS{
         CWBUILDER,
@@ -26,6 +29,7 @@ public class BuilderWrapper extends Utils {
         prioritizedResource = ResourceType.ADAMANTIUM;
         writePrioritizedResource = ResourceType.NO_RESOURCE;
         carrierBuilt = true;
+        carrierResourceCount = 0;
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.initBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.initBuilder(); break;
@@ -46,7 +50,8 @@ public class BuilderWrapper extends Utils {
             writePrioritizedResource = ResourceType.NO_RESOURCE;
         }
         else if (!carrierBuilt){
-            updatePrioritizedResource();
+            // updatePrioritizedResource();
+            rollBackPrioritizedResource();
             carrierBuilt = true;
         }
         switch(CURRENT_BUILDER){
@@ -108,8 +113,16 @@ public class BuilderWrapper extends Utils {
 
     // Resource Prioritization
 
+    private static void rollBackPrioritizedResource(){
+        carrierResourceCount--;
+        if (carrierResourceCount < 0) carrierResourceCount = (int)(RESOURCE_MANA_ADAMANTIUM_RATIO);
+        prioritizedResource = (carrierResourceCount < RESOURCE_MANA_ADAMANTIUM_RATIO) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+    }
+
     private static void updatePrioritizedResource(){
-        prioritizedResource = (prioritizedResource == ResourceType.ADAMANTIUM) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+        // prioritizedResource = (prioritizedResource == ResourceType.ADAMANTIUM) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+        prioritizedResource = (carrierResourceCount < RESOURCE_MANA_ADAMANTIUM_RATIO) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+        carrierResourceCount = (carrierResourceCount + 1) % (int)(RESOURCE_MANA_ADAMANTIUM_RATIO+1);
     }
 
     public static void setPrioritizedResource(ResourceType resource){
