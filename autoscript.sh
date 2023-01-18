@@ -25,7 +25,7 @@ fi
 
 count=0
 for i in SmallElements AllElements DefaultMap \
-    OctDoors GrandRing CloudyOctDoors
+    CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
   if test $count -eq 1; then
@@ -69,5 +69,5 @@ echo "Elapsed time: $elapsed seconds"
 #2: AllElements   : 30 x 30 : 900
 #3: DefaultMap    : 32 x 32 : 1024
 #4: OctDoors      : 45 x 45 : 2025
-#5: GrandRing     : 60 x 60 : 3600
-#6: CloudyOctDoors: 45 x 45 : 2025
+#5: CloudyOctDoors: 45 x 45 : 2025
+##6: GrandRing     : 60 x 60 : 3600
