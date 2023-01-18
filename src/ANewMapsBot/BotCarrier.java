@@ -286,7 +286,7 @@ public class BotCarrier extends Utils{
             return;
         }
         currentInventoryWeight = rc.getWeight();
-        if (!returnToHQ && currentInventoryWeight == GameConstants.CARRIER_CAPACITY){
+        if (!returnToHQ && currentInventoryWeight >= amountToCollect()){
             returnToHQ = true;
             movementDestination = Comms.findNearestHeadquarter();
         }
@@ -484,6 +484,17 @@ public class BotCarrier extends Utils{
         moveToIslandAndPlaceAnchor();
     }
 
+    private static int amountToCollect(){
+        switch(prioritizedResource){
+            case ADAMANTIUM: return Math.min(RobotType.CARRIER.buildCostAdamantium / 2 + 1, GameConstants.CARRIER_CAPACITY);
+            case MANA: return Math.min(RobotType.LAUNCHER.buildCostMana / 2 + 1, GameConstants.CARRIER_CAPACITY);
+            case ELIXIR: return Math.min(RobotType.DESTABILIZER.buildCostElixir / 2 + 1, GameConstants.CARRIER_CAPACITY);
+            default : break;
+        }
+        assert false;
+        return 0;
+    }
+
     private static void collectResources() throws GameActionException{
         if (!rc.isActionReady() || returnToHQ) return;
         WellInfo[] adjacentWells = rc.senseNearbyWells(2);
@@ -491,7 +502,7 @@ public class BotCarrier extends Utils{
         int i = rng.nextInt(adjacentWells.length), amount;
         
         WellInfo curWell = adjacentWells[i];
-        amount = Math.min(curWell.getRate(), GameConstants.CARRIER_CAPACITY - rc.getWeight());
+        amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());
         rc.collectResource(curWell.getMapLocation(), amount);
         currentInventoryWeight += amount;
         switch(curWell.getResourceType()){
@@ -504,7 +515,7 @@ public class BotCarrier extends Utils{
         collectedResourcesThisTurn = true;
         desperationIndex = 0;
         
-        if (currentInventoryWeight >= GameConstants.CARRIER_CAPACITY){
+        if (currentInventoryWeight >= amountToCollect()){
             returnToHQ = true;
             movementDestination = Comms.findNearestHeadquarter();
         }
