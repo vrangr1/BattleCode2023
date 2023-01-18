@@ -25,7 +25,7 @@ do
 done
 
 count=0
-maps=(SmallElements, AllElements, DefaultMap, Cat, Tacocat, Pizza, Diagonal BatSignal)
+maps=(SmallElements AllElements DefaultMap Cat Tacocat Pizza Diagonal BatSignal)
 length=${#maps[@]}
 for ((i=0; i<${length}; i+=4));
 do

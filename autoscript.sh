@@ -25,7 +25,7 @@ fi
 
 count=0
 for i in SmallElements AllElements DefaultMap Cat Tacocat Pizza Diagonal \
-    KingdomRush
+    BatSignal
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
