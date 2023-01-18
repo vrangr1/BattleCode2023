@@ -50,6 +50,7 @@ public strictfp class RobotPlayer {
             // loop, we call Clock.yield(), signifying that we've done everything we want to do.
 
             turnCount += 1;  // We have now been alive for one more turn!
+            if (Globals.END_EARLY && rc.getRoundNum() >= Globals.END_EARLY_ROUND_NUM) continue;
             Globals.updateGlobals();
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode.
             try {
