@@ -24,8 +24,9 @@ if test -f "logs/log2.log"; then
 fi
 
 count=0
-for i in SmallElements AllElements DefaultMap \
-    CloudyOctDoors OctDoors #GrandRing
+for i in SmallElements AllElements DefaultMap Cat Tacocat Pizza Diagonal \
+    KingdomRush
+    # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
   if test $count -eq 1; then
