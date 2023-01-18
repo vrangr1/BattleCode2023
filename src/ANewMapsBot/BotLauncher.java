@@ -78,9 +78,6 @@ public class BotLauncher extends CombatUtils{
                 currentDestination = rememberedEnemyHQLocations[0];
             else if (rememberedEnemyHQLocations[1] != null) 
                 currentDestination = rememberedEnemyHQLocations[1];
-            else{
-                findNewCombatLocation();
-            }
         }
         pathing.setNewDestination(currentDestination);
         launcherState = Status.MARCHING;
@@ -456,6 +453,9 @@ public class BotLauncher extends CombatUtils{
                 pathing.setNewDestination(currentDestination);
                 launcherState = Status.MARCHING;
                 return true;
+            }
+            else if (currentDestination.distanceSquaredTo(rc.getLocation()) <= 5 && enemyHQ == null){
+                setBaseDestination();
             }
         }
         return false;

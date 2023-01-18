@@ -179,6 +179,7 @@ public class Nav extends Utils {
 
     public static boolean goTo(MapLocation theDest) throws GameActionException {
         if (!rc.isActionReady()) return false;
+        if (theDest == null) return false;
         if (!theDest.equals(dest)) {
             dest = theDest;
             bugState = BugState.DIRECT;

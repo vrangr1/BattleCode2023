@@ -144,7 +144,9 @@ public class Globals {
         Comms.initCommunicationsArray();
         getParentHQLocation();
         rememberedEnemyHQLocations = new MapLocation[4];
-        updateEnemyHQLocation();
+        if (UNIT_TYPE != RobotType.HEADQUARTERS){
+            guessEnemyHQLocation();
+        }
     }
 
     public static void getParentHQLocation() throws GameActionException{
@@ -176,9 +178,27 @@ public class Globals {
         myHealth = curHealth;
     }
 
-    public static void updateEnemyHQLocation() throws NullPointerException {
-        rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x, parentHQLocation.y);
-        rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
-        rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
+    public static void guessEnemyHQLocation() throws GameActionException {
+        if (MAP_WIDTH - parentHQLocation.x >= 0){
+            rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x, parentHQLocation.y);
+        }
+        if (MAP_HEIGHT - parentHQLocation.y >= 0){
+            rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
+        }
+        if (MAP_WIDTH - parentHQLocation.x >= 0 && MAP_HEIGHT - parentHQLocation.y >= 0){
+            rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
+        }
+        MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
+        for (int i = alliedHQs.length; --i >= 0;) {
+            if (alliedHQs[i] == null) continue;
+            for (int j = rememberedEnemyHQLocations.length; --j >= 0;) {         
+                if (rememberedEnemyHQLocations[j] == null) continue;
+                int hqDistance = alliedHQs[i].distanceSquaredTo(rememberedEnemyHQLocations[j]);
+                if (hqDistance > RobotType.HEADQUARTERS.visionRadiusSquared) continue;
+                else{
+                    rememberedEnemyHQLocations[j] = null;
+                }
+            }
+        }
     }
 }

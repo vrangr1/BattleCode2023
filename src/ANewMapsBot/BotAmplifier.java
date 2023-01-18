@@ -34,13 +34,12 @@ public class BotAmplifier extends Explore{
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
-            amplifierState = Status.FLEEING;
         }
         else if (rc.getRoundNum() < 25){
             pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
             currentDestination = CENTER_OF_THE_MAP;
         } 
-        else if (vNonHQEnemies == 0){
+        if (vNonHQCombatEnemies == 0){
             amplifierMove();
         }
         rc.setIndicatorString(amplifierState.toString() + " " + currentDestination);
@@ -78,8 +77,6 @@ public class BotAmplifier extends Explore{
 		for (Direction dir : directions) {
 			if (!rc.canMove(dir)) continue;
 			MapLocation dirLoc = lCR.add(dir);
-            boolean isDirPassable = rc.sensePassability(dirLoc);
-            if (!isDirPassable) continue; // Don't try to move to impassable location
 
 			int smallestDistSq = Integer.MAX_VALUE;
 			for (int i= visibleEnemies.length; --i >= 0;) {
@@ -96,8 +93,6 @@ public class BotAmplifier extends Explore{
 			}
 		}
 		if (bestRetreatDir != null) {
-			assignExplore3Dir(bestRetreatDir);
-            currentDestination = explore(true);
             Nav.goTo(currentDestination);
             amplifierState = Status.FLEEING;
 			return true;

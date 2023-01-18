@@ -218,6 +218,8 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean tryBuildStandardAnchor() throws GameActionException{
+        if (rc.getNumAnchors(Anchor.STANDARD) > 2) return false;
+        if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 8)) return true;
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
         if (rc.getRoundNum() < 40) return false;
         if (carrierScore + launcherScore < standardAnchorScore + 10) return false;

@@ -25,7 +25,7 @@ fi
 
 count=0
 for i in SmallElements AllElements DefaultMap Cat Tacocat Pizza Diagonal \
-    BatSignal
+    BatSignal Eyelands
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
@@ -51,9 +51,9 @@ grep -E "Birth |vs. " logs/log1.log >> logs/freezing.log
 echo -e "===========\n" >> logs/freezing.log
 grep -E --line-buffered "Birth |vs. " logs/log2.log >> logs/freezing.log 
 
-grep -E "vs. |wins" logs/log1.log >> logs/detailed_results.log
+grep -E "vs. |wins |won" logs/log1.log >> logs/detailed_results.log
 echo -e "===========\n" >> logs/detailed_results.log
-grep -E "vs. |wins" logs/log2.log >> logs/detailed_results.log
+grep -E "vs. |wins |won" logs/log2.log >> logs/detailed_results.log
 
 sleep 1
 
