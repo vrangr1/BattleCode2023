@@ -10,7 +10,7 @@ touch ../logs/freezing.log
 touch ../logs/detailed_results.log
 touch ../logs/results.log
 
-for ((i=1; i<=4; i++));
+for ((i=1; i<=8; i++));
 do
     grep -E "Warning,|vs. " ../logs/log$i.log >> ../logs/warnings.log
     echo -e "===========\n" >> ../logs/warnings.log
