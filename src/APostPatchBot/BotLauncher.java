@@ -339,7 +339,7 @@ public class BotLauncher extends CombatUtils{
 		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHostileThatAttacksUs.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		for (int i = nearbyAllies.length; --i >= 0;) {
             RobotInfo ally = nearbyAllies[i];
-			if (ally.type == RobotType.LAUNCHER) {
+			if (ally.type == RobotType.LAUNCHER || ally.type == RobotType.CARRIER) {
 				if (ally.location.distanceSquaredTo(closestHostileThatAttacksUs.location)
 						<= ally.type.actionRadiusSquared) {
 					numAlliesAttackingClosestHostile += 1;

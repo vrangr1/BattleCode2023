@@ -294,6 +294,9 @@ public class BotCarrier extends Utils{
             movementDestination = Comms.findNearestHeadquarter();
         if (returnToHQ && !goingToCollectAnchor)
             carrierStatus = Status.TRANSIT_RES_DEP;
+        collectedElixir = rc.getResourceAmount(ResourceType.ELIXIR);
+        collectedMana = rc.getResourceAmount(ResourceType.MANA);
+        collectedAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         transferResourcesToHQ();
         collectedResourcesThisTurn = false;
     }
