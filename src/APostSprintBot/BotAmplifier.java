@@ -54,7 +54,7 @@ public class BotAmplifier extends Explore{
                     assignExplore3Dir(away);
                 }
             }
-            currentDestination = explore();
+            currentDestination = explore(true);
             Nav.goTo(currentDestination);
             amplifierState = Status.EXPLORING;
         }
@@ -97,7 +97,7 @@ public class BotAmplifier extends Explore{
 		}
 		if (bestRetreatDir != null) {
 			assignExplore3Dir(bestRetreatDir);
-            currentDestination = explore();
+            currentDestination = explore(true);
             Nav.goTo(currentDestination);
             amplifierState = Status.FLEEING;
 			return true;
