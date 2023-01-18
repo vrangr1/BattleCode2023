@@ -63,6 +63,7 @@ public class BotAmplifier extends Explore{
         MapLocation destination = checkShepherdUnitLocation();
         if (destination != null){
             if (rc.isMovementReady()){
+                currentDestination = destination;
                 Nav.goTo(destination);
             }
         }
@@ -76,6 +77,7 @@ public class BotAmplifier extends Explore{
                 }
             }
         }
+        shepherdUnit = null;
         setShepherdUnit();
         return null;
     }
@@ -98,12 +100,6 @@ public class BotAmplifier extends Explore{
 
     private static void amplifierMove() throws GameActionException{
         if(rc.isMovementReady()){
-            if (rc.getRoundNum()%25 == 0){
-                Direction away = directionAwayFromAmplifierAndHQ(visibleAllies);
-                if (away != null){
-                    assignExplore3Dir(away);
-                }
-            }
             currentDestination = explore(true);
             Nav.goTo(currentDestination);
             amplifierState = Status.EXPLORING;
@@ -130,7 +126,7 @@ public class BotAmplifier extends Explore{
 			MapLocation dirLoc = lCR.add(dir);
 
 			int smallestDistSq = Integer.MAX_VALUE;
-			for (int i= visibleEnemies.length; --i >= 0;) {
+			for (int i = visibleEnemies.length; --i >= 0;) {
                 RobotInfo hostile = visibleEnemies[i];
 				if (hostile.type != RobotType.LAUNCHER) continue;
 				int distSq = hostile.location.distanceSquaredTo(dirLoc);
@@ -138,13 +134,13 @@ public class BotAmplifier extends Explore{
 					smallestDistSq = distSq;
 				}
 			}
-			if (smallestDistSq > bestDistSq) {
+			if (smallestDistSq >= bestDistSq) {
 				bestDistSq = smallestDistSq;
 				bestRetreatDir = dir;
 			}
 		}
 		if (bestRetreatDir != null) {
-            Nav.goTo(currentDestination);
+            Nav.goTo(rc.getLocation().add(bestRetreatDir));
             amplifierState = Status.FLEEING;
 			return true;
 		}
