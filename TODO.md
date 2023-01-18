@@ -14,13 +14,14 @@
 - [x] Collect anchors when going back to deposit resources..
 - [x] Flee from launchers.
 - [x] Consume less bytecode in highly crowded areas.
+- [x] Opportunistic anchor collection.
 - [ ] Avoid overcrowding
 - [ ] Write combat locations
 - [ ] Work on generation of elixir
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
-- [x] Opportunistic anchor collection.
 - [ ] Store island and wells locations locally also and write it to comms later on.
 - [ ] Attack carriers by carriers
+- [ ] Slowly ramp up the amount of resource collected before returning to hq. Collection rate too low now.
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order

@@ -86,9 +86,20 @@ public class SimpleBuilder extends Utils{
         // acceleratingAnchorScore = Comms.getRobotScore(Anchor.ACCELERATING);
     }
 
+    private static boolean optimalBuildLocationUsage(RobotType robotType){
+        switch(robotType){
+            case CARRIER: return true;
+            case LAUNCHER: return true;
+            case AMPLIFIER: return false;
+            case BOOSTER: return false;
+            case DESTABILIZER: return false;
+            default: return false;
+        }
+    }
+
     private static boolean constructRobotGreedy(RobotType t, MapLocation target){
         try {
-            if (t.equals(RobotType.CARRIER) && target != null){
+            if (optimalBuildLocationUsage(t) && target != null){
                 assert rc.canBuildRobot(t, target) : "round num : " + rc.getRoundNum() + " id: " + rc.getID() + " target: " + target + " curLoc: " + rc.getLocation();
                 rc.buildRobot(t, target);
                 return true;
@@ -164,7 +175,8 @@ public class SimpleBuilder extends Utils{
             return false;
         }
 
-        if (tryConstructEnvelope(RobotType.LAUNCHER, Comms.findNearestEnemyHeadquarterLocation())){
+        // if (tryConstructEnvelope(RobotType.LAUNCHER, Comms.findNearestEnemyHeadquarterLocation())){
+        if (tryConstructEnvelope(RobotType.LAUNCHER, BuilderWrapper.findBestSpawnLocation(RobotType.LAUNCHER))){
             Comms.writeScore(RobotType.LAUNCHER, updateScore(RobotType.LAUNCHER, launcherScore));
             return true;
         }
