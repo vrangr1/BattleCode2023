@@ -109,7 +109,7 @@ public class Globals {
     public static int bytecodeCounter = 0;
     public static MapLocation parentHQLocation = null;
     public static MapLocation rememberedEnemyHQLocations[];
-    public static final boolean END_EARLY = false;
+    public static final boolean END_EARLY = true;
     public static final int END_EARLY_ROUND_NUM = 1000;
 
     public static void initGlobals(RobotController rc1) throws GameActionException{

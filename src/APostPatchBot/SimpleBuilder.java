@@ -210,7 +210,7 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean shouldBuildAmplifier() throws GameActionException{
-        return Math.min(carrierScore, launcherScore) >= 10 && rc.getRoundNum() >= 15;
+        return Math.min(carrierScore, launcherScore + 2) >= 10 + amplifierScore && rc.getRoundNum() >= 15;
     }
 
     private static boolean shouldBuildAnchor() throws GameActionException{
@@ -236,7 +236,7 @@ public class SimpleBuilder extends Utils{
 
     public static boolean tryBuildAmplifier() throws GameActionException{
         if (!shouldBuildAmplifier()) return false;
-        if (amplifierScore > carrierScore) return false;
+        // if (amplifierScore > carrierScore) return false;
         if (amplifierScore > launcherScore) return false;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.AMPLIFIER, 1)) return false;
         if (tryConstructEnvelope(RobotType.AMPLIFIER, Comms.findNearestEnemyHeadquarterLocation())){

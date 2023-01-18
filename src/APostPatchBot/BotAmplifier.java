@@ -1,6 +1,7 @@
 package APostPatchBot;
 
 import battlecode.common.*;
+import APostPatchBot.Comms.COMM_TYPE;
 import APostPatchBot.path.Nav;
 
 public class BotAmplifier extends Explore{
@@ -22,20 +23,24 @@ public class BotAmplifier extends Explore{
     private static int vNonHQCombatEnemies = 0;
     private static int vNonHQCombatAllies = 0;  
     private static MapLocation currentDestination;
+    private static RobotInfo shepherdUnit;
 
     public static void initAmplifier() throws GameActionException{
         amplifierState = Status.BORN;
+        shepherdUnit = null;
     }
 
     public static void runAmplifier() throws GameActionException{
         if (TRACKING_AMPLIFIER_COUNT) Comms.incrementRobotCount(RobotType.AMPLIFIER);
         updateVision();
         findAndWriteWellLocationsToComms();
+        // commsCleaner();
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
         }
-        else if (rc.getRoundNum() < 25){
+        followCombatUnit();
+        if (rc.getRoundNum() < 25){
             pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
             currentDestination = CENTER_OF_THE_MAP;
         } 
@@ -43,6 +48,52 @@ public class BotAmplifier extends Explore{
             amplifierMove();
         }
         rc.setIndicatorString(amplifierState.toString() + " " + currentDestination);
+    }
+
+    private static void commsCleaner() throws GameActionException{
+        MapLocation combatLoc = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
+        if (combatLoc == null)  return;
+        if (vNonHQEnemies > 0)  return;
+        if (rc.getLocation().distanceSquaredTo(combatLoc) * 1.25 < RobotType.AMPLIFIER.visionRadiusSquared){
+            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, combatLoc);
+        }
+    }
+
+    private static void followCombatUnit() throws GameActionException{
+        MapLocation destination = checkShepherdUnitLocation();
+        if (destination != null){
+            if (rc.isMovementReady()){
+                Nav.goTo(destination);
+            }
+        }
+    }
+
+    private static MapLocation checkShepherdUnitLocation () throws GameActionException{
+        if (shepherdUnit != null){
+            for (int i = visibleAllies.length; --i >= 0;) {
+                if (visibleAllies[i].ID == shepherdUnit.ID){
+                    return visibleAllies[i].location;
+                }
+            }
+        }
+        setShepherdUnit();
+        return null;
+    }
+
+    private static void setShepherdUnit() throws GameActionException{
+        RobotInfo nonCombatShepherdUnit = null;
+        if (shepherdUnit == null && visibleAllies.length - commAllyRobots > 0){
+            for (int i = visibleAllies.length; --i >= 0;) {
+                if (visibleAllies[i].type == RobotType.DESTABILIZER || visibleAllies[i].type == RobotType.LAUNCHER){
+                    shepherdUnit = visibleAllies[i];
+                    amplifierState = Status.BATTLE_FOLLOWER;
+                    break;
+                }
+                else if (visibleAllies[i].type == RobotType.CARRIER){
+                    nonCombatShepherdUnit = visibleAllies[i];
+                }
+            }
+        }
     }
 
     private static void amplifierMove() throws GameActionException{
