@@ -15,20 +15,21 @@
 - [x] Flee from launchers.
 - [x] Consume less bytecode in highly crowded areas.
 - [x] Opportunistic anchor collection.
+- [x] Collection rate too low. Fix issue.
 - [ ] Avoid overcrowding
 - [ ] Write combat locations
+- [ ] Store island and wells locations locally also and write it to comms later on.
 - [ ] Work on generation of elixir
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
-- [ ] Store island and wells locations locally also and write it to comms later on.
 - [ ] Attack carriers by carriers
-- [ ] Slowly ramp up the amount of resource collected before returning to hq. Collection rate too low now.
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order
 ~~- [ ] If using bot counts for build order prioritization, use amplifier count as a confidence factor on how trustworthy each bot count is.~~
 - [x] Fix amplifier excess production.
 - [x] verify well designation by hq for carrier.
-- [ ] Set optimal build location properly
+- [ ] Anchor production too low now. Fix
+- [ ] Set optimal build location properly (carriers and launchers done)
 - [ ] Spawn launchers when our hq can see enemy hq
 
 ## Launchers

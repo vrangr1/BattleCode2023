@@ -52,6 +52,7 @@ public class BotCarrier extends Utils{
     private static int ignoredIslandLocationsCount = 0;
     private static int hqIndex;
     private static MapLocation exploreDest;
+    private static final int EXCESS_RESOURCES = 1;
 
     private static void initSpawningHeadquarterIndex() throws GameActionException{
         MapLocation loc = Comms.findNearestHeadquarter();
@@ -489,9 +490,9 @@ public class BotCarrier extends Utils{
 
     private static int amountToCollect(){
         switch(prioritizedResource){
-            case ADAMANTIUM: return Math.min(RobotType.CARRIER.buildCostAdamantium / 2 + 1, GameConstants.CARRIER_CAPACITY);
-            case MANA: return Math.min(RobotType.LAUNCHER.buildCostMana / 2 + 1, GameConstants.CARRIER_CAPACITY);
-            case ELIXIR: return Math.min(RobotType.DESTABILIZER.buildCostElixir / 2 + 1, GameConstants.CARRIER_CAPACITY);
+            case ADAMANTIUM: return Math.min(RobotType.CARRIER.buildCostAdamantium / 2 + EXCESS_RESOURCES, GameConstants.CARRIER_CAPACITY);
+            case MANA: return Math.min(RobotType.LAUNCHER.buildCostMana / 2 + EXCESS_RESOURCES, GameConstants.CARRIER_CAPACITY);
+            case ELIXIR: return Math.min(RobotType.DESTABILIZER.buildCostElixir / 2 + EXCESS_RESOURCES, GameConstants.CARRIER_CAPACITY);
             default : break;
         }
         assert false;

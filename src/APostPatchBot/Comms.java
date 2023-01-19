@@ -254,7 +254,8 @@ public class Comms extends Utils{
     private static void headquarterChannelsInit() throws GameActionException{
         if (rc.getType() == RobotType.HEADQUARTERS && rc.getRoundNum() == 1){
             wipeCountChannels();
-            wipeScoreChannels();
+            // wipeScoreChannels();
+            scoreChannelsInit();
             writeHeadquarterLocation(rc.getLocation());
             return;
         }
@@ -274,6 +275,17 @@ public class Comms extends Utils{
         allocateChannels(COMM_TYPE.ISLAND, ISLAND_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.AMPLIFIER, AMPLIFIER_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.COMBAT, COMBAT_CHANNELS_COUNT);
+    }
+
+    private static void scoreChannelsInit() throws GameActionException{
+        wipeChannel(LAUNCHER_SCORE_CHANNEL);
+        wipeChannel(CARRIER_SCORE_CHANNEL);
+        wipeChannel(AMPLIFIER_SCORE_CHANNEL);
+        // wipeChannel(STANDARD_ANCHOR_SCORE_CHANNEL);
+        rc.writeSharedArray(STANDARD_ANCHOR_SCORE_CHANNEL, SimpleBuilder.INIT_ANCHOR_SCORE);
+        // wipeChannel(BOOSTER_SCORE_CHANNEL);
+        // wipeChannel(DESTABILIZER_SCORE_CHANNEL);
+        // wipeChannel(ACCELERATING_ANCHOR_COUNT_CHANNEL);
     }
 
 

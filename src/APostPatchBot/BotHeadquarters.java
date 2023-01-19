@@ -7,6 +7,7 @@ public class BotHeadquarters extends Utils{
     public static void initHeadquarters() throws GameActionException{
         BuilderWrapper.initBuilder();
         if (TRACKING_LAUNCHER_COUNT) Comms.resetRobotCount(RobotType.LAUNCHER);
+        if (TRACKING_AMPLIFIER_COUNT) Comms.resetRobotCount(RobotType.AMPLIFIER);
     }
 
     public static void updateEveryTurn() throws GameActionException{

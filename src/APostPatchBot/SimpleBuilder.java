@@ -23,6 +23,7 @@ public class SimpleBuilder extends Utils{
     private static final int MIN_WAIT_CARRIERS = 15;
     // private static final int MIN_WAIT_AMPLIFIERS = 25;
     private static final double MISCOUNT_FACTOR = 5;
+    public static final int INIT_ANCHOR_SCORE = 50;
 
     static class BuildRobotLoc {
         MapLocation loc;
@@ -193,9 +194,8 @@ public class SimpleBuilder extends Utils{
         // }
 
         // TODO: Explore resource
-        if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1)) {
-            return false;
-        }
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1)) return false;
+
         if (carrierScore < launcherScore || BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
@@ -217,21 +217,23 @@ public class SimpleBuilder extends Utils{
         return (int)((double)Comms.getRobotCount(RobotType.LAUNCHER) * MISCOUNT_FACTOR) >= getMinLaunchers();
     }
 
+    private static boolean buildOurAnchor() throws GameActionException{
+        System.out.println("Trying to build standard anchor");
+        if (!rc.canBuildAnchor(Anchor.STANDARD)) return false;
+        System.out.println("Built standard anchor");
+        rc.buildAnchor(Anchor.STANDARD);
+        Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
+        BuilderWrapper.sendAnchorCollectionCommand();
+        return true;
+    }
+
     private static boolean tryBuildStandardAnchor() throws GameActionException{
         if (rc.getNumAnchors(Anchor.STANDARD) > 2) return false;
-        if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 8)) return true;
+        if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
-        if (rc.getRoundNum() < 40) return false;
-        if (carrierScore + launcherScore < standardAnchorScore + 10) return false;
-        System.out.println("Trying to build standard anchor");
-        if (rc.canBuildAnchor(Anchor.STANDARD)){
-            System.out.println("Built standard anchor");
-            rc.buildAnchor(Anchor.STANDARD);
-            Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
-            BuilderWrapper.sendAnchorCollectionCommand();
-            return true;
-        }
-        return false;
+        // if (rc.getRoundNum() < 40) return false;
+        if (carrierScore + launcherScore < standardAnchorScore) return false;
+        return buildOurAnchor();
     }
 
     public static boolean tryBuildAmplifier() throws GameActionException{
