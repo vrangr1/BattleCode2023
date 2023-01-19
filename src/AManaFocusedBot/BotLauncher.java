@@ -44,6 +44,7 @@ public class BotLauncher extends CombatUtils{
         
         updateVision();
         previousTurnResolution();
+        findAndWriteWellLocationsToComms();
         bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
             seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
