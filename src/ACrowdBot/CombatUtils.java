@@ -124,57 +124,6 @@ public class CombatUtils extends Utils{
         return false;
     }
 
-    public static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
-		int closestHostileDistSq = Integer.MAX_VALUE;
-        MapLocation lCR = rc.getLocation();
-        for (RobotInfo hostile : visibleHostiles) {
-			if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
-			int distSq = lCR.distanceSquaredTo(hostile.location);
-			if (distSq < closestHostileDistSq) {
-				closestHostileDistSq = distSq;
-			}
-		}
-		
-        // We don't want to get out of our max range
-		if (closestHostileDistSq > rc.getType().actionRadiusSquared) return false;
-		
-		Direction bestRetreatDir = null;
-		int bestDistSq = closestHostileDistSq;
-        // int bestRubble = rc.senseRubble(rc.getLocation());
-
-		for (Direction dir : directions) {
-			if (!rc.canMove(dir)) continue;
-			MapLocation dirLoc = lCR.add(dir);
-            // int dirLocRubble = rc.senseRubble(dirLoc);
-            // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
-            if (rc.senseCloud(dirLoc)){
-                bestRetreatDir = dir;
-                break;
-            }
-			int smallestDistSq = Integer.MAX_VALUE;
-			for (int j  = visibleHostiles.length; --j >= 0;) {
-                RobotInfo hostile = visibleHostiles[j];
-				if (!hostile.type.canAttack()) continue;
-				int distSq = hostile.location.distanceSquaredTo(dirLoc);
-				if (distSq < smallestDistSq) {
-					smallestDistSq = distSq;
-				}
-			}
-			if (smallestDistSq > bestDistSq) {
-				bestDistSq = smallestDistSq;
-				bestRetreatDir = dir;
-                // bestRubble = dirLocRubble;
-			}
-		}
-		if (bestRetreatDir != null) {
-            rc.setIndicatorString("Backing: " + bestRetreatDir);
-			rc.move(bestRetreatDir);
-            currentLocation = rc.getLocation();
-			return true;
-		}
-		return false;
-	}
-
     public static MapLocation tryToBackUpFromEnemyHQ(RobotInfo enemyHQ) throws GameActionException {
 		int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();

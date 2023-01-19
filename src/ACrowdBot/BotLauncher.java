@@ -31,6 +31,7 @@ public class BotLauncher extends CombatUtils{
     private static boolean standOff = false;
     private static RobotInfo prevTurnHostile = null;
     private static MapLocation prevTurnLocation = null;
+    private static String destinationFlag = "";
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -42,7 +43,6 @@ public class BotLauncher extends CombatUtils{
         if (TRACKING_LAUNCHER_COUNT) Comms.incrementRobotCount(RobotType.LAUNCHER);
         
         updateVision();
-        standOff = false;
         previousTurnResolution();
         bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
@@ -66,7 +66,8 @@ public class BotLauncher extends CombatUtils{
                 chooseTargetAndAttack(inRangeEnemies);
             }
         }
-        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Bytecodes left " + Clock.getBytecodesLeft());
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Des flag " + destinationFlag + 
+            " Bytecodes left " + Clock.getBytecodesLeft());
     }
 
     private static void setBaseDestination() throws GameActionException {
@@ -80,10 +81,13 @@ public class BotLauncher extends CombatUtils{
                 currentDestination = rememberedEnemyHQLocations[1];
         }
         pathing.setNewDestination(currentDestination);
+        destinationFlag = "base";
         launcherState = Status.MARCHING;
     }
 
     private static void previousTurnResolution() throws GameActionException {
+        standOff = false;
+        destinationFlag = "";
         cloudCentral();
         simplePursuit();
         if (launcherState != Status.PURSUING){
@@ -450,6 +454,7 @@ public class BotLauncher extends CombatUtils{
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null){
                 currentDestination = combatLocation;
+                destinationFlag = "fNCL";
                 pathing.setNewDestination(currentDestination);
                 launcherState = Status.MARCHING;
                 return true;
@@ -473,6 +478,7 @@ public class BotLauncher extends CombatUtils{
         else if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
             rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
                 currentDestination = nearestCombatLocation;
+                destinationFlag = "cCD";
                 launcherState = Status.MARCHING;
         }
     }
@@ -483,6 +489,7 @@ public class BotLauncher extends CombatUtils{
                 MapLocation targetLocation = tryToBackUpFromEnemyHQ(enemyHQ);
                 if (targetLocation != null){
                     currentDestination = targetLocation;
+                    destinationFlag = "cEHQ";
                     launcherState = Status.MARCHING;
                 }
             }
@@ -501,4 +508,55 @@ public class BotLauncher extends CombatUtils{
             }
         }
     }
+
+    private static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
+		int closestHostileDistSq = Integer.MAX_VALUE;
+        MapLocation lCR = rc.getLocation();
+        for (RobotInfo hostile : visibleHostiles) {
+			if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
+			int distSq = lCR.distanceSquaredTo(hostile.location);
+			if (distSq < closestHostileDistSq) {
+				closestHostileDistSq = distSq;
+			}
+		}
+		
+        // We don't want to get out of our max range
+		if (closestHostileDistSq > rc.getType().actionRadiusSquared) return false;
+		
+		Direction bestRetreatDir = null;
+		int bestDistSq = closestHostileDistSq;
+        // int bestRubble = rc.senseRubble(rc.getLocation());
+
+		for (Direction dir : directions) {
+			if (!rc.canMove(dir)) continue;
+			MapLocation dirLoc = lCR.add(dir);
+            // int dirLocRubble = rc.senseRubble(dirLoc);
+            // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
+            if (rc.senseCloud(dirLoc)){
+                bestRetreatDir = dir;
+                break;
+            }
+			int smallestDistSq = Integer.MAX_VALUE;
+			for (int j  = visibleHostiles.length; --j >= 0;) {
+                RobotInfo hostile = visibleHostiles[j];
+				if (!hostile.type.canAttack()) continue;
+				int distSq = hostile.location.distanceSquaredTo(dirLoc);
+				if (distSq < smallestDistSq) {
+					smallestDistSq = distSq;
+				}
+			}
+			if (smallestDistSq > bestDistSq) {
+				bestDistSq = smallestDistSq;
+				bestRetreatDir = dir;
+                // bestRubble = dirLocRubble;
+			}
+		}
+		if (bestRetreatDir != null) {
+            rc.setIndicatorString("Backing: " + bestRetreatDir);
+			rc.move(bestRetreatDir);
+            currentLocation = rc.getLocation();
+			return true;
+		}
+		return false;
+	}
 }

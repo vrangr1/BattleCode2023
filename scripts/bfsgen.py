@@ -70,7 +70,7 @@ def gen_bfs(radius):
             for y in range(-7, 8):
                 if dist(x, y) == r2:
                     out += f"""
-        if (rc.onTheMap(l{encode(x,y)})) {{ // check ({x}, {y})"""
+        if (rc.canSenseLocation(l{encode(x,y)})) {{ // check ({x}, {y})"""
                     indent = ""
                     if r2 <= 2:
                         out += f"""
@@ -87,6 +87,31 @@ def gen_bfs(radius):
             {indent}}}"""
                     out += f"""
             {indent}d{encode(x,y)} += locationScore(l{encode(x,y)}, m{encode(x,y)}, dir{encode(x,y)});"""
+                    if r2 <= 2:
+                        out += f"""
+            }}"""
+                    visited.add(encode(x,y))
+                    out += f"""
+        }}"""
+                if dist(x, y) == r2:
+                    out += f"""
+        else if (rc.onTheMap(l{encode(x,y)})) {{ // check ({x}, {y})"""
+                    indent = ""
+                    if r2 <= 2:
+                        out += f"""
+            if (!rc.isLocationOccupied(l{encode(x,y)})) {{ """
+                        indent = "    "
+                    dxdy = [(dx, dy) for dx in range(-1, 2) for dy in range(-1, 2) if (dx, dy) != (0, 0) and dist(x+dx,y+dy) <= radius]
+                    dxdy = sorted(dxdy, key=lambda dd: dist(x+dd[0], y+dd[1]))
+                    for dx, dy in dxdy:
+                        if encode(x+dx, y+dy) in visited:
+                            out += f"""
+            {indent}if (d{encode(x,y)} > d{encode(x+dx,y+dy)}) {{ // from ({x+dx}, {y+dy})
+                {indent}d{encode(x,y)} = d{encode(x+dx,y+dy)};
+                {indent}dir{encode(x,y)} = {DIRECTIONS[(-dx, -dy)] if (x+dx,y+dy) == (0, 0) else f'dir{encode(x+dx,y+dy)}'};
+            {indent}}}"""
+                    out += f"""
+            {indent}d{encode(x,y)} += 12;"""
                     if r2 <= 2:
                         out += f"""
             }}"""
@@ -185,14 +210,16 @@ public class Bot{unit}Pathing implements UnitPathing {{
     }}
 
     public int locationScore(MapLocation loc, MapInfo mapLoc, Direction inputDir) throws GameActionException {{
-        if (!rc.canSenseLocation(loc))
-            return 12;
         mapLoc = rc.senseMapInfo(loc);
         if (!mapLoc.isPassable())
             return 99999;
-        if (inputDir != null && mapLoc.getCurrentDirection().equals(inputDir.opposite()))
+        if (inputDir == null)
             return 99999;
-        return (int) (10 + mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
+        if (mapLoc.getCurrentDirection().equals(inputDir.opposite()))
+            return 99999;
+        else if (mapLoc.getCurrentDirection().equals(inputDir))
+            return 5;
+        return (int) (mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
     }}
 
     public Direction bestDir(MapLocation target) throws GameActionException {{
