@@ -8,7 +8,6 @@ public class CombatUtils extends Utils{
         switch (type){
             case LAUNCHER:
             case DESTABILIZER:
-            case CARRIER:
                 return true;
             default:
                 return false;
