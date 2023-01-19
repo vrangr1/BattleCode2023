@@ -48,7 +48,7 @@ public class BotLauncher extends CombatUtils{
         bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
             seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
-            closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
+            // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
         }
         bytecodeCheck(); //1
         tryToMicro();
@@ -449,8 +449,8 @@ public class BotLauncher extends CombatUtils{
     // If our current destination has no enemies left, move to the nearest new location with combat
     private static boolean findNewCombatLocation() throws GameActionException{
         circleEnemyHQ();
-        if (currentDestination == null || (vNonHQEnemies == 0 && launcherState != Status.ISLAND_WORK && 
-            rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared)){
+        if (vNonHQEnemies == 0 && (currentDestination == null || (launcherState != Status.ISLAND_WORK && 
+            rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared))){
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null){
@@ -460,7 +460,7 @@ public class BotLauncher extends CombatUtils{
                 launcherState = Status.MARCHING;
                 return true;
             }
-            else if (currentDestination.distanceSquaredTo(rc.getLocation()) <= 5 && enemyHQ == null){
+            else if (currentDestination == null || currentDestination.distanceSquaredTo(rc.getLocation()) <= 5 && enemyHQ == null){
                 setBaseDestination();
             }
         }
