@@ -676,7 +676,11 @@ public class BotCarrier extends Utils{
      * @BytecodeCost : ~ 350
      */
     private static void getAndSetWellLocation() throws GameActionException{
-        MapLocation senseLoc = findNearestWellInVision(prioritizedResource);
+        MapLocation senseLoc = null;
+        if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
+        senseLoc = findNearestWellInVision(ResourceType.MANA);
+        else 
+            senseLoc = findNearestWellInVision(prioritizedResource);
         if (senseLoc != null && rc.canWriteSharedArray(0, 0)){
             Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.resourceFlag(prioritizedResource));
             setWellDestination(senseLoc);
