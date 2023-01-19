@@ -207,7 +207,8 @@ public class BotCarrier extends Utils{
         currentLocation = rc.getLocation();
         updateVision();
         // isFleeing = false;
-
+        if (rc.canWriteSharedArray(0, 0))
+            Comms.writeSavedLocations();
         if (TRY_TO_FLEE){
             if (!isFleeing && canSeeMilitaryUnit()){
                 isFleeing = true;
@@ -317,13 +318,21 @@ public class BotCarrier extends Utils{
     private static void updateCarrier() throws GameActionException{
         if (exploringForWells){
             // pathing.setAndMoveToDestination(explore());
-            if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
+            ResourceType rType = null;
+            if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND){
                 movementDestination = findNearestWellInVision(ResourceType.MANA);
-            else
+                rType = ResourceType.MANA;
+            }
+            else{
                 movementDestination = findNearestWellInVision(prioritizedResource);
+                rType = prioritizedResource;
+            }
             carrierStatus = Status.EXPLORE_FOR_WELLS;
-            if (movementDestination != null)
+            if (movementDestination != null){
                 exploringForWells = false;
+                if (!rc.canWriteSharedArray(0, 0))
+                    Comms.saveThisLocation(movementDestination, Comms.resourceFlag(rType));
+            }
             else movementWrapper();
             return;
         }
@@ -550,6 +559,8 @@ public class BotCarrier extends Utils{
         int i = rng.nextInt(adjacentWells.length), amount;
         
         WellInfo curWell = adjacentWells[i];
+        if (!rc.canWriteSharedArray(0, 0))
+            Comms.saveThisLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));
         amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());
         if (amount < 0){
             returnToHQ = true;
@@ -902,6 +913,7 @@ public class BotCarrier extends Utils{
         if (!TRY_TO_FLEE || !isFleeing) return;
         if (!rc.isMovementReady()) // Can't do anything...
             return;
+        carrierStatus = Status.FLEEING;
         Direction dir = getRetreatDirection(visibleEnemies);
         if (dir != null) Explore.assignExplore3Dir(dir);
         movementWrapper(true);

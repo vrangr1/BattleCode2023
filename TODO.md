@@ -22,9 +22,10 @@
 - [x] Desperation index
 - [x] Replace hasMilitaryUnit with a non carrier one
 - [x] Mine only mana on smaller and medium size maps until some certain round.
+- [ ] Store island and wells locations locally and write it to comms later on.
+- [ ] Fix 
 - [ ] Fix fleeing code
 - [ ] Avoid overcrowding
-- [ ] Store island and wells locations locally and write it to comms later on.
 - [ ] Write combat locations
 - [ ] Work on generation of elixir
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.

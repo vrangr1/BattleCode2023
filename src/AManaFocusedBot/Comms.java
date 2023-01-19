@@ -47,6 +47,12 @@ public class Comms extends Utils{
     // kth Nearest Headquarter
     private static MapLocation[] sortedHeadquarters = null;
 
+    // Saving unwritten locations stuff
+    private static MapLocation[] locationsToWrite = null;
+    private static SHAFlag[] locationsToWriteFlags = null;
+    private static int savedLocationsCount = 0;
+    private static final int MAX_LOCATIONS_TO_SAVE = 20;
+
     
 
 
@@ -223,6 +229,27 @@ public class Comms extends Utils{
         return -1;
     }
 
+    private static COMM_TYPE getCOMM_TYPEFromSHAFlag(SHAFlag flag){
+        switch(flag){
+            case EMPTY_MESSAGE: assert false; break;
+            case ADAMANTIUM_WELL_LOCATION: return COMM_TYPE.WELLS;
+            case MANA_WELL_LOCATION: return COMM_TYPE.WELLS;
+            case ELIXIR_WELL_LOCATION : return COMM_TYPE.WELLS;
+            case HEADQUARTER_LOCATION : return COMM_TYPE.HEADQUARTER;
+            case ENEMY_HEADQUARTER_LOCATION : return COMM_TYPE.HEADQUARTER;
+            case COLLECT_ANCHOR : return COMM_TYPE.HEADQUARTER;
+            case AMPLIFIER_LOCATION : return COMM_TYPE.AMPLIFIER;
+            case ANCHOR_DEFENSE_NEEDED : return COMM_TYPE.AMPLIFIER;
+            case OCCUPIED_ISLAND : return COMM_TYPE.ISLAND;
+            case UNOCCUPIED_ISLAND : return COMM_TYPE.ISLAND;
+            case COMBAT_LOCATION : return COMM_TYPE.COMBAT;
+            case CLOUD_COMBAT_LOCATION : return COMM_TYPE.COMBAT;
+            case ARRAY_HEAD : break;
+        }
+        assert false;
+        return null;
+    }
+
 
 
     ////////////////////////////////////////
@@ -278,6 +305,10 @@ public class Comms extends Utils{
         commsEnemyHeadquarterCount = 0;
         commsHeadquarterLocations = null;
         commsEnemyHeadquarterLocations = null;
+        locationsToWrite = null;
+        // flagsToWrite = null;
+        locationsToWriteFlags = null;
+        savedLocationsCount = 0;
         headquarterChannelsInit();
         if (rc.getRoundNum() == 1) return;
         allocateChannels(COMM_TYPE.WELLS, WELLS_CHANNELS_COUNT);
@@ -1139,5 +1170,42 @@ public class Comms extends Utils{
             locations = rc.senseNearbyIslandLocations(islandIDs[i]);
             writeAndOverwriteLesserPriorityMessage(type, locations[0], SHAFlag.UNOCCUPIED_ISLAND);
         }
+    }
+
+    
+
+    ////////////////////////////////////////
+    // SAVING UNWRITTEN LOCATIONS //////////
+    ////////////////////////////////////////
+
+    public static void saveThisLocation(MapLocation loc, SHAFlag flag) throws GameActionException{
+        if (locationsToWrite == null){
+            locationsToWrite = new MapLocation[MAX_LOCATIONS_TO_SAVE];
+            locationsToWriteFlags = new SHAFlag[MAX_LOCATIONS_TO_SAVE];
+            savedLocationsCount = 0;
+        }
+        // assert savedLocationsCount < MAX_LOCATIONS_TO_SAVE;
+        for (int i = savedLocationsCount; i-->0;)
+            if (locationsToWrite[i].equals(loc)) return;
+        if (savedLocationsCount >= MAX_LOCATIONS_TO_SAVE){
+            System.out.println("Too many locations to save! Count: " + savedLocationsCount);
+            return;
+        }
+        if (findIfLocationAlreadyPresent(loc, getCOMM_TYPEFromSHAFlag(flag), flag)) return;
+        locationsToWrite[savedLocationsCount] = loc;
+        locationsToWriteFlags[savedLocationsCount++] = flag;
+    }
+
+    public static boolean writeSavedLocations() throws GameActionException{
+        if (locationsToWrite == null || savedLocationsCount == 0) return true;
+        if (!rc.canWriteSharedArray(0, 0)) return false;
+        while(savedLocationsCount-->0){
+            COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[savedLocationsCount]);
+            assert type != null : "Invalid SHAFlag";
+            assert type != COMM_TYPE.HEADQUARTER : "Invalid SHAFlag";
+            writeAndOverwriteLesserPriorityMessage(COMM_TYPE.COMBAT, locationsToWrite[savedLocationsCount], locationsToWriteFlags[savedLocationsCount]);
+        }
+        savedLocationsCount = 0;
+        return true;
     }
 }
