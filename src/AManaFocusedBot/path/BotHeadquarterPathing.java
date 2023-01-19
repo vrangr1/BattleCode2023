@@ -564,13 +564,185 @@ public class BotHeadquarterPathing implements UnitPathing {
         mapLoc = rc.senseMapInfo(loc);
         if (!mapLoc.isPassable())
             return 99999;
-        if (inputDir == null)
+        if (inputDir == null)   
             return 99999;
-        if (mapLoc.getCurrentDirection().equals(inputDir.opposite()))
-            return 99999;
-        else if (mapLoc.getCurrentDirection().equals(inputDir))
-            return 5;
-        return (int) (mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
+        return currentSwitchScore(inputDir, mapLoc);
+    }
+
+    public int currentSwitchScore(Direction inputDir, MapInfo mapLoc) throws GameActionException{
+        Direction currentDir = mapLoc.getCurrentDirection();
+        switch(currentDir) {
+            case NORTH:
+                switch(inputDir){
+                    case NORTH:
+                        return 5;
+                    case NORTHEAST:
+                        return 8;
+                    case EAST:
+                        return 15;
+                    case SOUTHEAST:
+                        return 99999;
+                    case SOUTH:
+                        return 99999;
+                    case SOUTHWEST:
+                        return 99999;
+                    case WEST:
+                        return 15;
+                    case NORTHWEST:
+                        return 8;
+                    default:
+                        return 99999;
+                }
+            case NORTHEAST:
+                switch(inputDir){
+                    case NORTH:
+                        return 8;
+                    case NORTHEAST:
+                        return 5;
+                    case EAST:
+                        return 8;
+                    case SOUTHEAST:
+                        return 15;
+                    case SOUTH:
+                        return 99999;
+                    case SOUTHWEST:
+                        return 99999;
+                    case WEST:
+                        return 99999;
+                    case NORTHWEST:
+                        return 15;
+                    default:
+                        return 99999;
+                }
+            case EAST:
+                switch(inputDir){
+                    case NORTH:
+                        return 15;
+                    case NORTHEAST:
+                        return 8;
+                    case EAST:
+                        return 5;
+                    case SOUTHEAST:
+                        return 8;
+                    case SOUTH:
+                        return 15;
+                    case SOUTHWEST:
+                        return 99999;
+                    case WEST:
+                        return 99999;
+                    case NORTHWEST:
+                        return 99999;
+                    default:
+                        return 99999;
+                }
+            case SOUTHEAST:
+                switch(inputDir){
+                    case NORTH:
+                        return 99999;
+                    case NORTHEAST:
+                        return 15;
+                    case EAST:
+                        return 8;
+                    case SOUTHEAST:
+                        return 5;
+                    case SOUTH:
+                        return 8;
+                    case SOUTHWEST:
+                        return 15;
+                    case WEST:
+                        return 99999;
+                    case NORTHWEST:
+                        return 99999;
+                    default:
+                        return 99999;
+                }
+            case SOUTH:
+                switch(inputDir){
+                    case NORTH:
+                        return 99999;
+                    case NORTHEAST:
+                        return 99999;
+                    case EAST:
+                        return 15;
+                    case SOUTHEAST:
+                        return 8;
+                    case SOUTH:
+                        return 5;
+                    case SOUTHWEST:
+                        return 8;
+                    case WEST:
+                        return 15;
+                    case NORTHWEST:
+                        return 99999;
+                    default:
+                        return 99999;
+                }
+            case SOUTHWEST:
+                switch(inputDir){
+                    case NORTH:
+                        return 99999;
+                    case NORTHEAST:
+                        return 99999;
+                    case EAST:
+                        return 99999;
+                    case SOUTHEAST:
+                        return 15;
+                    case SOUTH:
+                        return 8;
+                    case SOUTHWEST:
+                        return 5;
+                    case WEST:
+                        return 8;
+                    case NORTHWEST:
+                        return 15;
+                    default:
+                        return 99999;
+                }
+            case WEST:
+                switch(inputDir){
+                    case NORTH:
+                        return 15;
+                    case NORTHEAST:
+                        return 99999;
+                    case EAST:
+                        return 99999;
+                    case SOUTHEAST:
+                        return 99999;
+                    case SOUTH:
+                        return 15;
+                    case SOUTHWEST:
+                        return 8;
+                    case WEST:
+                        return 5;
+                    case NORTHWEST:
+                        return 8;
+                    default:
+                        return 99999;
+                }
+            case NORTHWEST:
+                switch(inputDir){
+                    case NORTH:
+                        return 8;
+                    case NORTHEAST:
+                        return 15;
+                    case EAST:
+                        return 99999;
+                    case SOUTHEAST:
+                        return 99999;
+                    case SOUTH:
+                        return 99999;
+                    case SOUTHWEST:
+                        return 15;
+                    case WEST:
+                        return 8;
+                    case NORTHWEST:
+                        return 5;
+                    default:
+                        return 99999;
+                }
+            default:
+                return (int) (mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
+        }
     }
 
     public Direction bestDir(MapLocation target) throws GameActionException {
