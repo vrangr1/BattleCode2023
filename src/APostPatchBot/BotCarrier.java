@@ -52,7 +52,8 @@ public class BotCarrier extends Utils{
     private static int ignoredIslandLocationsCount = 0;
     private static int hqIndex;
     private static MapLocation exploreDest;
-    private static final int EXCESS_RESOURCES = 1;
+    private static final int EXCESS_RESOURCES = 3;
+    private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 50;
 
     private static void initSpawningHeadquarterIndex() throws GameActionException{
         MapLocation loc = Comms.findNearestHeadquarter();
@@ -77,7 +78,7 @@ public class BotCarrier extends Utils{
         collectAnchorHQidx = -1;
         returnEarly = false;
         exploreDest = null;
-        rng = new Random(rc.getRoundNum() + 6147);
+        rng = new Random(rc.getID());
         // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
         initSpawningHeadquarterIndex();
         prioritizedResource = Comms.getPrioritizedResource(hqIndex);
@@ -490,6 +491,7 @@ public class BotCarrier extends Utils{
     }
 
     private static int amountToCollect(){
+        if (rc.getRoundNum() > INCREASE_RESOURCE_COLLECTION_ROUND) return GameConstants.CARRIER_CAPACITY;
         switch(prioritizedResource){
             case ADAMANTIUM: return Math.min(RobotType.CARRIER.buildCostAdamantium / 2 + EXCESS_RESOURCES, GameConstants.CARRIER_CAPACITY);
             case MANA: return Math.min(RobotType.LAUNCHER.buildCostMana / 2 + EXCESS_RESOURCES, GameConstants.CARRIER_CAPACITY);

@@ -665,31 +665,36 @@ public class Comms extends Utils{
         int message = rc.readSharedArray(channel);
         int p = (message & 0x0006) >> 1;
         if (p != 0){
-            rc.writeSharedArray(channel, (message & 0xFFF9));
+            if (rc.canWriteSharedArray(0, 0))
+                rc.writeSharedArray(channel, (message & 0xFFF9));
             return getResourceType(resourcePrioritizations[p]);
         }
         
         p = (message & 0x0018) >> 3;
         if (p != 0){
-            rc.writeSharedArray(channel, (message & 0xFFE7));
+            if (rc.canWriteSharedArray(0, 0))
+                rc.writeSharedArray(channel, (message & 0xFFE7));
             return getResourceType(resourcePrioritizations[p]);
         }
         
         p = (message & 0x0060) >> 5;
         if (p != 0){
-            rc.writeSharedArray(channel, (message & 0xFF9F));
+            if (rc.canWriteSharedArray(0, 0))
+                rc.writeSharedArray(channel, (message & 0xFF9F));
             return getResourceType(resourcePrioritizations[p]);
         }
         
         p = (message & 0x0180) >> 7;
         if (p != 0){
-            rc.writeSharedArray(channel, (message & 0xFE7F));
+            if (rc.canWriteSharedArray(0, 0))
+                rc.writeSharedArray(channel, (message & 0xFE7F));
             return getResourceType(resourcePrioritizations[p]);
         }
         
         p = (message & 0x0600) >> 9;
         if (p != 0){
-            rc.writeSharedArray(channel, (message & 0xF9FF));
+            if (rc.canWriteSharedArray(0, 0))
+                rc.writeSharedArray(channel, (message & 0xF9FF));
             return getResourceType(resourcePrioritizations[p]);
         }
         
