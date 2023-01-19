@@ -24,8 +24,9 @@ if test -f "logs/log2.log"; then
 fi
 
 count=0
-for i in SmallElements AllElements DefaultMap Cat Tacocat Pizza Diagonal \
-    BatSignal Eyelands
+# Sorted the maps by size
+for i in SmallElements AllElements Pizza DefaultMap BatSignal Tacocat Eyelands\
+    Diagonal Cat
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
