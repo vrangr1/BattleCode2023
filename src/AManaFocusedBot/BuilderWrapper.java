@@ -222,12 +222,12 @@ public class BuilderWrapper extends Utils {
         return null;
     }
 
-    public static void buildUnits() throws GameActionException{
+    public static void buildUnits(boolean endangered) throws GameActionException{
         updateBuilder();
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.buildUnits(); break;
             case SAVVYBUILDER: SavvyBuilder.buildUnits(); break;
-            case SIMPLEBUILDER: SimpleBuilder.buildUnits(); break;
+            case SIMPLEBUILDER: SimpleBuilder.buildUnits(endangered); break;
             default: break;
         }
     }

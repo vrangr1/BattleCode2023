@@ -50,15 +50,6 @@ public class BotAmplifier extends Explore{
         rc.setIndicatorString(amplifierState.toString() + " " + currentDestination);
     }
 
-    private static void commsCleaner() throws GameActionException{
-        MapLocation combatLoc = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-        if (combatLoc == null)  return;
-        if (vNonHQEnemies > 0)  return;
-        if (rc.getLocation().distanceSquaredTo(combatLoc) * 1.25 < RobotType.AMPLIFIER.visionRadiusSquared){
-            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, combatLoc);
-        }
-    }
-
     private static void followCombatUnit() throws GameActionException{
         MapLocation destination = checkShepherdUnitLocation();
         if (destination != null){

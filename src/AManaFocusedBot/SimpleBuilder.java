@@ -261,20 +261,8 @@ public class SimpleBuilder extends Utils{
         return false;
     }
 
-    private static boolean endangered() throws GameActionException{
-        RobotInfo[] visibleEnemies = rc.senseNearbyRobots(rc.getType().visionRadiusSquared, ENEMY_TEAM);
-        if (visibleEnemies.length > 0){
-            if (visibleEnemies[0].type != RobotType.AMPLIFIER && visibleEnemies[0].type != RobotType.CARRIER){
-                rc.setIndicatorString("Enemy at: " + visibleEnemies[0].getLocation());
-                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, visibleEnemies[0].getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public static void buildUnits() throws GameActionException{
-        if (endangered()){
+    public static void buildUnits(boolean endangered) throws GameActionException{
+        if (endangered){
             if (tryBuildLauncher()) return;
         }
         boolean builtUnit = true;
