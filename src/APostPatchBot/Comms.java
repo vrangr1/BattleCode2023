@@ -698,7 +698,7 @@ public class Comms extends Utils{
             return getResourceType(resourcePrioritizations[p]);
         }
         
-        assert false;
+        assert false : "message:" + message + " channel:" + channel + "; rn: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation();
         return null;
         // int message = rc.readSharedArray(channel);
         // return getResourceType(resourcePrioritizations[(message >> 1) & 0x3]);

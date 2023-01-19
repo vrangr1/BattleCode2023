@@ -253,6 +253,14 @@ public class Utils extends Globals{
         return optLoc;
     }
 
+    public static int senseRubbleFriend(MapInfo locInfo) throws GameActionException{
+        return (int) (1+locInfo.getCooldownMultiplier(MY_TEAM)) * 10;
+    }
+
+    public static int senseRubbleEnemy(MapInfo locInfo) throws GameActionException{
+        return (int) (1+locInfo.getCooldownMultiplier(ENEMY_TEAM)) * 10;
+    }
+
     public static int senseRubbleFriend(MapLocation loc) throws GameActionException{
         return (int) (1+rc.senseMapInfo(loc).getCooldownMultiplier(MY_TEAM)) * 10;
     }

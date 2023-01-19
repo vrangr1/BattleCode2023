@@ -30,6 +30,7 @@ def gen_constants(radius):
             if dist(x, y) <= radius:
                 out += f"""
     static MapLocation l{encode(x,y)}; // location representing relative coordinate ({x}, {y})
+    static MapInfo m{encode(x,y)}; // map info at location representing relative coordinate ({x}, {y})
     static int d{encode(x,y)}; // shortest distance to location from current location
     static Direction dir{encode(x,y)}; // best direction to take now to optimally get to location
 """
@@ -45,6 +46,7 @@ def sign(x):
 def gen_init(radius):
     out = f"""
         l{encode(0,0)} = rc.getLocation();
+        m{encode(0,0)} = rc.senseMapInfo(l{encode(0,0)});
         d{encode(0,0)} = 0;
         dir{encode(0,0)} = Direction.CENTER;
 """
@@ -68,7 +70,7 @@ def gen_bfs(radius):
             for y in range(-7, 8):
                 if dist(x, y) == r2:
                     out += f"""
-        if (rc.canSenseLocation(l{encode(x,y)}) && rc.sensePassability(l{encode(x,y)})) {{ // check ({x}, {y})"""
+        if (rc.onTheMap(l{encode(x,y)})) {{ // check ({x}, {y})"""
                     indent = ""
                     if r2 <= 2:
                         out += f"""
@@ -84,7 +86,7 @@ def gen_bfs(radius):
                 {indent}dir{encode(x,y)} = {DIRECTIONS[(-dx, -dy)] if (x+dx,y+dy) == (0, 0) else f'dir{encode(x+dx,y+dy)}'};
             {indent}}}"""
                     out += f"""
-            {indent}d{encode(x,y)} += locationScore(l{encode(x,y)});"""
+            {indent}d{encode(x,y)} += locationScore(l{encode(x,y)}, m{encode(x,y)});"""
                     if r2 <= 2:
                         out += f"""
             }}"""
@@ -172,7 +174,6 @@ def gen_full(bot, unit):
 package {bot}.path;
 
 import battlecode.common.*;
-import {bot}.Utils;
 
 public class Bot{unit}Pathing implements UnitPathing {{
     
@@ -183,8 +184,13 @@ public class Bot{unit}Pathing implements UnitPathing {{
         this.rc = rc;
     }}
 
-    public int locationScore(MapLocation loc) throws GameActionException {{
-        return Utils.senseRubbleFriend(loc);
+    public int locationScore(MapLocation loc, MapInfo mapLoc) throws GameActionException {{
+        if (!rc.canSenseLocation(loc))
+            return 12;
+        mapLoc = rc.senseMapInfo(loc);
+        if (!mapLoc.isPassable())
+            return 99999;
+        return (int) (10 + mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
     }}
 
     public Direction bestDir(MapLocation target) throws GameActionException {{

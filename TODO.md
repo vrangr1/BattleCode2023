@@ -36,6 +36,7 @@
 
 - [x] Change to Finite State Machine micro.
 - [ ] Try to shift code to microbattle if possible
+- [ ] Add cloud attacking
 - [ ] Add hiding in clouds and better attacking comms
 
 ## Combat

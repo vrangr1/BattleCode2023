@@ -161,6 +161,9 @@ public class Globals {
     }
 
     public static void updateGlobals() throws GameActionException{
+        if (rc.getRoundNum() == 2 && UNIT_TYPE == RobotType.HEADQUARTERS){
+            fillEnemyHQGuessForHQ();
+        }
         currentLocation = rc.getLocation();
         bytecodeCounter = 0;
         MAX_HEALTH = UNIT_TYPE.getMaxHealth();
@@ -188,6 +191,23 @@ public class Globals {
         if (MAP_WIDTH - parentHQLocation.x >= 0 && MAP_HEIGHT - parentHQLocation.y >= 0){
             rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
         }
+        if (UNIT_TYPE != RobotType.HEADQUARTERS){
+            MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
+            for (int i = alliedHQs.length; --i >= 0;) {
+                if (alliedHQs[i] == null) continue;
+                for (int j = rememberedEnemyHQLocations.length; --j >= 0;) {         
+                    if (rememberedEnemyHQLocations[j] == null) continue;
+                    int hqDistance = alliedHQs[i].distanceSquaredTo(rememberedEnemyHQLocations[j]);
+                    if (hqDistance > RobotType.HEADQUARTERS.visionRadiusSquared) continue;
+                    else{
+                        rememberedEnemyHQLocations[j] = null;
+                    }
+                }
+            }
+        }
+    }
+
+    public static void fillEnemyHQGuessForHQ() throws GameActionException{
         MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
         for (int i = alliedHQs.length; --i >= 0;) {
             if (alliedHQs[i] == null) continue;
@@ -200,5 +220,21 @@ public class Globals {
                 }
             }
         }
+    }
+
+    public static MapLocation returnEnemyHQGuess() throws GameActionException{
+        MapLocation guessDestination = CENTER_OF_THE_MAP;
+        if (rc.getRoundNum() > 1){
+            guessDestination = Comms.findNearestEnemyHeadquarterLocation();
+        }
+        if (guessDestination.equals(CENTER_OF_THE_MAP)){
+            if (rememberedEnemyHQLocations[2] != null)  
+                guessDestination = rememberedEnemyHQLocations[2];
+            else if (rememberedEnemyHQLocations[0] != null) 
+                guessDestination = rememberedEnemyHQLocations[0];
+            else if (rememberedEnemyHQLocations[1] != null) 
+                guessDestination = rememberedEnemyHQLocations[1];
+        }
+        return guessDestination;
     }
 }

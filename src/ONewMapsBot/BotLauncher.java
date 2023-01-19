@@ -70,15 +70,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void setBaseDestination() throws GameActionException {
-        currentDestination = Comms.findNearestEnemyHeadquarterLocation();
-        if (currentDestination.equals(CENTER_OF_THE_MAP)){
-            if (rememberedEnemyHQLocations[2] != null)  
-            currentDestination = rememberedEnemyHQLocations[2];
-            else if (rememberedEnemyHQLocations[0] != null) 
-                currentDestination = rememberedEnemyHQLocations[0];
-            else if (rememberedEnemyHQLocations[1] != null) 
-                currentDestination = rememberedEnemyHQLocations[1];
-        }
+        currentDestination = returnEnemyHQGuess();
         pathing.setNewDestination(currentDestination);
         launcherState = Status.MARCHING;
     }

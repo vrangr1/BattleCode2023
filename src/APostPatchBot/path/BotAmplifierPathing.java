@@ -5,333 +5,413 @@
 package APostPatchBot.path;
 
 import battlecode.common.*;
-import APostPatchBot.Utils;
 
 public class BotAmplifierPathing implements UnitPathing {
     
     RobotController rc;
 
     static MapLocation l107; // location representing relative coordinate (-5, 0)
+    static MapInfo m107; // map info at location representing relative coordinate (-5, 0)
     static int d107; // shortest distance to location from current location
     static Direction dir107; // best direction to take now to optimally get to location
 
     static MapLocation l63; // location representing relative coordinate (-4, -3)
+    static MapInfo m63; // map info at location representing relative coordinate (-4, -3)
     static int d63; // shortest distance to location from current location
     static Direction dir63; // best direction to take now to optimally get to location
 
     static MapLocation l78; // location representing relative coordinate (-4, -2)
+    static MapInfo m78; // map info at location representing relative coordinate (-4, -2)
     static int d78; // shortest distance to location from current location
     static Direction dir78; // best direction to take now to optimally get to location
 
     static MapLocation l93; // location representing relative coordinate (-4, -1)
+    static MapInfo m93; // map info at location representing relative coordinate (-4, -1)
     static int d93; // shortest distance to location from current location
     static Direction dir93; // best direction to take now to optimally get to location
 
     static MapLocation l108; // location representing relative coordinate (-4, 0)
+    static MapInfo m108; // map info at location representing relative coordinate (-4, 0)
     static int d108; // shortest distance to location from current location
     static Direction dir108; // best direction to take now to optimally get to location
 
     static MapLocation l123; // location representing relative coordinate (-4, 1)
+    static MapInfo m123; // map info at location representing relative coordinate (-4, 1)
     static int d123; // shortest distance to location from current location
     static Direction dir123; // best direction to take now to optimally get to location
 
     static MapLocation l138; // location representing relative coordinate (-4, 2)
+    static MapInfo m138; // map info at location representing relative coordinate (-4, 2)
     static int d138; // shortest distance to location from current location
     static Direction dir138; // best direction to take now to optimally get to location
 
     static MapLocation l153; // location representing relative coordinate (-4, 3)
+    static MapInfo m153; // map info at location representing relative coordinate (-4, 3)
     static int d153; // shortest distance to location from current location
     static Direction dir153; // best direction to take now to optimally get to location
 
     static MapLocation l49; // location representing relative coordinate (-3, -4)
+    static MapInfo m49; // map info at location representing relative coordinate (-3, -4)
     static int d49; // shortest distance to location from current location
     static Direction dir49; // best direction to take now to optimally get to location
 
     static MapLocation l64; // location representing relative coordinate (-3, -3)
+    static MapInfo m64; // map info at location representing relative coordinate (-3, -3)
     static int d64; // shortest distance to location from current location
     static Direction dir64; // best direction to take now to optimally get to location
 
     static MapLocation l79; // location representing relative coordinate (-3, -2)
+    static MapInfo m79; // map info at location representing relative coordinate (-3, -2)
     static int d79; // shortest distance to location from current location
     static Direction dir79; // best direction to take now to optimally get to location
 
     static MapLocation l94; // location representing relative coordinate (-3, -1)
+    static MapInfo m94; // map info at location representing relative coordinate (-3, -1)
     static int d94; // shortest distance to location from current location
     static Direction dir94; // best direction to take now to optimally get to location
 
     static MapLocation l109; // location representing relative coordinate (-3, 0)
+    static MapInfo m109; // map info at location representing relative coordinate (-3, 0)
     static int d109; // shortest distance to location from current location
     static Direction dir109; // best direction to take now to optimally get to location
 
     static MapLocation l124; // location representing relative coordinate (-3, 1)
+    static MapInfo m124; // map info at location representing relative coordinate (-3, 1)
     static int d124; // shortest distance to location from current location
     static Direction dir124; // best direction to take now to optimally get to location
 
     static MapLocation l139; // location representing relative coordinate (-3, 2)
+    static MapInfo m139; // map info at location representing relative coordinate (-3, 2)
     static int d139; // shortest distance to location from current location
     static Direction dir139; // best direction to take now to optimally get to location
 
     static MapLocation l154; // location representing relative coordinate (-3, 3)
+    static MapInfo m154; // map info at location representing relative coordinate (-3, 3)
     static int d154; // shortest distance to location from current location
     static Direction dir154; // best direction to take now to optimally get to location
 
     static MapLocation l169; // location representing relative coordinate (-3, 4)
+    static MapInfo m169; // map info at location representing relative coordinate (-3, 4)
     static int d169; // shortest distance to location from current location
     static Direction dir169; // best direction to take now to optimally get to location
 
     static MapLocation l50; // location representing relative coordinate (-2, -4)
+    static MapInfo m50; // map info at location representing relative coordinate (-2, -4)
     static int d50; // shortest distance to location from current location
     static Direction dir50; // best direction to take now to optimally get to location
 
     static MapLocation l65; // location representing relative coordinate (-2, -3)
+    static MapInfo m65; // map info at location representing relative coordinate (-2, -3)
     static int d65; // shortest distance to location from current location
     static Direction dir65; // best direction to take now to optimally get to location
 
     static MapLocation l80; // location representing relative coordinate (-2, -2)
+    static MapInfo m80; // map info at location representing relative coordinate (-2, -2)
     static int d80; // shortest distance to location from current location
     static Direction dir80; // best direction to take now to optimally get to location
 
     static MapLocation l95; // location representing relative coordinate (-2, -1)
+    static MapInfo m95; // map info at location representing relative coordinate (-2, -1)
     static int d95; // shortest distance to location from current location
     static Direction dir95; // best direction to take now to optimally get to location
 
     static MapLocation l110; // location representing relative coordinate (-2, 0)
+    static MapInfo m110; // map info at location representing relative coordinate (-2, 0)
     static int d110; // shortest distance to location from current location
     static Direction dir110; // best direction to take now to optimally get to location
 
     static MapLocation l125; // location representing relative coordinate (-2, 1)
+    static MapInfo m125; // map info at location representing relative coordinate (-2, 1)
     static int d125; // shortest distance to location from current location
     static Direction dir125; // best direction to take now to optimally get to location
 
     static MapLocation l140; // location representing relative coordinate (-2, 2)
+    static MapInfo m140; // map info at location representing relative coordinate (-2, 2)
     static int d140; // shortest distance to location from current location
     static Direction dir140; // best direction to take now to optimally get to location
 
     static MapLocation l155; // location representing relative coordinate (-2, 3)
+    static MapInfo m155; // map info at location representing relative coordinate (-2, 3)
     static int d155; // shortest distance to location from current location
     static Direction dir155; // best direction to take now to optimally get to location
 
     static MapLocation l170; // location representing relative coordinate (-2, 4)
+    static MapInfo m170; // map info at location representing relative coordinate (-2, 4)
     static int d170; // shortest distance to location from current location
     static Direction dir170; // best direction to take now to optimally get to location
 
     static MapLocation l51; // location representing relative coordinate (-1, -4)
+    static MapInfo m51; // map info at location representing relative coordinate (-1, -4)
     static int d51; // shortest distance to location from current location
     static Direction dir51; // best direction to take now to optimally get to location
 
     static MapLocation l66; // location representing relative coordinate (-1, -3)
+    static MapInfo m66; // map info at location representing relative coordinate (-1, -3)
     static int d66; // shortest distance to location from current location
     static Direction dir66; // best direction to take now to optimally get to location
 
     static MapLocation l81; // location representing relative coordinate (-1, -2)
+    static MapInfo m81; // map info at location representing relative coordinate (-1, -2)
     static int d81; // shortest distance to location from current location
     static Direction dir81; // best direction to take now to optimally get to location
 
     static MapLocation l96; // location representing relative coordinate (-1, -1)
+    static MapInfo m96; // map info at location representing relative coordinate (-1, -1)
     static int d96; // shortest distance to location from current location
     static Direction dir96; // best direction to take now to optimally get to location
 
     static MapLocation l111; // location representing relative coordinate (-1, 0)
+    static MapInfo m111; // map info at location representing relative coordinate (-1, 0)
     static int d111; // shortest distance to location from current location
     static Direction dir111; // best direction to take now to optimally get to location
 
     static MapLocation l126; // location representing relative coordinate (-1, 1)
+    static MapInfo m126; // map info at location representing relative coordinate (-1, 1)
     static int d126; // shortest distance to location from current location
     static Direction dir126; // best direction to take now to optimally get to location
 
     static MapLocation l141; // location representing relative coordinate (-1, 2)
+    static MapInfo m141; // map info at location representing relative coordinate (-1, 2)
     static int d141; // shortest distance to location from current location
     static Direction dir141; // best direction to take now to optimally get to location
 
     static MapLocation l156; // location representing relative coordinate (-1, 3)
+    static MapInfo m156; // map info at location representing relative coordinate (-1, 3)
     static int d156; // shortest distance to location from current location
     static Direction dir156; // best direction to take now to optimally get to location
 
     static MapLocation l171; // location representing relative coordinate (-1, 4)
+    static MapInfo m171; // map info at location representing relative coordinate (-1, 4)
     static int d171; // shortest distance to location from current location
     static Direction dir171; // best direction to take now to optimally get to location
 
     static MapLocation l37; // location representing relative coordinate (0, -5)
+    static MapInfo m37; // map info at location representing relative coordinate (0, -5)
     static int d37; // shortest distance to location from current location
     static Direction dir37; // best direction to take now to optimally get to location
 
     static MapLocation l52; // location representing relative coordinate (0, -4)
+    static MapInfo m52; // map info at location representing relative coordinate (0, -4)
     static int d52; // shortest distance to location from current location
     static Direction dir52; // best direction to take now to optimally get to location
 
     static MapLocation l67; // location representing relative coordinate (0, -3)
+    static MapInfo m67; // map info at location representing relative coordinate (0, -3)
     static int d67; // shortest distance to location from current location
     static Direction dir67; // best direction to take now to optimally get to location
 
     static MapLocation l82; // location representing relative coordinate (0, -2)
+    static MapInfo m82; // map info at location representing relative coordinate (0, -2)
     static int d82; // shortest distance to location from current location
     static Direction dir82; // best direction to take now to optimally get to location
 
     static MapLocation l97; // location representing relative coordinate (0, -1)
+    static MapInfo m97; // map info at location representing relative coordinate (0, -1)
     static int d97; // shortest distance to location from current location
     static Direction dir97; // best direction to take now to optimally get to location
 
     static MapLocation l112; // location representing relative coordinate (0, 0)
+    static MapInfo m112; // map info at location representing relative coordinate (0, 0)
     static int d112; // shortest distance to location from current location
     static Direction dir112; // best direction to take now to optimally get to location
 
     static MapLocation l127; // location representing relative coordinate (0, 1)
+    static MapInfo m127; // map info at location representing relative coordinate (0, 1)
     static int d127; // shortest distance to location from current location
     static Direction dir127; // best direction to take now to optimally get to location
 
     static MapLocation l142; // location representing relative coordinate (0, 2)
+    static MapInfo m142; // map info at location representing relative coordinate (0, 2)
     static int d142; // shortest distance to location from current location
     static Direction dir142; // best direction to take now to optimally get to location
 
     static MapLocation l157; // location representing relative coordinate (0, 3)
+    static MapInfo m157; // map info at location representing relative coordinate (0, 3)
     static int d157; // shortest distance to location from current location
     static Direction dir157; // best direction to take now to optimally get to location
 
     static MapLocation l172; // location representing relative coordinate (0, 4)
+    static MapInfo m172; // map info at location representing relative coordinate (0, 4)
     static int d172; // shortest distance to location from current location
     static Direction dir172; // best direction to take now to optimally get to location
 
     static MapLocation l187; // location representing relative coordinate (0, 5)
+    static MapInfo m187; // map info at location representing relative coordinate (0, 5)
     static int d187; // shortest distance to location from current location
     static Direction dir187; // best direction to take now to optimally get to location
 
     static MapLocation l53; // location representing relative coordinate (1, -4)
+    static MapInfo m53; // map info at location representing relative coordinate (1, -4)
     static int d53; // shortest distance to location from current location
     static Direction dir53; // best direction to take now to optimally get to location
 
     static MapLocation l68; // location representing relative coordinate (1, -3)
+    static MapInfo m68; // map info at location representing relative coordinate (1, -3)
     static int d68; // shortest distance to location from current location
     static Direction dir68; // best direction to take now to optimally get to location
 
     static MapLocation l83; // location representing relative coordinate (1, -2)
+    static MapInfo m83; // map info at location representing relative coordinate (1, -2)
     static int d83; // shortest distance to location from current location
     static Direction dir83; // best direction to take now to optimally get to location
 
     static MapLocation l98; // location representing relative coordinate (1, -1)
+    static MapInfo m98; // map info at location representing relative coordinate (1, -1)
     static int d98; // shortest distance to location from current location
     static Direction dir98; // best direction to take now to optimally get to location
 
     static MapLocation l113; // location representing relative coordinate (1, 0)
+    static MapInfo m113; // map info at location representing relative coordinate (1, 0)
     static int d113; // shortest distance to location from current location
     static Direction dir113; // best direction to take now to optimally get to location
 
     static MapLocation l128; // location representing relative coordinate (1, 1)
+    static MapInfo m128; // map info at location representing relative coordinate (1, 1)
     static int d128; // shortest distance to location from current location
     static Direction dir128; // best direction to take now to optimally get to location
 
     static MapLocation l143; // location representing relative coordinate (1, 2)
+    static MapInfo m143; // map info at location representing relative coordinate (1, 2)
     static int d143; // shortest distance to location from current location
     static Direction dir143; // best direction to take now to optimally get to location
 
     static MapLocation l158; // location representing relative coordinate (1, 3)
+    static MapInfo m158; // map info at location representing relative coordinate (1, 3)
     static int d158; // shortest distance to location from current location
     static Direction dir158; // best direction to take now to optimally get to location
 
     static MapLocation l173; // location representing relative coordinate (1, 4)
+    static MapInfo m173; // map info at location representing relative coordinate (1, 4)
     static int d173; // shortest distance to location from current location
     static Direction dir173; // best direction to take now to optimally get to location
 
     static MapLocation l54; // location representing relative coordinate (2, -4)
+    static MapInfo m54; // map info at location representing relative coordinate (2, -4)
     static int d54; // shortest distance to location from current location
     static Direction dir54; // best direction to take now to optimally get to location
 
     static MapLocation l69; // location representing relative coordinate (2, -3)
+    static MapInfo m69; // map info at location representing relative coordinate (2, -3)
     static int d69; // shortest distance to location from current location
     static Direction dir69; // best direction to take now to optimally get to location
 
     static MapLocation l84; // location representing relative coordinate (2, -2)
+    static MapInfo m84; // map info at location representing relative coordinate (2, -2)
     static int d84; // shortest distance to location from current location
     static Direction dir84; // best direction to take now to optimally get to location
 
     static MapLocation l99; // location representing relative coordinate (2, -1)
+    static MapInfo m99; // map info at location representing relative coordinate (2, -1)
     static int d99; // shortest distance to location from current location
     static Direction dir99; // best direction to take now to optimally get to location
 
     static MapLocation l114; // location representing relative coordinate (2, 0)
+    static MapInfo m114; // map info at location representing relative coordinate (2, 0)
     static int d114; // shortest distance to location from current location
     static Direction dir114; // best direction to take now to optimally get to location
 
     static MapLocation l129; // location representing relative coordinate (2, 1)
+    static MapInfo m129; // map info at location representing relative coordinate (2, 1)
     static int d129; // shortest distance to location from current location
     static Direction dir129; // best direction to take now to optimally get to location
 
     static MapLocation l144; // location representing relative coordinate (2, 2)
+    static MapInfo m144; // map info at location representing relative coordinate (2, 2)
     static int d144; // shortest distance to location from current location
     static Direction dir144; // best direction to take now to optimally get to location
 
     static MapLocation l159; // location representing relative coordinate (2, 3)
+    static MapInfo m159; // map info at location representing relative coordinate (2, 3)
     static int d159; // shortest distance to location from current location
     static Direction dir159; // best direction to take now to optimally get to location
 
     static MapLocation l174; // location representing relative coordinate (2, 4)
+    static MapInfo m174; // map info at location representing relative coordinate (2, 4)
     static int d174; // shortest distance to location from current location
     static Direction dir174; // best direction to take now to optimally get to location
 
     static MapLocation l55; // location representing relative coordinate (3, -4)
+    static MapInfo m55; // map info at location representing relative coordinate (3, -4)
     static int d55; // shortest distance to location from current location
     static Direction dir55; // best direction to take now to optimally get to location
 
     static MapLocation l70; // location representing relative coordinate (3, -3)
+    static MapInfo m70; // map info at location representing relative coordinate (3, -3)
     static int d70; // shortest distance to location from current location
     static Direction dir70; // best direction to take now to optimally get to location
 
     static MapLocation l85; // location representing relative coordinate (3, -2)
+    static MapInfo m85; // map info at location representing relative coordinate (3, -2)
     static int d85; // shortest distance to location from current location
     static Direction dir85; // best direction to take now to optimally get to location
 
     static MapLocation l100; // location representing relative coordinate (3, -1)
+    static MapInfo m100; // map info at location representing relative coordinate (3, -1)
     static int d100; // shortest distance to location from current location
     static Direction dir100; // best direction to take now to optimally get to location
 
     static MapLocation l115; // location representing relative coordinate (3, 0)
+    static MapInfo m115; // map info at location representing relative coordinate (3, 0)
     static int d115; // shortest distance to location from current location
     static Direction dir115; // best direction to take now to optimally get to location
 
     static MapLocation l130; // location representing relative coordinate (3, 1)
+    static MapInfo m130; // map info at location representing relative coordinate (3, 1)
     static int d130; // shortest distance to location from current location
     static Direction dir130; // best direction to take now to optimally get to location
 
     static MapLocation l145; // location representing relative coordinate (3, 2)
+    static MapInfo m145; // map info at location representing relative coordinate (3, 2)
     static int d145; // shortest distance to location from current location
     static Direction dir145; // best direction to take now to optimally get to location
 
     static MapLocation l160; // location representing relative coordinate (3, 3)
+    static MapInfo m160; // map info at location representing relative coordinate (3, 3)
     static int d160; // shortest distance to location from current location
     static Direction dir160; // best direction to take now to optimally get to location
 
     static MapLocation l175; // location representing relative coordinate (3, 4)
+    static MapInfo m175; // map info at location representing relative coordinate (3, 4)
     static int d175; // shortest distance to location from current location
     static Direction dir175; // best direction to take now to optimally get to location
 
     static MapLocation l71; // location representing relative coordinate (4, -3)
+    static MapInfo m71; // map info at location representing relative coordinate (4, -3)
     static int d71; // shortest distance to location from current location
     static Direction dir71; // best direction to take now to optimally get to location
 
     static MapLocation l86; // location representing relative coordinate (4, -2)
+    static MapInfo m86; // map info at location representing relative coordinate (4, -2)
     static int d86; // shortest distance to location from current location
     static Direction dir86; // best direction to take now to optimally get to location
 
     static MapLocation l101; // location representing relative coordinate (4, -1)
+    static MapInfo m101; // map info at location representing relative coordinate (4, -1)
     static int d101; // shortest distance to location from current location
     static Direction dir101; // best direction to take now to optimally get to location
 
     static MapLocation l116; // location representing relative coordinate (4, 0)
+    static MapInfo m116; // map info at location representing relative coordinate (4, 0)
     static int d116; // shortest distance to location from current location
     static Direction dir116; // best direction to take now to optimally get to location
 
     static MapLocation l131; // location representing relative coordinate (4, 1)
+    static MapInfo m131; // map info at location representing relative coordinate (4, 1)
     static int d131; // shortest distance to location from current location
     static Direction dir131; // best direction to take now to optimally get to location
 
     static MapLocation l146; // location representing relative coordinate (4, 2)
+    static MapInfo m146; // map info at location representing relative coordinate (4, 2)
     static int d146; // shortest distance to location from current location
     static Direction dir146; // best direction to take now to optimally get to location
 
     static MapLocation l161; // location representing relative coordinate (4, 3)
+    static MapInfo m161; // map info at location representing relative coordinate (4, 3)
     static int d161; // shortest distance to location from current location
     static Direction dir161; // best direction to take now to optimally get to location
 
     static MapLocation l117; // location representing relative coordinate (5, 0)
+    static MapInfo m117; // map info at location representing relative coordinate (5, 0)
     static int d117; // shortest distance to location from current location
     static Direction dir117; // best direction to take now to optimally get to location
 
@@ -340,13 +420,19 @@ public class BotAmplifierPathing implements UnitPathing {
         this.rc = rc;
     }
 
-    public int locationScore(MapLocation loc) throws GameActionException {
-        return Utils.senseRubbleFriend(loc);
+    public int locationScore(MapLocation loc, MapInfo mapLoc) throws GameActionException {
+        if (!rc.canSenseLocation(loc))
+            return 12;
+        mapLoc = rc.senseMapInfo(loc);
+        if (!mapLoc.isPassable())
+            return 99999;
+        return (int) (10 + mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
     }
 
     public Direction bestDir(MapLocation target) throws GameActionException {
 
         l112 = rc.getLocation();
+        m112 = rc.senseMapInfo(l112);
         d112 = 0;
         dir112 = Direction.CENTER;
 
@@ -672,17 +758,17 @@ public class BotAmplifierPathing implements UnitPathing {
 
 
 
-        if (rc.canSenseLocation(l111) && rc.sensePassability(l111)) { // check (-1, 0)
+        if (rc.onTheMap(l111)) { // check (-1, 0)
             if (!rc.isLocationOccupied(l111)) { 
                 if (d111 > d112) { // from (0, 0)
                     d111 = d112;
                     dir111 = Direction.WEST;
                 }
-                d111 += locationScore(l111);
+                d111 += locationScore(l111, m111);
             }
         }
 
-        if (rc.canSenseLocation(l97) && rc.sensePassability(l97)) { // check (0, -1)
+        if (rc.onTheMap(l97)) { // check (0, -1)
             if (!rc.isLocationOccupied(l97)) { 
                 if (d97 > d112) { // from (0, 0)
                     d97 = d112;
@@ -692,11 +778,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d97 = d111;
                     dir97 = dir111;
                 }
-                d97 += locationScore(l97);
+                d97 += locationScore(l97, m97);
             }
         }
 
-        if (rc.canSenseLocation(l127) && rc.sensePassability(l127)) { // check (0, 1)
+        if (rc.onTheMap(l127)) { // check (0, 1)
             if (!rc.isLocationOccupied(l127)) { 
                 if (d127 > d112) { // from (0, 0)
                     d127 = d112;
@@ -706,11 +792,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d127 = d111;
                     dir127 = dir111;
                 }
-                d127 += locationScore(l127);
+                d127 += locationScore(l127, m127);
             }
         }
 
-        if (rc.canSenseLocation(l113) && rc.sensePassability(l113)) { // check (1, 0)
+        if (rc.onTheMap(l113)) { // check (1, 0)
             if (!rc.isLocationOccupied(l113)) { 
                 if (d113 > d112) { // from (0, 0)
                     d113 = d112;
@@ -724,11 +810,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d113 = d127;
                     dir113 = dir127;
                 }
-                d113 += locationScore(l113);
+                d113 += locationScore(l113, m113);
             }
         }
 
-        if (rc.canSenseLocation(l96) && rc.sensePassability(l96)) { // check (-1, -1)
+        if (rc.onTheMap(l96)) { // check (-1, -1)
             if (!rc.isLocationOccupied(l96)) { 
                 if (d96 > d112) { // from (0, 0)
                     d96 = d112;
@@ -742,11 +828,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d96 = d97;
                     dir96 = dir97;
                 }
-                d96 += locationScore(l96);
+                d96 += locationScore(l96, m96);
             }
         }
 
-        if (rc.canSenseLocation(l126) && rc.sensePassability(l126)) { // check (-1, 1)
+        if (rc.onTheMap(l126)) { // check (-1, 1)
             if (!rc.isLocationOccupied(l126)) { 
                 if (d126 > d112) { // from (0, 0)
                     d126 = d112;
@@ -760,11 +846,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d126 = d127;
                     dir126 = dir127;
                 }
-                d126 += locationScore(l126);
+                d126 += locationScore(l126, m126);
             }
         }
 
-        if (rc.canSenseLocation(l98) && rc.sensePassability(l98)) { // check (1, -1)
+        if (rc.onTheMap(l98)) { // check (1, -1)
             if (!rc.isLocationOccupied(l98)) { 
                 if (d98 > d112) { // from (0, 0)
                     d98 = d112;
@@ -778,11 +864,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d98 = d113;
                     dir98 = dir113;
                 }
-                d98 += locationScore(l98);
+                d98 += locationScore(l98, m98);
             }
         }
 
-        if (rc.canSenseLocation(l128) && rc.sensePassability(l128)) { // check (1, 1)
+        if (rc.onTheMap(l128)) { // check (1, 1)
             if (!rc.isLocationOccupied(l128)) { 
                 if (d128 > d112) { // from (0, 0)
                     d128 = d112;
@@ -796,11 +882,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     d128 = d113;
                     dir128 = dir113;
                 }
-                d128 += locationScore(l128);
+                d128 += locationScore(l128, m128);
             }
         }
 
-        if (rc.canSenseLocation(l110) && rc.sensePassability(l110)) { // check (-2, 0)
+        if (rc.onTheMap(l110)) { // check (-2, 0)
             if (d110 > d111) { // from (-1, 0)
                 d110 = d111;
                 dir110 = dir111;
@@ -813,10 +899,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d110 = d126;
                 dir110 = dir126;
             }
-            d110 += locationScore(l110);
+            d110 += locationScore(l110, m110);
         }
 
-        if (rc.canSenseLocation(l82) && rc.sensePassability(l82)) { // check (0, -2)
+        if (rc.onTheMap(l82)) { // check (0, -2)
             if (d82 > d97) { // from (0, -1)
                 d82 = d97;
                 dir82 = dir97;
@@ -829,10 +915,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d82 = d98;
                 dir82 = dir98;
             }
-            d82 += locationScore(l82);
+            d82 += locationScore(l82, m82);
         }
 
-        if (rc.canSenseLocation(l142) && rc.sensePassability(l142)) { // check (0, 2)
+        if (rc.onTheMap(l142)) { // check (0, 2)
             if (d142 > d127) { // from (0, 1)
                 d142 = d127;
                 dir142 = dir127;
@@ -845,10 +931,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d142 = d128;
                 dir142 = dir128;
             }
-            d142 += locationScore(l142);
+            d142 += locationScore(l142, m142);
         }
 
-        if (rc.canSenseLocation(l114) && rc.sensePassability(l114)) { // check (2, 0)
+        if (rc.onTheMap(l114)) { // check (2, 0)
             if (d114 > d113) { // from (1, 0)
                 d114 = d113;
                 dir114 = dir113;
@@ -861,10 +947,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d114 = d128;
                 dir114 = dir128;
             }
-            d114 += locationScore(l114);
+            d114 += locationScore(l114, m114);
         }
 
-        if (rc.canSenseLocation(l95) && rc.sensePassability(l95)) { // check (-2, -1)
+        if (rc.onTheMap(l95)) { // check (-2, -1)
             if (d95 > d111) { // from (-1, 0)
                 d95 = d111;
                 dir95 = dir111;
@@ -877,10 +963,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d95 = d110;
                 dir95 = dir110;
             }
-            d95 += locationScore(l95);
+            d95 += locationScore(l95, m95);
         }
 
-        if (rc.canSenseLocation(l125) && rc.sensePassability(l125)) { // check (-2, 1)
+        if (rc.onTheMap(l125)) { // check (-2, 1)
             if (d125 > d111) { // from (-1, 0)
                 d125 = d111;
                 dir125 = dir111;
@@ -893,10 +979,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d125 = d110;
                 dir125 = dir110;
             }
-            d125 += locationScore(l125);
+            d125 += locationScore(l125, m125);
         }
 
-        if (rc.canSenseLocation(l81) && rc.sensePassability(l81)) { // check (-1, -2)
+        if (rc.onTheMap(l81)) { // check (-1, -2)
             if (d81 > d97) { // from (0, -1)
                 d81 = d97;
                 dir81 = dir97;
@@ -913,10 +999,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d81 = d95;
                 dir81 = dir95;
             }
-            d81 += locationScore(l81);
+            d81 += locationScore(l81, m81);
         }
 
-        if (rc.canSenseLocation(l141) && rc.sensePassability(l141)) { // check (-1, 2)
+        if (rc.onTheMap(l141)) { // check (-1, 2)
             if (d141 > d127) { // from (0, 1)
                 d141 = d127;
                 dir141 = dir127;
@@ -933,10 +1019,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d141 = d125;
                 dir141 = dir125;
             }
-            d141 += locationScore(l141);
+            d141 += locationScore(l141, m141);
         }
 
-        if (rc.canSenseLocation(l83) && rc.sensePassability(l83)) { // check (1, -2)
+        if (rc.onTheMap(l83)) { // check (1, -2)
             if (d83 > d97) { // from (0, -1)
                 d83 = d97;
                 dir83 = dir97;
@@ -949,10 +1035,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d83 = d82;
                 dir83 = dir82;
             }
-            d83 += locationScore(l83);
+            d83 += locationScore(l83, m83);
         }
 
-        if (rc.canSenseLocation(l143) && rc.sensePassability(l143)) { // check (1, 2)
+        if (rc.onTheMap(l143)) { // check (1, 2)
             if (d143 > d127) { // from (0, 1)
                 d143 = d127;
                 dir143 = dir127;
@@ -965,10 +1051,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d143 = d142;
                 dir143 = dir142;
             }
-            d143 += locationScore(l143);
+            d143 += locationScore(l143, m143);
         }
 
-        if (rc.canSenseLocation(l99) && rc.sensePassability(l99)) { // check (2, -1)
+        if (rc.onTheMap(l99)) { // check (2, -1)
             if (d99 > d113) { // from (1, 0)
                 d99 = d113;
                 dir99 = dir113;
@@ -985,10 +1071,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d99 = d83;
                 dir99 = dir83;
             }
-            d99 += locationScore(l99);
+            d99 += locationScore(l99, m99);
         }
 
-        if (rc.canSenseLocation(l129) && rc.sensePassability(l129)) { // check (2, 1)
+        if (rc.onTheMap(l129)) { // check (2, 1)
             if (d129 > d113) { // from (1, 0)
                 d129 = d113;
                 dir129 = dir113;
@@ -1005,10 +1091,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d129 = d143;
                 dir129 = dir143;
             }
-            d129 += locationScore(l129);
+            d129 += locationScore(l129, m129);
         }
 
-        if (rc.canSenseLocation(l80) && rc.sensePassability(l80)) { // check (-2, -2)
+        if (rc.onTheMap(l80)) { // check (-2, -2)
             if (d80 > d96) { // from (-1, -1)
                 d80 = d96;
                 dir80 = dir96;
@@ -1021,10 +1107,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d80 = d81;
                 dir80 = dir81;
             }
-            d80 += locationScore(l80);
+            d80 += locationScore(l80, m80);
         }
 
-        if (rc.canSenseLocation(l140) && rc.sensePassability(l140)) { // check (-2, 2)
+        if (rc.onTheMap(l140)) { // check (-2, 2)
             if (d140 > d126) { // from (-1, 1)
                 d140 = d126;
                 dir140 = dir126;
@@ -1037,10 +1123,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d140 = d141;
                 dir140 = dir141;
             }
-            d140 += locationScore(l140);
+            d140 += locationScore(l140, m140);
         }
 
-        if (rc.canSenseLocation(l84) && rc.sensePassability(l84)) { // check (2, -2)
+        if (rc.onTheMap(l84)) { // check (2, -2)
             if (d84 > d98) { // from (1, -1)
                 d84 = d98;
                 dir84 = dir98;
@@ -1053,10 +1139,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d84 = d99;
                 dir84 = dir99;
             }
-            d84 += locationScore(l84);
+            d84 += locationScore(l84, m84);
         }
 
-        if (rc.canSenseLocation(l144) && rc.sensePassability(l144)) { // check (2, 2)
+        if (rc.onTheMap(l144)) { // check (2, 2)
             if (d144 > d128) { // from (1, 1)
                 d144 = d128;
                 dir144 = dir128;
@@ -1069,10 +1155,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d144 = d129;
                 dir144 = dir129;
             }
-            d144 += locationScore(l144);
+            d144 += locationScore(l144, m144);
         }
 
-        if (rc.canSenseLocation(l109) && rc.sensePassability(l109)) { // check (-3, 0)
+        if (rc.onTheMap(l109)) { // check (-3, 0)
             if (d109 > d110) { // from (-2, 0)
                 d109 = d110;
                 dir109 = dir110;
@@ -1085,10 +1171,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d109 = d125;
                 dir109 = dir125;
             }
-            d109 += locationScore(l109);
+            d109 += locationScore(l109, m109);
         }
 
-        if (rc.canSenseLocation(l67) && rc.sensePassability(l67)) { // check (0, -3)
+        if (rc.onTheMap(l67)) { // check (0, -3)
             if (d67 > d82) { // from (0, -2)
                 d67 = d82;
                 dir67 = dir82;
@@ -1101,10 +1187,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d67 = d83;
                 dir67 = dir83;
             }
-            d67 += locationScore(l67);
+            d67 += locationScore(l67, m67);
         }
 
-        if (rc.canSenseLocation(l157) && rc.sensePassability(l157)) { // check (0, 3)
+        if (rc.onTheMap(l157)) { // check (0, 3)
             if (d157 > d142) { // from (0, 2)
                 d157 = d142;
                 dir157 = dir142;
@@ -1117,10 +1203,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d157 = d143;
                 dir157 = dir143;
             }
-            d157 += locationScore(l157);
+            d157 += locationScore(l157, m157);
         }
 
-        if (rc.canSenseLocation(l115) && rc.sensePassability(l115)) { // check (3, 0)
+        if (rc.onTheMap(l115)) { // check (3, 0)
             if (d115 > d114) { // from (2, 0)
                 d115 = d114;
                 dir115 = dir114;
@@ -1133,10 +1219,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d115 = d129;
                 dir115 = dir129;
             }
-            d115 += locationScore(l115);
+            d115 += locationScore(l115, m115);
         }
 
-        if (rc.canSenseLocation(l94) && rc.sensePassability(l94)) { // check (-3, -1)
+        if (rc.onTheMap(l94)) { // check (-3, -1)
             if (d94 > d110) { // from (-2, 0)
                 d94 = d110;
                 dir94 = dir110;
@@ -1153,10 +1239,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d94 = d109;
                 dir94 = dir109;
             }
-            d94 += locationScore(l94);
+            d94 += locationScore(l94, m94);
         }
 
-        if (rc.canSenseLocation(l124) && rc.sensePassability(l124)) { // check (-3, 1)
+        if (rc.onTheMap(l124)) { // check (-3, 1)
             if (d124 > d110) { // from (-2, 0)
                 d124 = d110;
                 dir124 = dir110;
@@ -1173,10 +1259,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d124 = d109;
                 dir124 = dir109;
             }
-            d124 += locationScore(l124);
+            d124 += locationScore(l124, m124);
         }
 
-        if (rc.canSenseLocation(l66) && rc.sensePassability(l66)) { // check (-1, -3)
+        if (rc.onTheMap(l66)) { // check (-1, -3)
             if (d66 > d82) { // from (0, -2)
                 d66 = d82;
                 dir66 = dir82;
@@ -1193,10 +1279,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d66 = d67;
                 dir66 = dir67;
             }
-            d66 += locationScore(l66);
+            d66 += locationScore(l66, m66);
         }
 
-        if (rc.canSenseLocation(l156) && rc.sensePassability(l156)) { // check (-1, 3)
+        if (rc.onTheMap(l156)) { // check (-1, 3)
             if (d156 > d142) { // from (0, 2)
                 d156 = d142;
                 dir156 = dir142;
@@ -1213,10 +1299,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d156 = d157;
                 dir156 = dir157;
             }
-            d156 += locationScore(l156);
+            d156 += locationScore(l156, m156);
         }
 
-        if (rc.canSenseLocation(l68) && rc.sensePassability(l68)) { // check (1, -3)
+        if (rc.onTheMap(l68)) { // check (1, -3)
             if (d68 > d82) { // from (0, -2)
                 d68 = d82;
                 dir68 = dir82;
@@ -1233,10 +1319,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d68 = d67;
                 dir68 = dir67;
             }
-            d68 += locationScore(l68);
+            d68 += locationScore(l68, m68);
         }
 
-        if (rc.canSenseLocation(l158) && rc.sensePassability(l158)) { // check (1, 3)
+        if (rc.onTheMap(l158)) { // check (1, 3)
             if (d158 > d142) { // from (0, 2)
                 d158 = d142;
                 dir158 = dir142;
@@ -1253,10 +1339,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d158 = d157;
                 dir158 = dir157;
             }
-            d158 += locationScore(l158);
+            d158 += locationScore(l158, m158);
         }
 
-        if (rc.canSenseLocation(l100) && rc.sensePassability(l100)) { // check (3, -1)
+        if (rc.onTheMap(l100)) { // check (3, -1)
             if (d100 > d114) { // from (2, 0)
                 d100 = d114;
                 dir100 = dir114;
@@ -1273,10 +1359,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d100 = d115;
                 dir100 = dir115;
             }
-            d100 += locationScore(l100);
+            d100 += locationScore(l100, m100);
         }
 
-        if (rc.canSenseLocation(l130) && rc.sensePassability(l130)) { // check (3, 1)
+        if (rc.onTheMap(l130)) { // check (3, 1)
             if (d130 > d114) { // from (2, 0)
                 d130 = d114;
                 dir130 = dir114;
@@ -1293,10 +1379,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d130 = d115;
                 dir130 = dir115;
             }
-            d130 += locationScore(l130);
+            d130 += locationScore(l130, m130);
         }
 
-        if (rc.canSenseLocation(l79) && rc.sensePassability(l79)) { // check (-3, -2)
+        if (rc.onTheMap(l79)) { // check (-3, -2)
             if (d79 > d95) { // from (-2, -1)
                 d79 = d95;
                 dir79 = dir95;
@@ -1309,10 +1395,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d79 = d94;
                 dir79 = dir94;
             }
-            d79 += locationScore(l79);
+            d79 += locationScore(l79, m79);
         }
 
-        if (rc.canSenseLocation(l139) && rc.sensePassability(l139)) { // check (-3, 2)
+        if (rc.onTheMap(l139)) { // check (-3, 2)
             if (d139 > d125) { // from (-2, 1)
                 d139 = d125;
                 dir139 = dir125;
@@ -1325,10 +1411,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d139 = d124;
                 dir139 = dir124;
             }
-            d139 += locationScore(l139);
+            d139 += locationScore(l139, m139);
         }
 
-        if (rc.canSenseLocation(l65) && rc.sensePassability(l65)) { // check (-2, -3)
+        if (rc.onTheMap(l65)) { // check (-2, -3)
             if (d65 > d81) { // from (-1, -2)
                 d65 = d81;
                 dir65 = dir81;
@@ -1345,10 +1431,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d65 = d79;
                 dir65 = dir79;
             }
-            d65 += locationScore(l65);
+            d65 += locationScore(l65, m65);
         }
 
-        if (rc.canSenseLocation(l155) && rc.sensePassability(l155)) { // check (-2, 3)
+        if (rc.onTheMap(l155)) { // check (-2, 3)
             if (d155 > d141) { // from (-1, 2)
                 d155 = d141;
                 dir155 = dir141;
@@ -1365,10 +1451,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d155 = d139;
                 dir155 = dir139;
             }
-            d155 += locationScore(l155);
+            d155 += locationScore(l155, m155);
         }
 
-        if (rc.canSenseLocation(l69) && rc.sensePassability(l69)) { // check (2, -3)
+        if (rc.onTheMap(l69)) { // check (2, -3)
             if (d69 > d83) { // from (1, -2)
                 d69 = d83;
                 dir69 = dir83;
@@ -1381,10 +1467,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d69 = d68;
                 dir69 = dir68;
             }
-            d69 += locationScore(l69);
+            d69 += locationScore(l69, m69);
         }
 
-        if (rc.canSenseLocation(l159) && rc.sensePassability(l159)) { // check (2, 3)
+        if (rc.onTheMap(l159)) { // check (2, 3)
             if (d159 > d143) { // from (1, 2)
                 d159 = d143;
                 dir159 = dir143;
@@ -1397,10 +1483,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d159 = d158;
                 dir159 = dir158;
             }
-            d159 += locationScore(l159);
+            d159 += locationScore(l159, m159);
         }
 
-        if (rc.canSenseLocation(l85) && rc.sensePassability(l85)) { // check (3, -2)
+        if (rc.onTheMap(l85)) { // check (3, -2)
             if (d85 > d99) { // from (2, -1)
                 d85 = d99;
                 dir85 = dir99;
@@ -1417,10 +1503,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d85 = d69;
                 dir85 = dir69;
             }
-            d85 += locationScore(l85);
+            d85 += locationScore(l85, m85);
         }
 
-        if (rc.canSenseLocation(l145) && rc.sensePassability(l145)) { // check (3, 2)
+        if (rc.onTheMap(l145)) { // check (3, 2)
             if (d145 > d129) { // from (2, 1)
                 d145 = d129;
                 dir145 = dir129;
@@ -1437,10 +1523,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d145 = d159;
                 dir145 = dir159;
             }
-            d145 += locationScore(l145);
+            d145 += locationScore(l145, m145);
         }
 
-        if (rc.canSenseLocation(l108) && rc.sensePassability(l108)) { // check (-4, 0)
+        if (rc.onTheMap(l108)) { // check (-4, 0)
             if (d108 > d109) { // from (-3, 0)
                 d108 = d109;
                 dir108 = dir109;
@@ -1453,10 +1539,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d108 = d124;
                 dir108 = dir124;
             }
-            d108 += locationScore(l108);
+            d108 += locationScore(l108, m108);
         }
 
-        if (rc.canSenseLocation(l52) && rc.sensePassability(l52)) { // check (0, -4)
+        if (rc.onTheMap(l52)) { // check (0, -4)
             if (d52 > d67) { // from (0, -3)
                 d52 = d67;
                 dir52 = dir67;
@@ -1469,10 +1555,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d52 = d68;
                 dir52 = dir68;
             }
-            d52 += locationScore(l52);
+            d52 += locationScore(l52, m52);
         }
 
-        if (rc.canSenseLocation(l172) && rc.sensePassability(l172)) { // check (0, 4)
+        if (rc.onTheMap(l172)) { // check (0, 4)
             if (d172 > d157) { // from (0, 3)
                 d172 = d157;
                 dir172 = dir157;
@@ -1485,10 +1571,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d172 = d158;
                 dir172 = dir158;
             }
-            d172 += locationScore(l172);
+            d172 += locationScore(l172, m172);
         }
 
-        if (rc.canSenseLocation(l116) && rc.sensePassability(l116)) { // check (4, 0)
+        if (rc.onTheMap(l116)) { // check (4, 0)
             if (d116 > d115) { // from (3, 0)
                 d116 = d115;
                 dir116 = dir115;
@@ -1501,10 +1587,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d116 = d130;
                 dir116 = dir130;
             }
-            d116 += locationScore(l116);
+            d116 += locationScore(l116, m116);
         }
 
-        if (rc.canSenseLocation(l93) && rc.sensePassability(l93)) { // check (-4, -1)
+        if (rc.onTheMap(l93)) { // check (-4, -1)
             if (d93 > d109) { // from (-3, 0)
                 d93 = d109;
                 dir93 = dir109;
@@ -1521,10 +1607,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d93 = d108;
                 dir93 = dir108;
             }
-            d93 += locationScore(l93);
+            d93 += locationScore(l93, m93);
         }
 
-        if (rc.canSenseLocation(l123) && rc.sensePassability(l123)) { // check (-4, 1)
+        if (rc.onTheMap(l123)) { // check (-4, 1)
             if (d123 > d109) { // from (-3, 0)
                 d123 = d109;
                 dir123 = dir109;
@@ -1541,10 +1627,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d123 = d108;
                 dir123 = dir108;
             }
-            d123 += locationScore(l123);
+            d123 += locationScore(l123, m123);
         }
 
-        if (rc.canSenseLocation(l51) && rc.sensePassability(l51)) { // check (-1, -4)
+        if (rc.onTheMap(l51)) { // check (-1, -4)
             if (d51 > d67) { // from (0, -3)
                 d51 = d67;
                 dir51 = dir67;
@@ -1561,10 +1647,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d51 = d52;
                 dir51 = dir52;
             }
-            d51 += locationScore(l51);
+            d51 += locationScore(l51, m51);
         }
 
-        if (rc.canSenseLocation(l171) && rc.sensePassability(l171)) { // check (-1, 4)
+        if (rc.onTheMap(l171)) { // check (-1, 4)
             if (d171 > d157) { // from (0, 3)
                 d171 = d157;
                 dir171 = dir157;
@@ -1581,10 +1667,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d171 = d172;
                 dir171 = dir172;
             }
-            d171 += locationScore(l171);
+            d171 += locationScore(l171, m171);
         }
 
-        if (rc.canSenseLocation(l53) && rc.sensePassability(l53)) { // check (1, -4)
+        if (rc.onTheMap(l53)) { // check (1, -4)
             if (d53 > d67) { // from (0, -3)
                 d53 = d67;
                 dir53 = dir67;
@@ -1601,10 +1687,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d53 = d52;
                 dir53 = dir52;
             }
-            d53 += locationScore(l53);
+            d53 += locationScore(l53, m53);
         }
 
-        if (rc.canSenseLocation(l173) && rc.sensePassability(l173)) { // check (1, 4)
+        if (rc.onTheMap(l173)) { // check (1, 4)
             if (d173 > d157) { // from (0, 3)
                 d173 = d157;
                 dir173 = dir157;
@@ -1621,10 +1707,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d173 = d172;
                 dir173 = dir172;
             }
-            d173 += locationScore(l173);
+            d173 += locationScore(l173, m173);
         }
 
-        if (rc.canSenseLocation(l101) && rc.sensePassability(l101)) { // check (4, -1)
+        if (rc.onTheMap(l101)) { // check (4, -1)
             if (d101 > d115) { // from (3, 0)
                 d101 = d115;
                 dir101 = dir115;
@@ -1641,10 +1727,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d101 = d116;
                 dir101 = dir116;
             }
-            d101 += locationScore(l101);
+            d101 += locationScore(l101, m101);
         }
 
-        if (rc.canSenseLocation(l131) && rc.sensePassability(l131)) { // check (4, 1)
+        if (rc.onTheMap(l131)) { // check (4, 1)
             if (d131 > d115) { // from (3, 0)
                 d131 = d115;
                 dir131 = dir115;
@@ -1661,10 +1747,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d131 = d116;
                 dir131 = dir116;
             }
-            d131 += locationScore(l131);
+            d131 += locationScore(l131, m131);
         }
 
-        if (rc.canSenseLocation(l64) && rc.sensePassability(l64)) { // check (-3, -3)
+        if (rc.onTheMap(l64)) { // check (-3, -3)
             if (d64 > d80) { // from (-2, -2)
                 d64 = d80;
                 dir64 = dir80;
@@ -1677,10 +1763,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d64 = d65;
                 dir64 = dir65;
             }
-            d64 += locationScore(l64);
+            d64 += locationScore(l64, m64);
         }
 
-        if (rc.canSenseLocation(l154) && rc.sensePassability(l154)) { // check (-3, 3)
+        if (rc.onTheMap(l154)) { // check (-3, 3)
             if (d154 > d140) { // from (-2, 2)
                 d154 = d140;
                 dir154 = dir140;
@@ -1693,10 +1779,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d154 = d155;
                 dir154 = dir155;
             }
-            d154 += locationScore(l154);
+            d154 += locationScore(l154, m154);
         }
 
-        if (rc.canSenseLocation(l70) && rc.sensePassability(l70)) { // check (3, -3)
+        if (rc.onTheMap(l70)) { // check (3, -3)
             if (d70 > d84) { // from (2, -2)
                 d70 = d84;
                 dir70 = dir84;
@@ -1709,10 +1795,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d70 = d85;
                 dir70 = dir85;
             }
-            d70 += locationScore(l70);
+            d70 += locationScore(l70, m70);
         }
 
-        if (rc.canSenseLocation(l160) && rc.sensePassability(l160)) { // check (3, 3)
+        if (rc.onTheMap(l160)) { // check (3, 3)
             if (d160 > d144) { // from (2, 2)
                 d160 = d144;
                 dir160 = dir144;
@@ -1725,10 +1811,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d160 = d145;
                 dir160 = dir145;
             }
-            d160 += locationScore(l160);
+            d160 += locationScore(l160, m160);
         }
 
-        if (rc.canSenseLocation(l78) && rc.sensePassability(l78)) { // check (-4, -2)
+        if (rc.onTheMap(l78)) { // check (-4, -2)
             if (d78 > d94) { // from (-3, -1)
                 d78 = d94;
                 dir78 = dir94;
@@ -1745,10 +1831,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d78 = d64;
                 dir78 = dir64;
             }
-            d78 += locationScore(l78);
+            d78 += locationScore(l78, m78);
         }
 
-        if (rc.canSenseLocation(l138) && rc.sensePassability(l138)) { // check (-4, 2)
+        if (rc.onTheMap(l138)) { // check (-4, 2)
             if (d138 > d124) { // from (-3, 1)
                 d138 = d124;
                 dir138 = dir124;
@@ -1765,10 +1851,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d138 = d154;
                 dir138 = dir154;
             }
-            d138 += locationScore(l138);
+            d138 += locationScore(l138, m138);
         }
 
-        if (rc.canSenseLocation(l50) && rc.sensePassability(l50)) { // check (-2, -4)
+        if (rc.onTheMap(l50)) { // check (-2, -4)
             if (d50 > d66) { // from (-1, -3)
                 d50 = d66;
                 dir50 = dir66;
@@ -1785,10 +1871,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d50 = d64;
                 dir50 = dir64;
             }
-            d50 += locationScore(l50);
+            d50 += locationScore(l50, m50);
         }
 
-        if (rc.canSenseLocation(l170) && rc.sensePassability(l170)) { // check (-2, 4)
+        if (rc.onTheMap(l170)) { // check (-2, 4)
             if (d170 > d156) { // from (-1, 3)
                 d170 = d156;
                 dir170 = dir156;
@@ -1805,10 +1891,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d170 = d154;
                 dir170 = dir154;
             }
-            d170 += locationScore(l170);
+            d170 += locationScore(l170, m170);
         }
 
-        if (rc.canSenseLocation(l54) && rc.sensePassability(l54)) { // check (2, -4)
+        if (rc.onTheMap(l54)) { // check (2, -4)
             if (d54 > d68) { // from (1, -3)
                 d54 = d68;
                 dir54 = dir68;
@@ -1825,10 +1911,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d54 = d70;
                 dir54 = dir70;
             }
-            d54 += locationScore(l54);
+            d54 += locationScore(l54, m54);
         }
 
-        if (rc.canSenseLocation(l174) && rc.sensePassability(l174)) { // check (2, 4)
+        if (rc.onTheMap(l174)) { // check (2, 4)
             if (d174 > d158) { // from (1, 3)
                 d174 = d158;
                 dir174 = dir158;
@@ -1845,10 +1931,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d174 = d160;
                 dir174 = dir160;
             }
-            d174 += locationScore(l174);
+            d174 += locationScore(l174, m174);
         }
 
-        if (rc.canSenseLocation(l86) && rc.sensePassability(l86)) { // check (4, -2)
+        if (rc.onTheMap(l86)) { // check (4, -2)
             if (d86 > d100) { // from (3, -1)
                 d86 = d100;
                 dir86 = dir100;
@@ -1865,10 +1951,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d86 = d70;
                 dir86 = dir70;
             }
-            d86 += locationScore(l86);
+            d86 += locationScore(l86, m86);
         }
 
-        if (rc.canSenseLocation(l146) && rc.sensePassability(l146)) { // check (4, 2)
+        if (rc.onTheMap(l146)) { // check (4, 2)
             if (d146 > d130) { // from (3, 1)
                 d146 = d130;
                 dir146 = dir130;
@@ -1885,10 +1971,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d146 = d160;
                 dir146 = dir160;
             }
-            d146 += locationScore(l146);
+            d146 += locationScore(l146, m146);
         }
 
-        if (rc.canSenseLocation(l107) && rc.sensePassability(l107)) { // check (-5, 0)
+        if (rc.onTheMap(l107)) { // check (-5, 0)
             if (d107 > d108) { // from (-4, 0)
                 d107 = d108;
                 dir107 = dir108;
@@ -1901,10 +1987,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d107 = d123;
                 dir107 = dir123;
             }
-            d107 += locationScore(l107);
+            d107 += locationScore(l107, m107);
         }
 
-        if (rc.canSenseLocation(l63) && rc.sensePassability(l63)) { // check (-4, -3)
+        if (rc.onTheMap(l63)) { // check (-4, -3)
             if (d63 > d79) { // from (-3, -2)
                 d63 = d79;
                 dir63 = dir79;
@@ -1917,10 +2003,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d63 = d78;
                 dir63 = dir78;
             }
-            d63 += locationScore(l63);
+            d63 += locationScore(l63, m63);
         }
 
-        if (rc.canSenseLocation(l153) && rc.sensePassability(l153)) { // check (-4, 3)
+        if (rc.onTheMap(l153)) { // check (-4, 3)
             if (d153 > d139) { // from (-3, 2)
                 d153 = d139;
                 dir153 = dir139;
@@ -1933,10 +2019,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d153 = d138;
                 dir153 = dir138;
             }
-            d153 += locationScore(l153);
+            d153 += locationScore(l153, m153);
         }
 
-        if (rc.canSenseLocation(l49) && rc.sensePassability(l49)) { // check (-3, -4)
+        if (rc.onTheMap(l49)) { // check (-3, -4)
             if (d49 > d65) { // from (-2, -3)
                 d49 = d65;
                 dir49 = dir65;
@@ -1953,10 +2039,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d49 = d63;
                 dir49 = dir63;
             }
-            d49 += locationScore(l49);
+            d49 += locationScore(l49, m49);
         }
 
-        if (rc.canSenseLocation(l169) && rc.sensePassability(l169)) { // check (-3, 4)
+        if (rc.onTheMap(l169)) { // check (-3, 4)
             if (d169 > d155) { // from (-2, 3)
                 d169 = d155;
                 dir169 = dir155;
@@ -1973,10 +2059,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d169 = d153;
                 dir169 = dir153;
             }
-            d169 += locationScore(l169);
+            d169 += locationScore(l169, m169);
         }
 
-        if (rc.canSenseLocation(l37) && rc.sensePassability(l37)) { // check (0, -5)
+        if (rc.onTheMap(l37)) { // check (0, -5)
             if (d37 > d52) { // from (0, -4)
                 d37 = d52;
                 dir37 = dir52;
@@ -1989,10 +2075,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d37 = d53;
                 dir37 = dir53;
             }
-            d37 += locationScore(l37);
+            d37 += locationScore(l37, m37);
         }
 
-        if (rc.canSenseLocation(l187) && rc.sensePassability(l187)) { // check (0, 5)
+        if (rc.onTheMap(l187)) { // check (0, 5)
             if (d187 > d172) { // from (0, 4)
                 d187 = d172;
                 dir187 = dir172;
@@ -2005,10 +2091,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d187 = d173;
                 dir187 = dir173;
             }
-            d187 += locationScore(l187);
+            d187 += locationScore(l187, m187);
         }
 
-        if (rc.canSenseLocation(l55) && rc.sensePassability(l55)) { // check (3, -4)
+        if (rc.onTheMap(l55)) { // check (3, -4)
             if (d55 > d69) { // from (2, -3)
                 d55 = d69;
                 dir55 = dir69;
@@ -2021,10 +2107,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d55 = d54;
                 dir55 = dir54;
             }
-            d55 += locationScore(l55);
+            d55 += locationScore(l55, m55);
         }
 
-        if (rc.canSenseLocation(l175) && rc.sensePassability(l175)) { // check (3, 4)
+        if (rc.onTheMap(l175)) { // check (3, 4)
             if (d175 > d159) { // from (2, 3)
                 d175 = d159;
                 dir175 = dir159;
@@ -2037,10 +2123,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d175 = d174;
                 dir175 = dir174;
             }
-            d175 += locationScore(l175);
+            d175 += locationScore(l175, m175);
         }
 
-        if (rc.canSenseLocation(l71) && rc.sensePassability(l71)) { // check (4, -3)
+        if (rc.onTheMap(l71)) { // check (4, -3)
             if (d71 > d85) { // from (3, -2)
                 d71 = d85;
                 dir71 = dir85;
@@ -2057,10 +2143,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d71 = d55;
                 dir71 = dir55;
             }
-            d71 += locationScore(l71);
+            d71 += locationScore(l71, m71);
         }
 
-        if (rc.canSenseLocation(l161) && rc.sensePassability(l161)) { // check (4, 3)
+        if (rc.onTheMap(l161)) { // check (4, 3)
             if (d161 > d145) { // from (3, 2)
                 d161 = d145;
                 dir161 = dir145;
@@ -2077,10 +2163,10 @@ public class BotAmplifierPathing implements UnitPathing {
                 d161 = d175;
                 dir161 = dir175;
             }
-            d161 += locationScore(l161);
+            d161 += locationScore(l161, m161);
         }
 
-        if (rc.canSenseLocation(l117) && rc.sensePassability(l117)) { // check (5, 0)
+        if (rc.onTheMap(l117)) { // check (5, 0)
             if (d117 > d116) { // from (4, 0)
                 d117 = d116;
                 dir117 = dir116;
@@ -2093,7 +2179,7 @@ public class BotAmplifierPathing implements UnitPathing {
                 d117 = d131;
                 dir117 = dir131;
             }
-            d117 += locationScore(l117);
+            d117 += locationScore(l117, m117);
         }
 
 

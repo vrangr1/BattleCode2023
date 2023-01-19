@@ -166,7 +166,7 @@ public class BuilderWrapper extends Utils {
     }
 
     private static MapLocation findBestSpawnLocationForLauncher() throws GameActionException{
-        return findNearestActReadyLocation(CENTER_OF_THE_MAP, RobotType.LAUNCHER);
+        return findNearestActReadyLocation(returnEnemyHQGuess(), RobotType.LAUNCHER);
     }
 
     private static MapLocation findBestSpawnLocationForBooster() throws GameActionException{
