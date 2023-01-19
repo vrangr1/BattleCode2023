@@ -86,7 +86,7 @@ def gen_bfs(radius):
                 {indent}dir{encode(x,y)} = {DIRECTIONS[(-dx, -dy)] if (x+dx,y+dy) == (0, 0) else f'dir{encode(x+dx,y+dy)}'};
             {indent}}}"""
                     out += f"""
-            {indent}d{encode(x,y)} += locationScore(l{encode(x,y)}, m{encode(x,y)});"""
+            {indent}d{encode(x,y)} += locationScore(l{encode(x,y)}, m{encode(x,y)}, dir{encode(x,y)});"""
                     if r2 <= 2:
                         out += f"""
             }}"""
@@ -184,11 +184,13 @@ public class Bot{unit}Pathing implements UnitPathing {{
         this.rc = rc;
     }}
 
-    public int locationScore(MapLocation loc, MapInfo mapLoc) throws GameActionException {{
+    public int locationScore(MapLocation loc, MapInfo mapLoc, Direction inputDir) throws GameActionException {{
         if (!rc.canSenseLocation(loc))
             return 12;
         mapLoc = rc.senseMapInfo(loc);
         if (!mapLoc.isPassable())
+            return 99999;
+        if (inputDir != null && mapLoc.getCurrentDirection().equals(inputDir.opposite()))
             return 99999;
         return (int) (10 + mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
     }}

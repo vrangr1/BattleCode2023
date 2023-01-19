@@ -291,6 +291,12 @@ public class Utils extends Globals{
         bytecodeCounter++;
     }
 
+    public static void bytecodeCheck(String flag){
+        int bytecodesLeft = Clock.getBytecodesLeft();
+        rc.setIndicatorString("Bytecode " + bytecodesLeft +" at flag " + flag);
+    }
+
+
     public static MapLocation interpolate(MapLocation loc, Direction dir){
         MapLocation lastViableLocation = null;
         while(currentLocation.distanceSquaredTo(loc) < UNIT_TYPE.actionRadiusSquared){

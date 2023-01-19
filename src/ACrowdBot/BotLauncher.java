@@ -66,7 +66,7 @@ public class BotLauncher extends CombatUtils{
                 chooseTargetAndAttack(inRangeEnemies);
             }
         }
-        rc.setIndicatorString(launcherState.toString() + " " + currentDestination);
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Bytecodes left " + Clock.getBytecodesLeft());
     }
 
     private static void setBaseDestination() throws GameActionException {
