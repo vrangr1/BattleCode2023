@@ -197,7 +197,18 @@ public class SimpleBuilder extends Utils{
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1))
             return false;
 
-        if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100){
+            if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 4)){
+                ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
+                if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
+                    Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
+                    BuilderWrapper.setPrioritizedResource(prioritizedResource);
+                    rc.setIndicatorString("building carrier that prioritizes " + prioritizedResource);
+                    return true;
+                }
+            }
+        }
+        else if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
@@ -233,6 +244,7 @@ public class SimpleBuilder extends Utils{
         if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
         // if (rc.getRoundNum() < 40) return false;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100) return buildOurAnchor();
         if (carrierScore + launcherScore < standardAnchorScore) return false;
         return buildOurAnchor();
     }
