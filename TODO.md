@@ -21,8 +21,8 @@
 - [x] Carrier attacking carrier
 - [x] Desperation index
 - [x] Replace hasMilitaryUnit with a non carrier one
+- [x] Mine only mana on smaller and medium size maps until some certain round.
 - [ ] Avoid overcrowding
-- [ ] Mine only mana on smaller and medium size maps until some certain round.
 - [ ] Store island and wells locations locally and write it to comms later on.
 - [ ] Write combat locations
 - [ ] Work on generation of elixir

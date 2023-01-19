@@ -54,14 +54,20 @@ public class BotCarrier extends Utils{
     private static MapLocation exploreDest;
     private static final int EXCESS_RESOURCES = 3;
     private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 50;
-    private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = false;
-    private static final int MINE_ONLY_MANA_TILL_ROUND = 50;
+    private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
+    private static int MINE_ONLY_MANA_TILL_ROUND;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
         hqIndex = Comms.getHeadquarterIndex(loc);
         hqIndex = Comms.START_CHANNEL_BANDS + hqIndex * Comms.CHANNELS_COUNT_PER_HEADQUARTER + 2;
         return hqIndex;
+    }
+
+    private static void setMineOnlyManaRoundLimit(){
+        if (MAP_SIZE < 1000) MINE_ONLY_MANA_TILL_ROUND = 125;
+        else if (MAP_SIZE < 1600) MINE_ONLY_MANA_TILL_ROUND = 70;
+        else MINE_ONLY_MANA_TILL_ROUND = 50;
     }
 
     public static void initCarrier() throws GameActionException{
@@ -81,6 +87,7 @@ public class BotCarrier extends Utils{
         collectAnchorHQidx = -1;
         returnEarly = false;
         exploreDest = null;
+        setMineOnlyManaRoundLimit();
         rng = new Random(rc.getID());
         // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
         initSpawningHeadquarterIndex(0);
