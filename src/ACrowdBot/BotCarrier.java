@@ -56,6 +56,7 @@ public class BotCarrier extends Utils{
     private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 50;
     private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
     private static int MINE_ONLY_MANA_TILL_ROUND;
+    private static boolean exploringForWells = false;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -87,6 +88,7 @@ public class BotCarrier extends Utils{
         collectAnchorHQidx = -1;
         returnEarly = false;
         exploreDest = null;
+        exploringForWells = false;
         setMineOnlyManaRoundLimit();
         rng = new Random(rc.getID());
         // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
@@ -313,11 +315,16 @@ public class BotCarrier extends Utils{
     }
 
     private static void updateCarrier() throws GameActionException{
-        if (desperationIndex > 5){
+        if (exploringForWells){
             // pathing.setAndMoveToDestination(explore());
+            if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
+                movementDestination = findNearestWellInVision(ResourceType.MANA);
+            else
+                movementDestination = findNearestWellInVision(prioritizedResource);
             carrierStatus = Status.EXPLORE_FOR_WELLS;
-            movementWrapper();
-            desperationIndex--;
+            if (movementDestination != null)
+                exploringForWells = false;
+            else movementWrapper();
             return;
         }
         currentInventoryWeight = rc.getWeight();
@@ -698,6 +705,7 @@ public class BotCarrier extends Utils{
         else if (commsLoc != null) setWellDestination(commsLoc);
         else{
             carrierStatus = Status.EXPLORE_FOR_WELLS;
+            exploringForWells = true;
             movementDestination = null;
             inPlaceForCollection = false;
         }
@@ -742,7 +750,9 @@ public class BotCarrier extends Utils{
         if (desperationIndex < 5) return;
         if (rc.canWriteSharedArray(0, 0))
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource), movementDestination);
-        desperationIndex = 12;
+        // desperationIndex = 12;
+        exploringForWells = true;
+        desperationIndex = 0;
         movementDestination = null;
         carrierStatus = Status.DESPERATE;
         inPlaceForCollection = false;
@@ -757,7 +767,7 @@ public class BotCarrier extends Utils{
             carrierAnchorMode();
             return;
         }
-        if (desperationIndex > 5) return;
+        if (exploringForWells) return;
         if (returnToHQ){
             assert movementDestination != null : "movementDestination != null in gather resources";
             if (goingToCollectAnchor)
@@ -767,7 +777,14 @@ public class BotCarrier extends Utils{
             return;
         }
         collectResources();
-        if (collectedResourcesThisTurn) return;
+        if (collectedResourcesThisTurn) {
+            if (rc.getWeight() < amountToCollect()) return;
+            returnToHQ = true;
+            movementDestination = Comms.findNearestHeadquarter();
+            carrierStatus = Status.TRANSIT_RES_DEP;
+            movementWrapper(movementDestination);
+            return;
+        }
         if (movementDestination != null){
             goToWell();
             collectResources();

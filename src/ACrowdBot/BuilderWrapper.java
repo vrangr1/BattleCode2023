@@ -11,7 +11,7 @@ public class BuilderWrapper extends Utils {
     // private static ResourceType writePrioritizedResource = ResourceType.NO_RESOURCE;
     // private static boolean carrierBuilt = true;
     private static int carriersBuilt;
-    private static final double RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
+    private static final double RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
     private static final double RESOURCE_ELIXIR_NORMAL_RATIO = 1;
     private static int carrierResourceCount = 0;
     private static int updatesResourceCount = 0;
