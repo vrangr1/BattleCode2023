@@ -4,8 +4,8 @@
 
 - [x] Headquarter count: Fix.
 - [x] Lesser or equal priority message overwriting. If none found, overwrite oldest message.
+~~- [ ] Add dedicated channels for maintaining count of units~~
 - [ ] Flushing the queues
-- [ ] Add dedicated channels for maintaining count of units
 
 ## Carriers
 - [x] Carriers need to explore more and avoid overcrowding
@@ -17,8 +17,8 @@
 - [x] Opportunistic anchor collection.
 - [x] Collection rate too low. Fix issue.
 - [ ] Avoid overcrowding
+- [ ] Store island and wells locations locally and write it to comms later on.
 - [ ] Write combat locations
-- [ ] Store island and wells locations locally also and write it to comms later on.
 - [ ] Work on generation of elixir
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
 - [ ] Attack carriers by carriers
