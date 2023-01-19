@@ -297,8 +297,10 @@ public class BotCarrier extends Utils{
         }
         if (returnToHQ && movementDestination == null)
             movementDestination = Comms.findNearestHeadquarter();
-        if (returnToHQ && !goingToCollectAnchor)
+        if (returnToHQ && !goingToCollectAnchor){
             carrierStatus = Status.TRANSIT_RES_DEP;
+            movementDestination = Comms.findNearestHeadquarter();
+        }
         collectedElixir = rc.getResourceAmount(ResourceType.ELIXIR);
         collectedMana = rc.getResourceAmount(ResourceType.MANA);
         collectedAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
@@ -731,7 +733,7 @@ public class BotCarrier extends Utils{
             goToWell();
             collectResources();
         }
-        if (!collectedResourcesThisTurn && rc.isMovementReady())
+        if (rc.getWeight() < amountToCollect() && !collectedResourcesThisTurn && rc.isMovementReady())
             desperationIndex++;
         else desperationIndex = 0;
     }

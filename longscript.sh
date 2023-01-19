@@ -2,7 +2,7 @@
 
 team1="$(basename src/A*)"
 count1=0
-for team2 in ONewMapsBot OPostSprintBot OBetterSprintBot
+for team2 in ONewMapsBot OPostSprintBot
 do
     rm -rf logs/${team1}_vs_${team2}/
     mkdir -p logs/${team1}_vs_${team2}
