@@ -17,6 +17,7 @@
 - [x] Opportunistic anchor collection.
 - [x] Collection rate too low. Fix issue.
 - [ ] Avoid overcrowding
+- [ ] Mine only mana on smaller and medium size maps until some certain round.
 - [ ] Store island and wells locations locally and write it to comms later on.
 - [ ] Write combat locations
 - [ ] Work on generation of elixir

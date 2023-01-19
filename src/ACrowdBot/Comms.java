@@ -44,6 +44,9 @@ public class Comms extends Utils{
     public static int resourcePrioritizationBits = 10;
     private static int anchorCountBits = 5;                // TOTAL: 16
 
+    // kth Nearest Headquarter
+    private static MapLocation[] sortedHeadquarters = null;
+
     
 
 
@@ -661,7 +664,7 @@ public class Comms extends Utils{
         return null;
     }
 
-    public static ResourceType getPrioritizedResource(int channel) throws GameActionException{
+    public static ResourceType getPrioritizedResource(int channel, int index) throws GameActionException{
         int message = rc.readSharedArray(channel);
         int p = (message & 0x0006) >> 1;
         if (p != 0){
@@ -697,8 +700,10 @@ public class Comms extends Utils{
                 rc.writeSharedArray(channel, (message & 0xF9FF));
             return getResourceType(resourcePrioritizations[p]);
         }
-        
-        assert false : "message:" + message + " channel:" + channel + "; rn: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation();
+        int hqCount = getHeadquartersCount();
+        if (index + 1 < hqCount)
+            return getPrioritizedResource(BotCarrier.initSpawningHeadquarterIndex(index + 1), index + 1);
+        assert false : "message:" + message + " channel:" + channel + "; rn: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation() + "; hqCount: " + hqCount + "; index: " + index;
         return null;
         // int message = rc.readSharedArray(channel);
         // return getResourceType(resourcePrioritizations[(message >> 1) & 0x3]);
@@ -850,6 +855,38 @@ public class Comms extends Utils{
             }
         }
         return optLoc;
+    }
+
+    /**
+     * Finds the kth (1 indexed) nearest headquarter to the current robot.
+     * @param k : 1 indexed kth nearest headquarter. That is k = 1 is the nearest headquarter.
+     * @return the kth nearest headquarter to the current robot
+     * @throws GameActionException
+     */
+    public static MapLocation findKthNearestHeadquarter(int k) throws GameActionException{
+        if (rc.getRoundNum() == 1) assert false;
+        if (sortedHeadquarters != null) return sortedHeadquarters[k-1];
+        int headquarterCount = getHeadquartersCount();
+        sortedHeadquarters = new MapLocation[headquarterCount];
+        currentLocation = rc.getLocation();
+        MapLocation[] headquarters = getAlliedHeadquartersLocationsList();
+        switch(headquarterCount){
+            case 4: sortedHeadquarters[3] = headquarters[3];
+            case 3: sortedHeadquarters[2] = headquarters[2];
+            case 2: sortedHeadquarters[1] = headquarters[1];
+            case 1: sortedHeadquarters[0] = headquarters[0]; break;
+            default: assert false;
+        }
+        for (int i = 0; i < headquarterCount; ++i){
+            for (int j = i + 1; j < headquarterCount; ++j){
+                if (currentLocation.distanceSquaredTo(sortedHeadquarters[i]) > currentLocation.distanceSquaredTo(sortedHeadquarters[j])){
+                    MapLocation temp = sortedHeadquarters[i];
+                    sortedHeadquarters[i] = sortedHeadquarters[j];
+                    sortedHeadquarters[j] = temp;
+                }
+            }
+        }
+        return sortedHeadquarters[k-1];
     }
 
     public static MapLocation[] getEnemyHeadquartersLocationsList() throws GameActionException{
