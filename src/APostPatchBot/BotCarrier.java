@@ -228,7 +228,8 @@ public class BotCarrier extends Utils{
     private static boolean collectAnchorFromHQ() throws GameActionException{
         // TODO: Add anchor stuff for anchor.accelerating too...
         if (!isAnchorThereInHQ()) return false;
-        int count = Comms.readMessageWithoutSHAFlag(collectAnchorHQidx);
+        // int count = Comms.readMessageWithoutSHAFlag(collectAnchorHQidx);
+        int count = Comms.getAnchorCount(collectAnchorHQidx);
         if (count == 0){
             assert collectAnchorHQidx != -1 : "collectanchorhqidx != -1   2";
             if (rc.readSharedArray(collectAnchorHQidx) != 0){

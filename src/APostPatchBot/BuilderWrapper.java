@@ -8,11 +8,14 @@ public class BuilderWrapper extends Utils {
     public static int adamantium, mana, elixir;
     private static boolean elixirWellFound = false;
     private static ResourceType prioritizedResource;
-    private static ResourceType writePrioritizedResource = ResourceType.NO_RESOURCE;
-    private static boolean carrierBuilt = true;
+    // private static ResourceType writePrioritizedResource = ResourceType.NO_RESOURCE;
+    // private static boolean carrierBuilt = true;
+    private static int carriersBuilt;
     private static final double RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
     private static final double RESOURCE_ELIXIR_NORMAL_RATIO = 1;
     private static int carrierResourceCount = 0;
+    private static int updatesResourceCount = 0;
+    private static ResourceType[] writePrioritizedResources;
 
     private enum BUILDERS{
         CWBUILDER,
@@ -27,9 +30,12 @@ public class BuilderWrapper extends Utils {
         mana = 0;
         elixir = 0;
         prioritizedResource = ResourceType.ADAMANTIUM;
-        writePrioritizedResource = ResourceType.NO_RESOURCE;
-        carrierBuilt = true;
+        // writePrioritizedResource = ResourceType.NO_RESOURCE;
+        writePrioritizedResources = new ResourceType[Comms.resourcePrioritizationBits/2];
+        // carrierBuilt = true;
+        carriersBuilt = 0;
         carrierResourceCount = 0;
+        updatesResourceCount = 0;
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.initBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.initBuilder(); break;
@@ -42,18 +48,23 @@ public class BuilderWrapper extends Utils {
         adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         mana = rc.getResourceAmount(ResourceType.MANA);
         elixir = rc.getResourceAmount(ResourceType.ELIXIR);
-        if (writePrioritizedResource != ResourceType.NO_RESOURCE){
+        // System.out.println("")
+        // if (writePrioritizedResource != ResourceType.NO_RESOURCE){
+        if (carriersBuilt > 0){
             assert rc.getRoundNum() > 1 : "round num correctness";
             assert headquarterMessageIndex != -1 : "headquarter message index correctness";
-            assert carrierBuilt : "carrier built correctness";
-            Comms.writePrioritizedResource(writePrioritizedResource, headquarterMessageIndex);
-            writePrioritizedResource = ResourceType.NO_RESOURCE;
+            // Comms.resetPrioritizationBits(headquarterMessageIndex);
+            // assert carrierBuilt : "carrier built correctness";
+            // System.out.println("wrote prioritized resource: " + writePrioritizedResource + "; hqind: " + headquarterMessageIndex);
+            // Comms.writePrioritizedResource(writePrioritizedResource, headquarterMessageIndex);
+            Comms.writePrioritizationResources(writePrioritizedResources, carriersBuilt, headquarterMessageIndex);
+            // writePrioritizedResource = ResourceType.NO_RESOURCE;
         }
-        else if (!carrierBuilt){
-            // updatePrioritizedResource();
-            rollBackPrioritizedResource();
-            carrierBuilt = true;
-        }
+        rollBackPrioritizedResource(updatesResourceCount - carriersBuilt);
+        carriersBuilt = 0;
+        updatesResourceCount = 0;
+        assert carriersBuilt == 0 : "carriersBuilt == 0";
+        assert updatesResourceCount == 0 : "updatesResourceCount == 0";
         switch(CURRENT_BUILDER){
             case CWBUILDER: CWBuilder.updateBuilder(); break;
             case SAVVYBUILDER: SavvyBuilder.updateBuilder(); break;
@@ -113,25 +124,33 @@ public class BuilderWrapper extends Utils {
 
     // Resource Prioritization
 
-    private static void rollBackPrioritizedResource(){
-        carrierResourceCount--;
-        if (carrierResourceCount < 0) carrierResourceCount = (int)(RESOURCE_MANA_ADAMANTIUM_RATIO);
-        prioritizedResource = (carrierResourceCount < RESOURCE_MANA_ADAMANTIUM_RATIO) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+    // private static void rollBackPrioritizedResource(){
+    //     carrierResourceCount--;
+    //     if (carrierResourceCount < 0) carrierResourceCount = (int)(RESOURCE_MANA_ADAMANTIUM_RATIO);
+    //     prioritizedResource = (carrierResourceCount < RESOURCE_MANA_ADAMANTIUM_RATIO) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+    // }
+
+    private static void rollBackPrioritizedResource(int count){
+        count %= (int)(RESOURCE_MANA_ADAMANTIUM_RATIO + 1);
+        carrierResourceCount = (int)(carrierResourceCount + RESOURCE_MANA_ADAMANTIUM_RATIO + 1 - count) % (int)(RESOURCE_MANA_ADAMANTIUM_RATIO + 1);
     }
 
     private static void updatePrioritizedResource(){
         // prioritizedResource = (prioritizedResource == ResourceType.ADAMANTIUM) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
+        updatesResourceCount++;
         prioritizedResource = (carrierResourceCount < RESOURCE_MANA_ADAMANTIUM_RATIO) ? ResourceType.MANA : ResourceType.ADAMANTIUM;
         carrierResourceCount = (carrierResourceCount + 1) % (int)(RESOURCE_MANA_ADAMANTIUM_RATIO+1);
     }
 
     public static void setPrioritizedResource(ResourceType resource){
-        carrierBuilt = true;
-        writePrioritizedResource = prioritizedResource;
+        // carrierBuilt = true;
+        // carriersBuilt++;
+        // writePrioritizedResource = prioritizedResource;
+        writePrioritizedResources[carriersBuilt++] = prioritizedResource;
     }
 
     public static ResourceType getPrioritizedResource(){
-        carrierBuilt = false;
+        // carrierBuilt = false;
         updatePrioritizedResource();
         return prioritizedResource;
     }

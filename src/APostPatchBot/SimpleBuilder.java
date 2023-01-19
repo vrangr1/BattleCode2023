@@ -194,9 +194,10 @@ public class SimpleBuilder extends Utils{
         // }
 
         // TODO: Explore resource
-        if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1)) return false;
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1))
+            return false;
 
-        if (carrierScore < launcherScore || BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
+        if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
@@ -264,11 +265,30 @@ public class SimpleBuilder extends Utils{
         if (endangered()){
             if (tryBuildLauncher()) return;
         }
-
-        if (tryBuildStandardAnchor()) return;
-        if (tryBuildCarrier()) return;
-        if (tryBuildAmplifier()) return;
-        if (tryBuildLauncher()) return;
+        boolean builtUnit = true;
+        while(rc.isActionReady() && builtUnit){
+            builtUnit = false;
+            if (tryBuildStandardAnchor()) {
+                builtUnit = true;
+                continue;
+            }
+            if (tryBuildCarrier()) {
+                builtUnit = true;
+                continue;
+            }
+            if (tryBuildAmplifier()) {
+                builtUnit = true;
+                continue;
+            }
+            if (tryBuildLauncher()) {
+                builtUnit = true;
+                continue;
+            }
+        }
+        // if (tryBuildStandardAnchor()) return;
+        // if (tryBuildCarrier()) return;
+        // if (tryBuildAmplifier()) return;
+        // if (tryBuildLauncher()) return;
         // if (tryBuildAcceleratingAnchor()) return;
         // if (tryBuildBooster()) return;
         // if (tryBuildDestabilizer()) return;

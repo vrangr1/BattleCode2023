@@ -38,6 +38,12 @@ public class Comms extends Utils{
     private static int channelsUsed = 0;
     private static int commsHeadquarterCount = -1, commsEnemyHeadquarterCount = -1;
     private static MapLocation[] commsHeadquarterLocations = null, commsEnemyHeadquarterLocations = null;
+
+    // COLLECT_ANCHOR CHANNEL STUFF (changing the following will NOT correspondingly change the functions. Hardcoded values there....):
+    private static final int SHAFlagBits = 1; // don't change
+    public static int resourcePrioritizationBits = 10;
+    private static int anchorCountBits = 5;                // TOTAL: 16
+
     
 
 
@@ -334,8 +340,8 @@ public class Comms extends Utils{
         int message = rc.readSharedArray(channel);
         if (count > 0) message |= 0x1;
         else message &= 0xFFFE;
-        message &= (0xF);
-        message |= (count << 4);
+        message &= (0x07FF);
+        message |= (count << (SHAFlagBits + resourcePrioritizationBits));
         rc.writeSharedArray(channel, message);
     }
 
@@ -596,10 +602,52 @@ public class Comms extends Utils{
     }
 
     public static void writePrioritizedResource(ResourceType resourceType, int channel) throws GameActionException{
-        if (!rc.canWriteSharedArray(0, 0)) return;
+        // if (!rc.canWriteSharedArray(0, 0)) return;
         int message = rc.readSharedArray(channel);
-        message &= 0xFFF1;
-        message |= getResourcePrioritization(resourceType).ordinal() << 1;
+        int p = (message & 0x0006) >> 1;
+        if (p == 0){
+            message |= getResourcePrioritization(resourceType).ordinal() << 1;
+            rc.writeSharedArray(channel, message);
+            return;
+        }
+        p = (message & 0x0018) >> 3;
+        if (p == 0){
+            message |= getResourcePrioritization(resourceType).ordinal() << 3;
+            rc.writeSharedArray(channel, message);
+            return;
+        }
+        p = (message & 0x0060) >> 5;
+        if (p == 0){
+            message |= getResourcePrioritization(resourceType).ordinal() << 5;
+            rc.writeSharedArray(channel, message);
+            return;
+        }
+        p = (message & 0x0180) >> 7;
+        if (p == 0){
+            message |= getResourcePrioritization(resourceType).ordinal() << 7;
+            rc.writeSharedArray(channel, message);
+            return;
+        }
+        p = (message & 0x0600) >> 9;
+        if (p == 0){
+            message |= getResourcePrioritization(resourceType).ordinal() << 9;
+            rc.writeSharedArray(channel, message);
+            return;
+        }
+        assert false;
+    }
+
+    public static void writePrioritizationResources(ResourceType[] resources, int count, int channel) throws GameActionException{
+        int message = rc.readSharedArray(channel);
+        message &= 0xF801;
+        while(count-- > 0)
+            message |= (resources[count].resourceID << (SHAFlagBits + count*2));
+        rc.writeSharedArray(channel, message);
+    }
+
+    public static void resetPrioritizationBits(int channel) throws GameActionException{
+        int message = rc.readSharedArray(channel);
+        message &= 0xF801;
         rc.writeSharedArray(channel, message);
     }
 
@@ -615,7 +663,40 @@ public class Comms extends Utils{
 
     public static ResourceType getPrioritizedResource(int channel) throws GameActionException{
         int message = rc.readSharedArray(channel);
-        return getResourceType(resourcePrioritizations[(message >> 1) & 0x3]);
+        int p = (message & 0x0006) >> 1;
+        if (p != 0){
+            rc.writeSharedArray(channel, (message & 0xFFF9));
+            return getResourceType(resourcePrioritizations[p]);
+        }
+        
+        p = (message & 0x0018) >> 3;
+        if (p != 0){
+            rc.writeSharedArray(channel, (message & 0xFFE7));
+            return getResourceType(resourcePrioritizations[p]);
+        }
+        
+        p = (message & 0x0060) >> 5;
+        if (p != 0){
+            rc.writeSharedArray(channel, (message & 0xFF9F));
+            return getResourceType(resourcePrioritizations[p]);
+        }
+        
+        p = (message & 0x0180) >> 7;
+        if (p != 0){
+            rc.writeSharedArray(channel, (message & 0xFE7F));
+            return getResourceType(resourcePrioritizations[p]);
+        }
+        
+        p = (message & 0x0600) >> 9;
+        if (p != 0){
+            rc.writeSharedArray(channel, (message & 0xF9FF));
+            return getResourceType(resourcePrioritizations[p]);
+        }
+        
+        assert false;
+        return null;
+        // int message = rc.readSharedArray(channel);
+        // return getResourceType(resourcePrioritizations[(message >> 1) & 0x3]);
     }
 
 
@@ -987,6 +1068,11 @@ public class Comms extends Utils{
             return true;
         }
         return false;
+    }
+
+    public static int getAnchorCount(int channel) throws GameActionException{
+        int message = rc.readSharedArray(channel);
+        return ((message & 0xF800) >> 11);
     }
 
 

@@ -12,9 +12,9 @@ public class BotHeadquarters extends Utils{
 
     public static void updateEveryTurn() throws GameActionException{
         Comms.wipeCountChannels();
-        if (rc.getRoundNum() % 2 == 0){
-            // Comms.wipeChannelsCOMMTYPE();
-        }
+        // if (rc.getRoundNum() % 2 == 0){
+        //     // Comms.wipeChannelsCOMMTYPE();
+        // }
     }
 
     private static void printMapLocation(MapLocation[] locations) throws GameActionException{
