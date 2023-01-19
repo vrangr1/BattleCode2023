@@ -54,7 +54,8 @@ public class BotCarrier extends Utils{
     private static MapLocation exploreDest;
     private static final int EXCESS_RESOURCES = 3;
     private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 50;
-    private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
+    private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = false;
+    private static final int MINE_ONLY_MANA_TILL_ROUND = 50;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -169,6 +170,28 @@ public class BotCarrier extends Utils{
         assert matched : "matched; round num: " + rc.getRoundNum() + "; id: " + rc.getID() + "; currentLocation: " + rc.getLocation() + "; targetLoc: " + givenLoc;
     }
 
+    private static boolean isMilitaryUnit(RobotInfo robotInfo){
+        switch(robotInfo.type){
+            case LAUNCHER: 
+            case DESTABILIZER: return true;
+            case HEADQUARTERS: return (robotInfo.getLocation().distanceSquaredTo(rc.getLocation()) <= RobotType.HEADQUARTERS.actionRadiusSquared);
+            default: return false;
+        }
+    }
+
+    private static boolean canSeeMilitaryUnit(){
+        for (int i = visibleEnemies.length; --i >= 0;)
+            if (isMilitaryUnit(visibleEnemies[i])) return true;
+        return false;
+    }
+
+    private static int vicinityMilitaryCount(){
+        int count = 0;
+        for (int i = visibleEnemies.length; --i >= 0;)
+            if (isMilitaryUnit(visibleEnemies[i])) count++;
+        return count;
+    }
+
     private static void updateOverall() throws GameActionException{
         if (returnEarly) return;
         returnEarly = false;
@@ -177,14 +200,14 @@ public class BotCarrier extends Utils{
         // isFleeing = false;
 
         if (TRY_TO_FLEE){
-            if (!isFleeing && CombatUtils.hasMilitaryUnit(visibleEnemies)){
+            if (!isFleeing && canSeeMilitaryUnit()){
                 isFleeing = true;
                 returnEarly = true;
                 fleeCount = 5;
                 if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
                 return;
             }
-            if (isFleeing && CombatUtils.militaryCount(visibleEnemies) == 0)
+            if (isFleeing && vicinityMilitaryCount() == 0)
                 fleeCount = Math.max(0, fleeCount - 1);
             
             if (fleeCount == 0)
@@ -514,6 +537,11 @@ public class BotCarrier extends Utils{
         
         WellInfo curWell = adjacentWells[i];
         amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());
+        if (amount < 0){
+            returnToHQ = true;
+            movementDestination = Comms.findNearestHeadquarter();
+            return;
+        }
         rc.collectResource(curWell.getMapLocation(), amount);
         currentInventoryWeight += amount;
         switch(curWell.getResourceType()){
@@ -619,6 +647,8 @@ public class BotCarrier extends Utils{
      * @BytecodeCost : ~ 100 + 10 * [well count in vision]
      */
     public static MapLocation findNearestWellInVision(ResourceType resourceType) throws GameActionException{
+        if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
+            resourceType = ResourceType.MANA;
         WellInfo[] nearbyWells = rc.senseNearbyWells(resourceType);
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
@@ -645,7 +675,11 @@ public class BotCarrier extends Utils{
             setWellDestination(senseLoc);
             return;
         }
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource));
+        MapLocation commsLoc = null;
+        if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
+            commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(ResourceType.MANA));
+        else 
+            commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource));
         if (commsLoc != null && rc.canSenseLocation(commsLoc)){
             setWellDestination(commsLoc);
             return;

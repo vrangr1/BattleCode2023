@@ -16,6 +16,11 @@
 - [x] Consume less bytecode in highly crowded areas.
 - [x] Opportunistic anchor collection.
 - [x] Collection rate too low. Fix issue.
+- [x] Update HQ to go to every turn when in transit_TO_DESP
+~~- [ ] Don't do opportunistic if currently mining (inplacemining)~~
+- [x] Carrier attacking carrier
+- [x] Desperation index
+- [x] Replace hasMilitaryUnit with a non carrier one
 - [ ] Avoid overcrowding
 - [ ] Mine only mana on smaller and medium size maps until some certain round.
 - [ ] Store island and wells locations locally and write it to comms later on.

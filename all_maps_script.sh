@@ -24,8 +24,9 @@ if test -f "logs/log2.log"; then
 fi
 
 count=0
-for i in SmallElements AllElements DefaultMap Cat Tacocat Pizza Diagonal \
-    BatSignal Eyelands
+for i in AllElements ArtistRendition BatSignal BowAndArrow Cat CloudyOctDoors Clown DefaultMap Diagonal Eyelands Frog \
+    GrandRing Grievance Hah Jail KingdomRush maptestsmall Minefield Movepls OctDoors Orbit Pathfind Pit Pizza Quiet Rectangle \
+    Scatter SmallElements Sun Tacocat
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
@@ -72,35 +73,3 @@ echo "Elapsed time: $elapsed seconds"
 #4: OctDoors      : 45 x 45 : 2025
 #5: CloudyOctDoors: 45 x 45 : 2025
 ##6: GrandRing     : 60 x 60 : 3600
-
-# All Maps (sorted by size (width x height : (x, y)); double # represents our maps):
-#  maptestsmall         : 20 x 20 : 400
-#  Quiet                : 20 x 20 : 400
-#  SmallElements        : 20 x 20 : 400
-#  Clown                : 21 x 20 : 420
-#  Jail                 : 20 x 30 : 600
-#  Orbit                : 25 x 25 : 625
-#  Sun                  : 25 x 25 : 625
-#  BowAndArrow          : 35 x 25 : 875
-#  AllElements          : 30 x 30 : 900
-#  Pizza                : 30 x 30 : 900
-#  DefaultMap           : 32 x 32 : 1024
-#  KingdomRush          : 45 x 24 : 1080
-#  BatSignal            : 60 x 20 : 1200
-#  Minefield            : 60 x 20 : 1200
-#  Tacocat              : 60 x 20 : 1200
-#  Hah                  : 50 x 25 : 1250
-#  Movepls              : 45 x 30 : 1350
-#  Eyelands             : 50 x 30 : 1500
-#  Rectangle            : 50 x 30 : 1500
-#  Scatter              : 50 x 30 : 1500
-#  Frog                 : 39 x 39 : 1521
-#  ArtistRendition      : 40 x 40 : 1600
-#  Diagonal             : 40 x 40 : 1600
-#  Pit                  : 60 x 30 : 1800
-## CloudyOctDoors       : 45 x 45 : 2025
-#  Pathfind             : 45 x 45 : 2025
-## OctDoors             : 45 x 45 : 2025
-#  Cat                  : 50 x 50 : 2500
-## GrandRing            : 60 x 60 : 3600
-#  Grievance            : 60 x 60 : 3600

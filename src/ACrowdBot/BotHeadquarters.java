@@ -3,6 +3,7 @@ package ACrowdBot;
 import battlecode.common.*;
 
 public class BotHeadquarters extends Utils{
+    public static boolean CAN_SEE_HEADQUARTER;
 
     public static void initHeadquarters() throws GameActionException{
         BuilderWrapper.initBuilder();
