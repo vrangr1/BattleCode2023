@@ -1157,10 +1157,11 @@ public class Comms extends Utils{
     /**
      * Survey the vision radius for unoccupied islands and write them to the communication channels.
      * @throws GameActionException
-     * @BytecodeCost ~ 220 + (11)
+     * @BytecodeCost ~ 300 - 400
      */
     public static void surveyForIslands() throws GameActionException{
-        if (!rc.canWriteSharedArray(0, 0) && rc.getRoundNum() < 3) return;
+        // if (!rc.canWriteSharedArray(0, 0) && rc.getRoundNum() < 3) return;
+        boolean canWrite = rc.canWriteSharedArray(0,0);
         COMM_TYPE type = COMM_TYPE.ISLAND;
         int[] islandIDs = rc.senseNearbyIslands();
         MapLocation[] locations;
@@ -1168,7 +1169,9 @@ public class Comms extends Utils{
         for (int i = islandIDs.length; i-->0;){
             if (rc.senseTeamOccupyingIsland(islandIDs[i]) != Team.NEUTRAL) continue;
             locations = rc.senseNearbyIslandLocations(islandIDs[i]);
-            writeAndOverwriteLesserPriorityMessage(type, locations[0], SHAFlag.UNOCCUPIED_ISLAND);
+            if (canWrite)
+                writeAndOverwriteLesserPriorityMessage(type, locations[0], SHAFlag.UNOCCUPIED_ISLAND);
+            else saveThisLocation(locations[0], SHAFlag.UNOCCUPIED_ISLAND);
         }
     }
 
@@ -1178,19 +1181,63 @@ public class Comms extends Utils{
     // SAVING UNWRITTEN LOCATIONS //////////
     ////////////////////////////////////////
 
+
+
     public static void saveThisLocation(MapLocation loc, SHAFlag flag) throws GameActionException{
         if (locationsToWrite == null){
             locationsToWrite = new MapLocation[MAX_LOCATIONS_TO_SAVE];
             locationsToWriteFlags = new SHAFlag[MAX_LOCATIONS_TO_SAVE];
             savedLocationsCount = 0;
         }
-        // assert savedLocationsCount < MAX_LOCATIONS_TO_SAVE;
-        for (int i = savedLocationsCount; i-->0;)
-            if (locationsToWrite[i].equals(loc)) return;
         if (savedLocationsCount >= MAX_LOCATIONS_TO_SAVE){
             System.out.println("Too many locations to save! Count: " + savedLocationsCount);
             return;
         }
+        switch(savedLocationsCount){
+            case 20:
+                if (locationsToWrite[19].equals(loc)) return;
+            case 19:
+                if (locationsToWrite[18].equals(loc)) return;
+            case 18:
+                if (locationsToWrite[17].equals(loc)) return;
+            case 17:
+                if (locationsToWrite[16].equals(loc)) return;
+            case 16:
+                if (locationsToWrite[15].equals(loc)) return;
+            case 15:
+                if (locationsToWrite[14].equals(loc)) return;
+            case 14:
+                if (locationsToWrite[13].equals(loc)) return;
+            case 13:
+                if (locationsToWrite[12].equals(loc)) return;
+            case 12:
+                if (locationsToWrite[11].equals(loc)) return;
+            case 11:
+                if (locationsToWrite[10].equals(loc)) return;
+            case 10:
+                if (locationsToWrite[9].equals(loc)) return;
+            case 9:
+                if (locationsToWrite[8].equals(loc)) return;
+            case 8:
+                if (locationsToWrite[7].equals(loc)) return;
+            case 7:
+                if (locationsToWrite[6].equals(loc)) return;
+            case 6:
+                if (locationsToWrite[5].equals(loc)) return;
+            case 5:
+                if (locationsToWrite[4].equals(loc)) return;
+            case 4:
+                if (locationsToWrite[3].equals(loc)) return;
+            case 3:
+                if (locationsToWrite[2].equals(loc)) return;
+            case 2:
+                if (locationsToWrite[1].equals(loc)) return;
+            case 1:
+                if (locationsToWrite[0].equals(loc)) return;
+            case 0: break;
+            default: assert false;
+        }
+
         if (findIfLocationAlreadyPresent(loc, getCOMM_TYPEFromSHAFlag(flag), flag)) return;
         locationsToWrite[savedLocationsCount] = loc;
         locationsToWriteFlags[savedLocationsCount++] = flag;
@@ -1199,11 +1246,13 @@ public class Comms extends Utils{
     public static boolean writeSavedLocations() throws GameActionException{
         if (locationsToWrite == null || savedLocationsCount == 0) return true;
         if (!rc.canWriteSharedArray(0, 0)) return false;
+        if (Clock.getBytecodesLeft() < 300) return false;
         while(savedLocationsCount-->0){
             COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[savedLocationsCount]);
             assert type != null : "Invalid SHAFlag";
             assert type != COMM_TYPE.HEADQUARTER : "Invalid SHAFlag";
             writeAndOverwriteLesserPriorityMessage(COMM_TYPE.COMBAT, locationsToWrite[savedLocationsCount], locationsToWriteFlags[savedLocationsCount]);
+            if (Clock.getBytecodesLeft() < 200) return false;
         }
         savedLocationsCount = 0;
         return true;

@@ -357,10 +357,13 @@ public class Utils extends Globals{
     }
 
     public static MapLocation extrapolateLocation(MapLocation source, Direction dir, int unsquaredDistance){
-        double angle = Math.atan2(exploreDir.dy, exploreDir.dx);
+        double angle = Math.atan2(dir.dy, dir.dx);
         double x = source.x, y = source.y;
-        x += Math.cos(angle)*unsquaredDistance;
-        y += Math.sin(angle)*unsquaredDistance;
+        x += (Math.cos(angle)*(double)unsquaredDistance);
+        y += (Math.sin(angle)*(double)unsquaredDistance);
+        // if (rc.getID() == 13837){
+        //     System.out.println("source: " + source + "; dir: " + dir + "; angle: " + angle + " extrapolated location: [" + (int)x + ", " + (int)y + "]");
+        // }
         return new MapLocation((int)x, (int)y);
     }
 

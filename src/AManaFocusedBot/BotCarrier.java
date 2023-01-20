@@ -58,6 +58,11 @@ public class BotCarrier extends Utils{
     private static int MINE_ONLY_MANA_TILL_ROUND;
     private static boolean exploringForWells = false;
     private static MapLocation fleeTarget = null;
+    private static MapLocation otherTypeWell;
+    private static Direction lastRetreatDirection = null;
+    private static final int FLEE_EXTRAPOLATE_UNSQUARED_DISTANCE = 4;
+    private static final int FLEE_ROUNDS = 10;
+    private static final boolean USING_CIRCULAR_EXPLORATION = false;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -88,9 +93,11 @@ public class BotCarrier extends Utils{
         goingToCollectAnchor = false;
         collectAnchorHQidx = -1;
         returnEarly = false;
+        otherTypeWell = null;
         exploreDest = null;
         exploringForWells = false;
         fleeTarget = null;
+        lastRetreatDirection = null;
         setMineOnlyManaRoundLimit();
         rng = new Random(rc.getID());
         // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
@@ -134,6 +141,17 @@ public class BotCarrier extends Utils{
         }
         if (rc.isMovementReady()){
             exploreDest = Explore.explore(randomExploration);
+            Nav.goTo(exploreDest);
+        }
+    }
+
+    private static void movementWrapperForCircularExplore() throws GameActionException{
+        if (rc.isMovementReady()){
+            exploreDest = CircularExplore.explore();
+            pathing.setAndMoveToDestination(exploreDest);
+        }
+        if (rc.isMovementReady()){
+            exploreDest = CircularExplore.explore();
             Nav.goTo(exploreDest);
         }
     }
@@ -207,23 +225,24 @@ public class BotCarrier extends Utils{
         if (returnEarly) return;
         returnEarly = false;
         currentLocation = rc.getLocation();
+        otherTypeWell = null;
         updateVision();
-        // isFleeing = false;
-        if (rc.canWriteSharedArray(0, 0))
-            Comms.writeSavedLocations();
+        Comms.writeSavedLocations();
         if (TRY_TO_FLEE){
             if (!isFleeing && canSeeMilitaryUnit()){
                 isFleeing = true;
                 returnEarly = true;
-                fleeCount = 5;
+                fleeCount = FLEE_ROUNDS;
                 if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
                 return;
             }
-            if (isFleeing && vicinityMilitaryCount() == 0)
+            else if (isFleeing && vicinityMilitaryCount() == 0)
                 fleeCount = Math.max(0, fleeCount - 1);
             
-            if (fleeCount == 0)
+            if (fleeCount == 0){
                 isFleeing = false;
+                lastRetreatDirection = null;
+            }
         }
         if (rc.getRoundNum() % 200 == 0){
             unFlagAllIslands();
@@ -317,25 +336,30 @@ public class BotCarrier extends Utils{
         }
     }
 
-    private static void updateCarrier() throws GameActionException{
-        if (exploringForWells){
-            // pathing.setAndMoveToDestination(explore());
-            ResourceType rType = null;
-            if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND){
-                movementDestination = findNearestWellInVision(ResourceType.MANA);
-                rType = ResourceType.MANA;
-            }
-            else{
-                movementDestination = findNearestWellInVision(prioritizedResource);
-                rType = prioritizedResource;
-            }
-            carrierStatus = Status.EXPLORE_FOR_WELLS;
-            if (movementDestination != null){
-                exploringForWells = false;
-                if (!rc.canWriteSharedArray(0, 0))
-                    Comms.saveThisLocation(movementDestination, Comms.resourceFlag(rType));
+    private static void exploreForWells(boolean skip) throws GameActionException{
+        ResourceType rType = getLocalPrioritizedResource();
+        if (!skip) movementDestination = findNearestWellInVision(rType);
+        carrierStatus = Status.EXPLORE_FOR_WELLS;
+        if (movementDestination != null){
+            exploringForWells = false;
+            if (!rc.canWriteSharedArray(0, 0))
+                Comms.saveThisLocation(movementDestination, Comms.resourceFlag(rType));
+        }
+        else{
+            if (USING_CIRCULAR_EXPLORATION){
+                if (otherTypeWell == null) movementWrapperForCircularExplore();
+                else{
+                    CircularExplore.updateCenterLocation(otherTypeWell);
+                    movementWrapperForCircularExplore();
+                }
             }
             else movementWrapper();
+        }
+    }
+
+    private static void updateCarrier() throws GameActionException{
+        if (exploringForWells){
+            exploreForWells(false);
             return;
         }
         currentInventoryWeight = rc.getWeight();
@@ -468,8 +492,6 @@ public class BotCarrier extends Utils{
 
     private static boolean viableIslandCheck(boolean canSenseDest, MapLocation loc, int islandID) throws GameActionException{
         assert canSenseDest : "canSenseDest == true";
-        if (rc.getID() == 10094 && rc.getRoundNum() == 1986 || rc.getRoundNum() == 1987)
-            System.out.println("Island ID: " + islandID + " loc: " + loc);
         return rc.senseTeamOccupyingIsland(islandID) == Team.NEUTRAL;
     }
 
@@ -561,6 +583,8 @@ public class BotCarrier extends Utils{
         int i = rng.nextInt(adjacentWells.length), amount;
         
         WellInfo curWell = adjacentWells[i];
+        if (curWell.getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
+            return;
         if (!rc.canWriteSharedArray(0, 0))
             Comms.saveThisLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));
         amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());
@@ -595,6 +619,7 @@ public class BotCarrier extends Utils{
             return;
         else if (visibleEnemies.length == 0 || !rc.isActionReady())
             return;
+        else if (rc.getHealth() > UNIT_TYPE.health/10) return;
         else{
             double possibleDamage = Math.round(rc.getWeight()/5.0);
             double bestScore = -1.0;
@@ -676,11 +701,23 @@ public class BotCarrier extends Utils{
     public static MapLocation findNearestWellInVision(ResourceType resourceType) throws GameActionException{
         if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
             resourceType = ResourceType.MANA;
-        WellInfo[] nearbyWells = rc.senseNearbyWells(resourceType);
+        WellInfo[] nearbyWells = rc.senseNearbyWells();
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
-        for (WellInfo well : nearbyWells){
+        otherTypeWell = null;
+        int otherTypeDist = -1;
+        WellInfo well;
+        for (int i = nearbyWells.length; --i >= 0;){
+            well = nearbyWells[i];
             MapLocation loc = well.getMapLocation();
+            if (well.getResourceType() != resourceType){
+                curDist = currentLocation.distanceSquaredTo(loc);
+                if (otherTypeWell == null || curDist < otherTypeDist){
+                    otherTypeWell = loc;
+                    otherTypeDist = curDist;
+                }
+                continue;
+            }
             curDist = currentLocation.distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
                 nearestLoc = loc;
@@ -690,27 +727,25 @@ public class BotCarrier extends Utils{
         return nearestLoc;
     }
 
+    private static ResourceType getLocalPrioritizedResource(){
+        if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
+            return ResourceType.MANA;
+        return prioritizedResource;
+    }
+
     /**
      * Find a Well location from which resources are to be collected. First try to find in comms. If that location is null or not in vision, try to find out if there's a location in vision that is better
      * @throws GameActionException
      * @BytecodeCost : ~ 350
      */
     private static void getAndSetWellLocation() throws GameActionException{
-        MapLocation senseLoc = null;
-        if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
-        senseLoc = findNearestWellInVision(ResourceType.MANA);
-        else 
-            senseLoc = findNearestWellInVision(prioritizedResource);
+        MapLocation senseLoc = findNearestWellInVision(getLocalPrioritizedResource());
         if (senseLoc != null && rc.canWriteSharedArray(0, 0)){
             Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.resourceFlag(prioritizedResource));
             setWellDestination(senseLoc);
             return;
         }
-        MapLocation commsLoc = null;
-        if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
-            commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(ResourceType.MANA));
-        else 
-            commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource));
+        MapLocation commsLoc = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(getLocalPrioritizedResource()));
         if (commsLoc != null && rc.canSenseLocation(commsLoc)){
             setWellDestination(commsLoc);
             return;
@@ -732,7 +767,7 @@ public class BotCarrier extends Utils{
         if (!rc.isMovementReady()) return;
         if (movementDestination == null){
             assert carrierStatus == Status.EXPLORE_FOR_WELLS : "Movement destination is null but status is not explore for wells";
-            movementWrapper();
+            exploreForWells(true);
             return;
         }
         int curDist = currentLocation.distanceSquaredTo(movementDestination);
@@ -773,7 +808,7 @@ public class BotCarrier extends Utils{
 
     private static void gatherResources() throws GameActionException{
         // TODO: Add conditions and actions for behavior under attack here too.
-        if (returnEarly) return;
+        if (returnEarly || isFleeing) return;
         if (movingToIsland) resetIslandVariables();
         updateCarrier();
         if (rc.getAnchor() != null){
@@ -819,12 +854,16 @@ public class BotCarrier extends Utils{
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
         else if (carrierStatus == Status.EXPLORE_FOR_WELLS || carrierStatus == Status.EXPLORE_FOR_ISLANDS)
             rc.setIndicatorString(carrierStatus.toString() + " " + exploreDest);
+            // CircularExplore.printStatus(exploreDest);
         else
             rc.setIndicatorString(carrierStatus.toString());
         if (Clock.getBytecodesLeft() > 700){
             RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
             CombatUtils.sendGenericCombatLocation(visibleEnemies);
         }
+        if (Clock.getBytecodesLeft() > 700)
+            Comms.surveyForIslands();
+        Comms.writeSavedLocations();
     }
 
     private static Direction getRetreatDirection(RobotInfo[] visibleHostiles) throws GameActionException{
@@ -905,6 +944,7 @@ public class BotCarrier extends Utils{
         if (bestRetreatDir != null) {
             // rc.setIndicatorString("Backing: " + bestRetreatDir);
             carrierStatus = Status.FLEEING;
+            lastRetreatDirection = bestRetreatDir;
             rc.move(bestRetreatDir);
             return true;
         }
@@ -918,7 +958,14 @@ public class BotCarrier extends Utils{
         carrierStatus = Status.FLEEING;
         Direction dir = getRetreatDirection(visibleEnemies);
         // if (dir != null) Explore.assignExplore3Dir(dir);
-        fleeTarget = extrapolateLocation(rc.getLocation(), dir, 4);
+        if (dir != null)
+            fleeTarget = extrapolateLocation(rc.getLocation(), dir, FLEE_EXTRAPOLATE_UNSQUARED_DISTANCE);
+        else if (lastRetreatDirection != null)
+            fleeTarget = extrapolateLocation(rc.getLocation(), lastRetreatDirection, FLEE_EXTRAPOLATE_UNSQUARED_DISTANCE);
+        else{
+            movementWrapper();
+            return;
+        }
         movementWrapper(fleeTarget);
     }
 
