@@ -74,19 +74,33 @@ public class BotLauncher extends CombatUtils{
     private static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
-            if (enemyHQ ==null && rememberedEnemyHQLocations[i] != null &&
+            if (enemyHQ == null && rememberedEnemyHQLocations[i] != null &&
                 rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) < UNIT_TYPE.visionRadiusSquared){
                 rememberedEnemyHQLocations[i] = null;
             }
         }
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
-            if (rememberedEnemyHQLocations[2] != null){
-                currentDestination = rememberedEnemyHQLocations[2];
-            }  
-            else if (rememberedEnemyHQLocations[0] != null) 
-                currentDestination = rememberedEnemyHQLocations[0];
-            else if (rememberedEnemyHQLocations[1] != null) 
-                currentDestination = rememberedEnemyHQLocations[1];
+            if (rc.getRoundNum() <= BIRTH_ROUND + 1){
+                if (rememberedEnemyHQLocations[2] != null)
+                    currentDestination = rememberedEnemyHQLocations[2];
+                else if (rememberedEnemyHQLocations[0] != null) 
+                    currentDestination = rememberedEnemyHQLocations[0];
+                else if (rememberedEnemyHQLocations[1] != null) 
+                    currentDestination = rememberedEnemyHQLocations[1];
+            }
+            else{
+                int shortestDist = Integer.MAX_VALUE;
+                for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
+                    if (rememberedEnemyHQLocations[i] != null){
+                        int dist = rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation());
+                        if (dist < shortestDist){
+                            shortestDist = dist;
+                            currentDestination = rememberedEnemyHQLocations[i];
+                        }
+                    }
+                }
+            }
+
         }
         pathing.setNewDestination(currentDestination);
         destinationFlag = "base";
