@@ -57,6 +57,7 @@ public class BotCarrier extends Utils{
     private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
     private static int MINE_ONLY_MANA_TILL_ROUND;
     private static boolean exploringForWells = false;
+    private static MapLocation fleeTarget = null;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -89,6 +90,7 @@ public class BotCarrier extends Utils{
         returnEarly = false;
         exploreDest = null;
         exploringForWells = false;
+        fleeTarget = null;
         setMineOnlyManaRoundLimit();
         rng = new Random(rc.getID());
         // prioritizedResource = (rc.getID() % 2 == 0) ? ResourceType.ADAMANTIUM : ResourceType.MANA; // TODO: Change this
@@ -915,8 +917,9 @@ public class BotCarrier extends Utils{
             return;
         carrierStatus = Status.FLEEING;
         Direction dir = getRetreatDirection(visibleEnemies);
-        if (dir != null) Explore.assignExplore3Dir(dir);
-        movementWrapper(true);
+        // if (dir != null) Explore.assignExplore3Dir(dir);
+        fleeTarget = extrapolateLocation(rc.getLocation(), dir, 4);
+        movementWrapper(fleeTarget);
     }
 
     public static void runCarrier() throws GameActionException{
