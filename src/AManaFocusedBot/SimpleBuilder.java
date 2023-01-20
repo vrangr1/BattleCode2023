@@ -262,10 +262,19 @@ public class SimpleBuilder extends Utils{
     }
 
     public static void buildUnits(boolean endangered) throws GameActionException{
-        if (endangered){
-            if (tryBuildLauncher()) return;
-        }
         boolean builtUnit = true;
+        if (endangered){
+            while(rc.isActionReady() && builtUnit){
+                builtUnit = false;
+                if (tryBuildLauncher()) {
+                    builtUnit = true;
+                    continue;
+                }
+            }
+            // The below case is specifically for when enemy HQ spawn in vision range to HQ
+            if (endangered && rc.getRoundNum() < 30) 
+                return;
+        }
         while(rc.isActionReady() && builtUnit){
             builtUnit = false;
             if (tryBuildStandardAnchor()) {
@@ -276,7 +285,7 @@ public class SimpleBuilder extends Utils{
                 builtUnit = true;
                 continue;
             }
-            if (tryBuildAmplifier()) {
+            if (!endangered && tryBuildAmplifier()) {
                 builtUnit = true;
                 continue;
             }

@@ -25,8 +25,8 @@ fi
 
 count=0
 # Sorted the maps by size
-for i in SmallElements AllElements Pizza DefaultMap BatSignal Tacocat Eyelands\
-    Diagonal Cat
+for i in SmallElements AllElements Pizza DefaultMap BatSignal Tacocat Hah Eyelands\
+    Scatter Diagonal Cat
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]

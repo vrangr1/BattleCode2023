@@ -53,7 +53,7 @@ public class BotHeadquarters extends Utils{
                 }
             }
         }
-        if (combatUnit != null)
+        if (combatUnit != null && rc.getRoundNum() > 1)
             Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, combatUnit, Comms.SHAFlag.COMBAT_LOCATION);
     }
 }
