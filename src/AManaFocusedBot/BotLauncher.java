@@ -24,6 +24,7 @@ public class BotLauncher extends CombatUtils{
     public static RobotInfo[] visibleEnemies;
     public static RobotInfo[] inRangeEnemies;
     public static RobotInfo[] visibleAllies;
+    private static MapLocation[] cloudLocations;
     public static int vNonHQEnemies = 0;
     public static int inRNonHQEnemies = 0;
     public static int enemyHQInVision = 0;
@@ -65,6 +66,14 @@ public class BotLauncher extends CombatUtils{
             bytecodeCheck(); //6
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
+            }
+            else{
+                cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
+                if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1){
+                    if (rc.canAttack(cloudLocations[0])){
+                        rc.attack(cloudLocations[0]);
+                    }
+                }
             }
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Des flag " + destinationFlag + 
@@ -111,6 +120,7 @@ public class BotLauncher extends CombatUtils{
     private static void previousTurnResolution() throws GameActionException {
         standOff = false;
         destinationFlag = "";
+        cloudLocations = null;
         cloudCentral();
         simplePursuit();
         if (launcherState != Status.PURSUING){
@@ -420,7 +430,7 @@ public class BotLauncher extends CombatUtils{
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
                 if(tryMoveToHelpAlly(closestHostile)) {
-                    destinationFlag += "1";
+                    destinationFlag += "1 " + closestHostile.location.toString();
                     return true;
                 }
                 if(tryMoveToAttackProductionUnit(closestHostile)) {
@@ -588,4 +598,8 @@ public class BotLauncher extends CombatUtils{
 		}
 		return false;
 	}
+
+    // private static Direction findBestDirCloser(MapLocation hostileLoc) throws GameActionException{
+        
+    // }
 }

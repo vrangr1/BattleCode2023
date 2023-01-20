@@ -351,7 +351,7 @@ public class Utils extends Globals{
         if (!rc.canWriteSharedArray(0, 0)) return;
         if (combatLoc == null)  return;
         if (vNonHQEnemies > 0)  return;
-        if (rc.getLocation().distanceSquaredTo(combatLoc) < UNIT_TYPE.visionRadiusSquared){
+        if (rc.getLocation().distanceSquaredTo(combatLoc) <= UNIT_TYPE.visionRadiusSquared){
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, combatLoc);
         }
     }
