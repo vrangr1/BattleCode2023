@@ -172,7 +172,9 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean tryBuildLauncher() throws GameActionException{
-        if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, 1)) {
+        int soldierReq = 1;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100) soldierReq = 2;
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, soldierReq)) {
             return false;
         }
 
@@ -197,18 +199,10 @@ public class SimpleBuilder extends Utils{
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1))
             return false;
 
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100){
-            if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 4)){
-                ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
-                if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
-                    Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
-                    BuilderWrapper.setPrioritizedResource(prioritizedResource);
-                    rc.setIndicatorString("building carrier that prioritizes " + prioritizedResource);
-                    return true;
-                }
-            }
-        }
-        else if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 2)){
+        int carrierReq = 2;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100) carrierReq = 4;
+
+        if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, carrierReq)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
             if (tryConstructEnvelope(RobotType.CARRIER, BuilderWrapper.findBestSpawnLocation(RobotType.CARRIER, prioritizedResource))) {
                 Comms.writeScore(RobotType.CARRIER, updateScore(RobotType.CARRIER, carrierScore));
@@ -294,12 +288,5 @@ public class SimpleBuilder extends Utils{
                 continue;
             }
         }
-        // if (tryBuildStandardAnchor()) return;
-        // if (tryBuildCarrier()) return;
-        // if (tryBuildAmplifier()) return;
-        // if (tryBuildLauncher()) return;
-        // if (tryBuildAcceleratingAnchor()) return;
-        // if (tryBuildBooster()) return;
-        // if (tryBuildDestabilizer()) return;
     }
 }

@@ -174,6 +174,7 @@ public class BotLauncher extends CombatUtils{
         }
         if (nearestLoc != null){
             currentDestination = nearestLoc;
+            destinationFlag = "sEI";
             sendIslandLocation(nearestLoc);
             launcherState = Status.ISLAND_WORK;
             return true;

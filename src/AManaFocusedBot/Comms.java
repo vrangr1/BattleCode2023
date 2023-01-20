@@ -1175,6 +1175,28 @@ public class Comms extends Utils{
         }
     }
 
+    /**
+     * Survey the vision radius for unoccupied islands and write them to the communication channels.
+     * @throws GameActionException
+     * @BytecodeCost ~ 300 - 400
+     */
+    public static void surveyForIslandsAmplifiers() throws GameActionException{
+        if (rc.getRoundNum() < 2) return;
+        COMM_TYPE type = COMM_TYPE.ISLAND;
+        int[] islandIDs = rc.senseNearbyIslands();
+        MapLocation[] locations;
+        if (islandIDs.length == 0) return;
+        for (int i = islandIDs.length; i-->0;){
+            if (rc.senseTeamOccupyingIsland(islandIDs[i]) != Team.NEUTRAL) {
+                locations = rc.senseNearbyIslandLocations(islandIDs[i]);
+                Comms.wipeThisLocationFromChannels(type, SHAFlag.UNOCCUPIED_ISLAND, locations[0]);
+            }
+            else{
+                locations = rc.senseNearbyIslandLocations(islandIDs[i]);
+                writeAndOverwriteLesserPriorityMessage(type, locations[0], SHAFlag.UNOCCUPIED_ISLAND);
+            }
+        }
+    }
     
 
     ////////////////////////////////////////

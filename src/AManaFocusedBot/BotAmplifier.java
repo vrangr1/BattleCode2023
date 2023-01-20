@@ -18,10 +18,12 @@ public class BotAmplifier extends Explore{
     private static Status amplifierState;
     private static RobotInfo[] visibleEnemies;
     private static RobotInfo[] visibleAllies;
+    private static RobotInfo enemyHQ = null;
     private static int commAllyRobots = 0;
     private static int vNonHQEnemies = 0;
     private static int vNonHQCombatEnemies = 0;
     private static int vNonHQCombatAllies = 0;  
+    public static int enemyHQInVision = 0;
     private static MapLocation currentDestination;
     private static RobotInfo shepherdUnit;
 
@@ -34,18 +36,25 @@ public class BotAmplifier extends Explore{
         if (TRACKING_AMPLIFIER_COUNT) Comms.incrementRobotCount(RobotType.AMPLIFIER);
         updateVision();
         findAndWriteWellLocationsToComms();
+        Comms.surveyForIslandsAmplifiers();
         // commsCleaner();
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();
         }
+        // circleEnemyHQ();
         followCombatUnit();
-        if (rc.getRoundNum() < 25){
-            pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
-            currentDestination = CENTER_OF_THE_MAP;
+        if (shepherdUnit == null){
+            if (rc.getRoundNum() < 25){
+                pathing.setAndMoveToDestination(CENTER_OF_THE_MAP);
+                currentDestination = CENTER_OF_THE_MAP;
+            } 
+            else if (vNonHQCombatEnemies == 0){
+                amplifierMove();
+            }
         } 
-        if (vNonHQCombatEnemies == 0){
-            amplifierMove();
+        if (amplifierState == Status.BATTLE_FOLLOWER){
+            rc.setIndicatorString(amplifierState.toString() + " " + shepherdUnit.location);
         }
         rc.setIndicatorString(amplifierState.toString() + " " + currentDestination);
     }
@@ -53,9 +62,11 @@ public class BotAmplifier extends Explore{
     private static void followCombatUnit() throws GameActionException{
         MapLocation destination = checkShepherdUnitLocation();
         if (destination != null){
-            if (rc.isMovementReady()){
+            if (rc.isMovementReady() && rc.getLocation().distanceSquaredTo(destination) > 2){
                 currentDestination = destination;
-                Nav.goTo(destination);
+                if (willGoInEnemyHQRange(currentDestination)) return;
+                Nav.goTo(currentDestination);
+                amplifierState = Status.BATTLE_FOLLOWER;
             }
         }
     }
@@ -68,30 +79,45 @@ public class BotAmplifier extends Explore{
                 }
             }
         }
-        shepherdUnit = null;
         setShepherdUnit();
+        if (shepherdUnit != null){
+            return shepherdUnit.location;
+        }
         return null;
     }
 
     private static void setShepherdUnit() throws GameActionException{
+        shepherdUnit = null;
         RobotInfo nonCombatShepherdUnit = null;
-        if (shepherdUnit == null && visibleAllies.length - commAllyRobots > 0){
+        int bestDistance = 0;
+        int count = 1;
+        if (shepherdUnit == null && vNonHQCombatAllies - commAllyRobots >= 0){
             for (int i = visibleAllies.length; --i >= 0;) {
-                if (visibleAllies[i].type == RobotType.DESTABILIZER || visibleAllies[i].type == RobotType.LAUNCHER){
-                    shepherdUnit = visibleAllies[i];
-                    amplifierState = Status.BATTLE_FOLLOWER;
-                    break;
+                if (CombatUtils.isMilitaryUnit(visibleAllies[i].type)){
+                    int curDistance = rc.getLocation().distanceSquaredTo(visibleAllies[i].location);
+                    if (curDistance == bestDistance) count++;
+                    if (curDistance > bestDistance){
+                        count = 1;
+                        bestDistance = curDistance;
+                    }
+                    if (rng.nextInt(count) == 0){
+                        shepherdUnit = visibleAllies[i];
+                    }
                 }
                 else if (visibleAllies[i].type == RobotType.CARRIER){
                     nonCombatShepherdUnit = visibleAllies[i];
                 }
             }
         }
+        if (shepherdUnit == null)
+            amplifierState = Status.EXPLORING;
+        return;
     }
 
     private static void amplifierMove() throws GameActionException{
-        if(rc.isMovementReady()){
+        if (rc.isMovementReady()){
             currentDestination = explore(true);
+            if (willGoInEnemyHQRange(currentDestination)) return;
             Nav.goTo(currentDestination);
             amplifierState = Status.EXPLORING;
         }
@@ -102,12 +128,15 @@ public class BotAmplifier extends Explore{
         MapLocation lCR = rc.getLocation();
         for (int i= visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-			if (hostile.type != RobotType.LAUNCHER) continue;
+			if (!CombatUtils.isMilitaryUnit(hostile)) continue;
+            if (rc.getLocation().distanceSquaredTo(hostile.location) > hostile.type.visionRadiusSquared) continue;
 			int distSq = lCR.distanceSquaredTo(hostile.location);
 			if (distSq < closestHostileDistSq) {
 				closestHostileDistSq = distSq;
 			}
 		}
+
+        if (closestHostileDistSq == Integer.MAX_VALUE) return false;
 		
 		Direction bestRetreatDir = null;
 		int bestDistSq = closestHostileDistSq;
@@ -119,7 +148,8 @@ public class BotAmplifier extends Explore{
 			int smallestDistSq = Integer.MAX_VALUE;
 			for (int i = visibleEnemies.length; --i >= 0;) {
                 RobotInfo hostile = visibleEnemies[i];
-				if (hostile.type != RobotType.LAUNCHER) continue;
+				if (!CombatUtils.isMilitaryUnit(hostile)) continue;
+                if (rc.getLocation().distanceSquaredTo(hostile.location) > hostile.type.visionRadiusSquared) continue;
 				int distSq = hostile.location.distanceSquaredTo(dirLoc);
 				if (distSq < smallestDistSq) {
 					smallestDistSq = distSq;
@@ -138,17 +168,6 @@ public class BotAmplifier extends Explore{
 		return false;
 	}
 
-    private static Direction directionAwayFromAmplifierAndHQ(RobotInfo[] givenRobots){
-        MapLocation currentTarget = rc.getLocation();
-        for (int i = givenRobots.length; --i >= 0;) {
-            if (givenRobots[i].type == RobotType.HEADQUARTERS || givenRobots[i].type == RobotType.AMPLIFIER){
-                RobotInfo aRobot = givenRobots[i];			
-                currentTarget = currentTarget.add(aRobot.location.directionTo(rc.getLocation()));
-            }
-        }
-        return rc.getLocation().directionTo(currentTarget);
-    }
-
     private static void updateVision() throws GameActionException {
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
         visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
@@ -156,25 +175,39 @@ public class BotAmplifier extends Explore{
         vNonHQEnemies = 0;
         vNonHQCombatEnemies = 0;
         vNonHQCombatAllies= 0;
+        enemyHQInVision = 0;
+        enemyHQ = null;
         for (int i = visibleEnemies.length; --i >= 0;) {
             if (visibleEnemies[i].type != RobotType.HEADQUARTERS) {
                 vNonHQEnemies++;
-                if (visibleEnemies[i].type == RobotType.LAUNCHER){
+                if (CombatUtils.isMilitaryUnit(visibleEnemies[i])){
                     vNonHQCombatEnemies++;
                 }
             }
-            else if (rc.canWriteSharedArray(0, 0)){
-                Comms.writeEnemyHeadquarterLocation(visibleEnemies[i].location);
+            else {
+                enemyHQInVision++;
+                enemyHQ = visibleEnemies[i];
+                if (rc.canWriteSharedArray(0, 0)){
+                    Comms.writeEnemyHeadquarterLocation(enemyHQ.location);
+                }
             }
         }
         for (int i = visibleAllies.length; --i >= 0;) {
-            if (visibleAllies[i].type == RobotType.HEADQUARTERS || visibleAllies[i].type == RobotType.AMPLIFIER) {
+            if (visibleAllies[i].type == RobotType.AMPLIFIER) {
                 commAllyRobots++;
             }
-            else if (visibleAllies[i].type == RobotType.LAUNCHER){
+            else if (CombatUtils.isMilitaryUnit(visibleAllies[i].type)){
                 vNonHQCombatAllies++;
             }
         }
     }
 
+    private static boolean willGoInEnemyHQRange(MapLocation destination) throws GameActionException{
+        if (enemyHQInVision > 0){
+            if (destination.distanceSquaredTo(enemyHQ.location) <= enemyHQ.type.actionRadiusSquared * 1.5){
+                return true;
+            }
+        }
+        return false;
+    }
 }
