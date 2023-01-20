@@ -184,9 +184,9 @@ public class Globals {
     }
 
     public static void guessEnemyHQLocation() throws GameActionException {
-        rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x, parentHQLocation.y);
-        rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
-        rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
+        rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x - 1, parentHQLocation.y);
+        rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x - 1, MAP_HEIGHT - parentHQLocation.y - 1);
+        rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x - 1, MAP_HEIGHT - parentHQLocation.y - 1);
         MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
         for (int i = alliedHQs.length; --i >= 0;) {
             if (alliedHQs[i] == null) continue;

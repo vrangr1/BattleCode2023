@@ -79,14 +79,16 @@ public class Pathing extends Utils {
         int nearbyRobotcount = rc.senseNearbyRobots().length;
         if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15 || Clock.getBytecodesLeft() < BYTECODE_REMAINING) {
             Nav.goTo(target);
+            Utils.bytecodeCheck("PostBugNav1 T:" + target+ " " + rc.getLocation());
             return;
         }
         Utils.bytecodeCheck("PreBFS");
         Direction dir = up.bestDir(target);
-        Utils.bytecodeCheck("PostBFS");
+        Utils.bytecodeCheck("PostBFS T:" + target+ " " + dir);
         if (dir == null || !rc.canMove(dir) || isVisited(rc.getLocation().add(dir)) || !rc.sensePassability(rc.getLocation().add(dir)) || 
             rc.isLocationOccupied(rc.getLocation().add(dir))) {
             Nav.goTo(target);
+            Utils.bytecodeCheck("PostBugNav2 T:" + target + " " + rc.getLocation());
             addVisited(rc.getLocation());
         } else {
             moveTo(dir);
