@@ -77,6 +77,7 @@ public class BotLauncher extends CombatUtils{
             if (enemyHQ == null && rememberedEnemyHQLocations[i] != null &&
                 rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) < UNIT_TYPE.visionRadiusSquared){
                 rememberedEnemyHQLocations[i] = null;
+                mapSymmetry[i] = false;
             }
         }
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
@@ -103,7 +104,7 @@ public class BotLauncher extends CombatUtils{
 
         }
         pathing.setNewDestination(currentDestination);
-        destinationFlag = "base";
+        destinationFlag = "sBD";
         launcherState = Status.MARCHING;
     }
 
@@ -341,7 +342,7 @@ public class BotLauncher extends CombatUtils{
 		int numHostilesThatAttackUs = 0;
 		for (int i = visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-			if (hostile.type == RobotType.LAUNCHER) {
+			if (hostile.type == RobotType.LAUNCHER || hostile.type == RobotType.DESTABILIZER) {
 				int distSq = hostile.location.distanceSquaredTo(rc.getLocation());
 				if (distSq <= hostile.type.actionRadiusSquared) {
 					if (distSq < closestDistSq) {
@@ -407,6 +408,9 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered()){
+            // if (inRNonHQEnemies > 0) {
+            //     chooseTargetAndAttack(inRangeEnemies);
+            // }
             launcherState = Status.RETREATING;
             return true;
         }

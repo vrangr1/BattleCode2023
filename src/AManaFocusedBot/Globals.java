@@ -111,6 +111,7 @@ public class Globals {
     public static MapLocation rememberedEnemyHQLocations[];
     public static final boolean END_EARLY = false;
     public static final int END_EARLY_ROUND_NUM = 1000;
+    public static boolean[] mapSymmetry = {true, true, true}; // {Vertical, Horizontal, Rotational}
 
     public static void initGlobals(RobotController rc1) throws GameActionException{
         rc = rc1;
@@ -162,7 +163,8 @@ public class Globals {
 
     public static void updateGlobals() throws GameActionException{
         if (rc.getRoundNum() == 2 && UNIT_TYPE == RobotType.HEADQUARTERS){
-            fillEnemyHQGuessForHQ();
+            guessEnemyHQLocation();
+            // fillEnemyHQGuessForHQ();
         }
         currentLocation = rc.getLocation();
         bytecodeCounter = 0;
@@ -182,15 +184,9 @@ public class Globals {
     }
 
     public static void guessEnemyHQLocation() throws GameActionException {
-        if (MAP_WIDTH - parentHQLocation.x >= 0){
-            rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x, parentHQLocation.y);
-        }
-        if (MAP_HEIGHT - parentHQLocation.y >= 0){
-            rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
-        }
-        if (MAP_WIDTH - parentHQLocation.x >= 0 && MAP_HEIGHT - parentHQLocation.y >= 0){
-            rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
-        }
+        rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x, parentHQLocation.y);
+        rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
+        rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x, MAP_HEIGHT - parentHQLocation.y);
         MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
         for (int i = alliedHQs.length; --i >= 0;) {
             if (alliedHQs[i] == null) continue;
@@ -200,21 +196,7 @@ public class Globals {
                 if (hqDistance > RobotType.HEADQUARTERS.visionRadiusSquared) continue;
                 else{
                     rememberedEnemyHQLocations[j] = null;
-                }
-            }
-        }
-    }
-
-    public static void fillEnemyHQGuessForHQ() throws GameActionException{
-        MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
-        for (int i = alliedHQs.length; --i >= 0;) {
-            if (alliedHQs[i] == null) continue;
-            for (int j = rememberedEnemyHQLocations.length; --j >= 0;) {         
-                if (rememberedEnemyHQLocations[j] == null) continue;
-                int hqDistance = alliedHQs[i].distanceSquaredTo(rememberedEnemyHQLocations[j]);
-                if (hqDistance > RobotType.HEADQUARTERS.visionRadiusSquared) continue;
-                else{
-                    rememberedEnemyHQLocations[j] = null;
+                    mapSymmetry[j] = false;
                 }
             }
         }
