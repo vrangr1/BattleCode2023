@@ -231,7 +231,7 @@ public class BotLauncher extends CombatUtils{
         RobotType enemyType = enemyUnit.type;
         int enemyHealth = enemyUnit.getHealth();
         if (enemyHealth <= UNIT_TYPE.damage && enemyType != RobotType.HEADQUARTERS) 
-            return 100000 + enemyHealth; // Instakill
+            return 100000 + enemyHealth + enemyType.damage; // Instakill
         // TODO: Factor in time dilation cost
         // int rubbleAtLocation = rc.senseRubble(enemyUnit.getLocation());
 		switch(enemyType) {
@@ -241,10 +241,10 @@ public class BotLauncher extends CombatUtils{
 		    	return 1;
             case CARRIER:
 		    case BOOSTER:
+                return 100.0 / Math.ceil((double)enemyHealth/UNIT_TYPE.damage);
             case DESTABILIZER:
-		    	return 0.22 / (enemyHealth * (10.0)); // Max= 0.22, Min = 0.005 Low priority
 		    case LAUNCHER:
-		    	return 220.0 * enemyType.damage / (enemyHealth * (10.0));
+		    	return 10000.0 / Math.ceil((double)enemyHealth/UNIT_TYPE.damage);
             default:
                 return -2.0;
 		}
@@ -270,6 +270,7 @@ public class BotLauncher extends CombatUtils{
 
     private static boolean tryMoveToHelpAlly(RobotInfo closestHostile) throws GameActionException {
         if(closestHostile == null) return false;
+        //# if (inRNonHQEnemies > 0) return false;
 		MapLocation closestHostileLocation = closestHostile.location;
 		
 		boolean allyIsFighting = false;
@@ -304,7 +305,7 @@ public class BotLauncher extends CombatUtils{
 
     private static boolean tryMoveToEngageOutnumberedEnemy(RobotInfo closestHostile) throws GameActionException {
         if(closestHostile == null) return false;
-        MapLocation closestHostileLocation = closestHostile.location;
+        //# if (closestHostile.location.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.actionRadiusSquared) return false;
         int numNearbyHostiles = 0;
 		for (int i = visibleEnemies.length; --i >= 0;) {
 			if (visibleEnemies[i].type.canAttack()) {
@@ -366,7 +367,7 @@ public class BotLauncher extends CombatUtils{
 		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHostileThatAttacksUs.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		for (int i = nearbyAllies.length; --i >= 0;) {
             RobotInfo ally = nearbyAllies[i];
-			if (ally.type == RobotType.LAUNCHER || ally.type == RobotType.CARRIER) {
+			if (ally.type == RobotType.LAUNCHER || ally.type == RobotType.DESTABILIZER) {
 				if (ally.location.distanceSquaredTo(closestHostileThatAttacksUs.location)
 						<= ally.type.actionRadiusSquared) {
 					numAlliesAttackingClosestHostile += 1;
@@ -390,7 +391,7 @@ public class BotLauncher extends CombatUtils{
 		MapLocation retreatTarget = rc.getLocation();
 		for (int i = visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-			if (!(hostile.type == RobotType.LAUNCHER)) continue;			
+			if (!(hostile.type == RobotType.LAUNCHER) || !(hostile.type == RobotType.DESTABILIZER)) continue;			
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
 		if (!rc.getLocation().equals(retreatTarget)) {
@@ -408,9 +409,6 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered()){
-            // if (inRNonHQEnemies > 0) {
-            //     chooseTargetAndAttack(inRangeEnemies);
-            // }
             launcherState = Status.RETREATING;
             return true;
         }
@@ -422,9 +420,11 @@ public class BotLauncher extends CombatUtils{
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
                 if(tryMoveToHelpAlly(closestHostile)) {
+                    destinationFlag += "1";
                     return true;
                 }
                 if(tryMoveToAttackProductionUnit(closestHostile)) {
+                    destinationFlag += "2";
                     return true;
                 }
             }
@@ -437,12 +437,15 @@ public class BotLauncher extends CombatUtils{
             }
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (tryMoveToHelpAlly(closestHostile)) {
+                destinationFlag += "3";
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
             if (tryMoveToEngageOutnumberedEnemy(closestHostile)) {
+                destinationFlag += "4";
                 return true;
             }
             if (tryMoveToAttackProductionUnit(closestHostile)) {
+                destinationFlag += "5";
                 return true;
             }
         }
