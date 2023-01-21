@@ -188,7 +188,7 @@ public class CircularExplore extends Utils{
         switch(dir){
             case NORTH:
                 diff = MAP_WIDTH - currentLocation.x - 2;
-                if (lastDir != null)
+                if (lastDir != null || currentLocation.x == 0 || currentLocation.x == MAP_WIDTH - 1)
                     dir = Direction.SOUTH;
                 else if (currentLocation.x > diff)
                     dir = Direction.EAST;
@@ -219,7 +219,7 @@ public class CircularExplore extends Utils{
                 break;
             case WEST:
                 diff = MAP_HEIGHT - currentLocation.y - 2;
-                if (lastDir != null)
+                if (lastDir != null || currentLocation.y == 0 || currentLocation.y == MAP_HEIGHT - 1)
                     dir = Direction.EAST;
                 else if (currentLocation.y > diff)
                     dir = Direction.NORTH;
@@ -250,7 +250,7 @@ public class CircularExplore extends Utils{
                 break;
             case SOUTH:
                 diff = MAP_WIDTH - currentLocation.x - 2;
-                if (lastDir != null)
+                if (lastDir != null || currentLocation.x == 0 || currentLocation.x == MAP_WIDTH - 1)
                     dir = Direction.NORTH;
                 else if (currentLocation.x > diff)
                     dir = Direction.EAST;
@@ -281,7 +281,7 @@ public class CircularExplore extends Utils{
                 break;
             case EAST:
                 diff = MAP_HEIGHT - currentLocation.y - 2;
-                if (lastDir != null)
+                if (lastDir != null || currentLocation.y == 0 || currentLocation.y == MAP_HEIGHT - 1)
                     dir = Direction.WEST;
                 else if (currentLocation.y >= diff)
                     dir = Direction.NORTH;

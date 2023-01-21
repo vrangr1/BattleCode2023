@@ -137,7 +137,7 @@ public class BotLauncher extends CombatUtils{
         if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
             launcherState = Status.GUARDING;
             boolean willDieIfPursuit = prevTurnHostile.getType().canAttack() && rc.getHealth() <= prevTurnHostile.getType().damage;
-            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryMoveInDirection(prevTurnHostile.location)){
+            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryForcedMoveInDirection(prevTurnHostile.location)){
                 launcherState = Status.PURSUING;
             }
         }
@@ -290,7 +290,7 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		if (allyIsFighting) 
-			if (Movement.tryMoveInDirection(closestHostileLocation)) {
+			if (Movement.tryForcedMoveInDirection(closestHostileLocation)) {
 				launcherState = Status.FLANKING;
                 return true;
             }
@@ -299,7 +299,7 @@ public class BotLauncher extends CombatUtils{
 
     private static boolean tryMoveToAttackProductionUnit(RobotInfo closestHostile) throws GameActionException {
         if (closestHostile == null) return false;
-		if (closestHostile.type.canAttack() || closestHostile.type == RobotType.HEADQUARTERS) 
+		if (CombatUtils.isMilitaryUnit(closestHostile.type) || closestHostile.type == RobotType.HEADQUARTERS) 
             return false;
 	    pathing.setAndMoveToDestination(closestHostile.location);
         if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
@@ -327,11 +327,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() > closestHostile.health)) {
-			if (Movement.tryMoveInDirection(closestHostile.location)){
-                launcherState = Status.FLANKING;
-                return true;
-            }
-            else if(numNearbyAllies >= 1.5 * numNearbyHostiles && Movement.tryForcedMoveInDirection(closestHostile.location)){
+			if (Movement.tryForcedMoveInDirection(closestHostile.location)){
                 launcherState = Status.FLANKING;
                 return true;
             }
@@ -404,7 +400,7 @@ public class BotLauncher extends CombatUtils{
             if (rc.isActionReady() && inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
-			return Movement.tryForcedMoveInDirection(retreatTarget);
+			return Movement.tryMoveInDirection(retreatTarget);
 		}
 		return false;
 	}
@@ -619,7 +615,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    // private static Direction findBestDirCloser(MapLocation hostileLoc) throws GameActionException{
+    // private static Direction safestDirTowards(MapLocation destination) throws GameActionException{
         
     // }
 }

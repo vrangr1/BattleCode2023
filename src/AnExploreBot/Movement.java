@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class Movement extends Utils{
     
-    public static boolean tryMoveInDirection(MapLocation dest) throws GameActionException {
+    public static boolean tryForcedMoveInDirection(MapLocation dest) throws GameActionException {
         try{
             if (dest == null) return false;
             if(!rc.isMovementReady()) return false;
@@ -19,14 +19,14 @@ public class Movement extends Utils{
                 dirs = new Direction[] { forward, forward.rotateRight(), forward.rotateLeft()};
             }
             Direction bestDir = null;
-            double bestRubble = 0.0; //rc.senseRubble(rc.getLocation());
+            double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) * 10.0;
             int currentDistSq = lCR.distanceSquaredTo(dest);
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
                 if (!rc.canMove(direction)) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
-                double rubble = 0.0; // rc.senseRubble(dirLoc);
-                if ((rubble < bestRubble || rubble == 0)) {
+                double rubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(MY_TEAM) * 10.0;
+                if ((rubble <= bestRubble || rubble == 0)) {
                     bestRubble = rubble;
                     bestDir = direction;
                 }
@@ -46,7 +46,7 @@ public class Movement extends Utils{
         }
     }
 
-    public static boolean tryForcedMoveInDirection(MapLocation dest) throws GameActionException {
+    public static boolean tryMoveInDirection(MapLocation dest) throws GameActionException {
         try{
             if(!rc.isMovementReady()) return false;
             MapLocation lCR = rc.getLocation();
