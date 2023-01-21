@@ -27,12 +27,12 @@
 - [x] Write combat locations
 - [x] Do the new explore where you use the well near hq to find other wells
 ~~- [ ] What's happening with saving locations and writing them.~~
+- [x] Flee if carrying anchors also
 - [ ] Overwrite older locations in savedLocations.
 - [ ] Refine toExploreOrNotToExplore heuristic
-- [ ] Flee if carrying anchors also
-- [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
 - [ ] Increase radius if revolution complete in looping around hqs too.
 - [ ] If carrying anchor and encountered enemy occupied island with no enemy to defend, squat and free.
+- [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
 - [ ] Test flee rounds counts.
 - [ ] Test mining of resources enroute to another location
 - [ ] Experiment with mining immediately after first move. Remove bugs.

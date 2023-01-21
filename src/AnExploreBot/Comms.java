@@ -52,6 +52,8 @@ public class Comms extends Utils{
     private static SHAFlag[] locationsToWriteFlags = null;
     private static int savedLocationsCount = 0;
     private static final int MAX_LOCATIONS_TO_SAVE = 20;
+    private static final boolean OVERWRITE_OLDER_SAVED_LOCATIONS = true;
+    private static boolean wrapAround = false;
 
     
 
@@ -306,8 +308,8 @@ public class Comms extends Utils{
         commsHeadquarterLocations = null;
         commsEnemyHeadquarterLocations = null;
         locationsToWrite = null;
-        // flagsToWrite = null;
         locationsToWriteFlags = null;
+        wrapAround = false;
         savedLocationsCount = 0;
         headquarterChannelsInit();
         if (rc.getRoundNum() == 1) return;
@@ -1213,6 +1215,56 @@ public class Comms extends Utils{
         else saveThisLocation(loc, flag);
     }
 
+    public static boolean checkIfLocationSaved(MapLocation loc){
+        int count = OVERWRITE_OLDER_SAVED_LOCATIONS && wrapAround ? 20 : savedLocationsCount;
+        switch(count){
+            case 20:
+                if (locationsToWrite[19].equals(loc)) return true;
+            case 19:
+                if (locationsToWrite[18].equals(loc)) return true;
+            case 18:
+                if (locationsToWrite[17].equals(loc)) return true;
+            case 17:
+                if (locationsToWrite[16].equals(loc)) return true;
+            case 16:
+                if (locationsToWrite[15].equals(loc)) return true;
+            case 15:
+                if (locationsToWrite[14].equals(loc)) return true;
+            case 14:
+                if (locationsToWrite[13].equals(loc)) return true;
+            case 13:
+                if (locationsToWrite[12].equals(loc)) return true;
+            case 12:
+                if (locationsToWrite[11].equals(loc)) return true;
+            case 11:
+                if (locationsToWrite[10].equals(loc)) return true;
+            case 10:
+                if (locationsToWrite[9].equals(loc)) return true;
+            case 9:
+                if (locationsToWrite[8].equals(loc)) return true;
+            case 8:
+                if (locationsToWrite[7].equals(loc)) return true;
+            case 7:
+                if (locationsToWrite[6].equals(loc)) return true;
+            case 6:
+                if (locationsToWrite[5].equals(loc)) return true;
+            case 5:
+                if (locationsToWrite[4].equals(loc)) return true;
+            case 4:
+                if (locationsToWrite[3].equals(loc)) return true;
+            case 3:
+                if (locationsToWrite[2].equals(loc)) return true;
+            case 2:
+                if (locationsToWrite[1].equals(loc)) return true;
+            case 1:
+                if (locationsToWrite[0].equals(loc)) return true;
+            case 0: return false;
+            default: break;
+        }
+        assert false;
+        return false;
+    }
+
     public static void saveThisLocation(MapLocation loc, SHAFlag flag) throws GameActionException{
         if (locationsToWrite == null){
             locationsToWrite = new MapLocation[MAX_LOCATIONS_TO_SAVE];
@@ -1220,53 +1272,12 @@ public class Comms extends Utils{
             savedLocationsCount = 0;
         }
         if (savedLocationsCount >= MAX_LOCATIONS_TO_SAVE){
-            System.out.println("Too many locations to save! Count: " + savedLocationsCount);
-            return;
+            if (!OVERWRITE_OLDER_SAVED_LOCATIONS) return;
+            wrapAround = true;
+            savedLocationsCount = 0;
         }
-        switch(savedLocationsCount){
-            case 20:
-                if (locationsToWrite[19].equals(loc)) return;
-            case 19:
-                if (locationsToWrite[18].equals(loc)) return;
-            case 18:
-                if (locationsToWrite[17].equals(loc)) return;
-            case 17:
-                if (locationsToWrite[16].equals(loc)) return;
-            case 16:
-                if (locationsToWrite[15].equals(loc)) return;
-            case 15:
-                if (locationsToWrite[14].equals(loc)) return;
-            case 14:
-                if (locationsToWrite[13].equals(loc)) return;
-            case 13:
-                if (locationsToWrite[12].equals(loc)) return;
-            case 12:
-                if (locationsToWrite[11].equals(loc)) return;
-            case 11:
-                if (locationsToWrite[10].equals(loc)) return;
-            case 10:
-                if (locationsToWrite[9].equals(loc)) return;
-            case 9:
-                if (locationsToWrite[8].equals(loc)) return;
-            case 8:
-                if (locationsToWrite[7].equals(loc)) return;
-            case 7:
-                if (locationsToWrite[6].equals(loc)) return;
-            case 6:
-                if (locationsToWrite[5].equals(loc)) return;
-            case 5:
-                if (locationsToWrite[4].equals(loc)) return;
-            case 4:
-                if (locationsToWrite[3].equals(loc)) return;
-            case 3:
-                if (locationsToWrite[2].equals(loc)) return;
-            case 2:
-                if (locationsToWrite[1].equals(loc)) return;
-            case 1:
-                if (locationsToWrite[0].equals(loc)) return;
-            case 0: break;
-            default: assert false;
-        }
+        
+        if (checkIfLocationSaved(loc)) return;
 
         if (findIfLocationAlreadyPresent(loc, getCOMM_TYPEFromSHAFlag(flag), flag)) return;
         locationsToWrite[savedLocationsCount] = loc;
@@ -1277,14 +1288,20 @@ public class Comms extends Utils{
         if (locationsToWrite == null || savedLocationsCount == 0) return true;
         if (!rc.canWriteSharedArray(0, 0)) return false;
         if (Clock.getBytecodesLeft() < 300) return false;
-        while(savedLocationsCount-->0){
-            COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[savedLocationsCount]);
+        int count = OVERWRITE_OLDER_SAVED_LOCATIONS && wrapAround ? 20 : savedLocationsCount;
+        while(count-->0){
+            COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[count]);
             assert type != null : "Invalid SHAFlag";
             assert type != COMM_TYPE.HEADQUARTER : "Invalid SHAFlag";
-            writeAndOverwriteLesserPriorityMessage(type, locationsToWrite[savedLocationsCount], locationsToWriteFlags[savedLocationsCount]);
-            if (Clock.getBytecodesLeft() < 200) return false;
+            writeAndOverwriteLesserPriorityMessage(type, locationsToWrite[count], locationsToWriteFlags[count]);
+            if (Clock.getBytecodesLeft() < 200) {
+                savedLocationsCount = count;
+                wrapAround = false;
+                return false;
+            }
         }
         savedLocationsCount = 0;
+        wrapAround = false;
         return true;
     }
 }

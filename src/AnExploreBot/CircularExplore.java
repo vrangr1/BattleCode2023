@@ -325,8 +325,9 @@ public class CircularExplore extends Utils{
         reachedPerimeter = true;
         revolutionStartLocation = currentLocation;
         revolutionStartRound = rc.getRoundNum();
-        lastDir = null;
-        lastDir = centerLocationDir.rotateRight().rotateRight(); // TODO: Works?
+        // lastDir = centerLocationDir.rotateRight().rotateRight();
+        lastDir = updateDirection(centerLocationDir);
+        lastDir = updateDirection(lastDir);
     }
 
     private static boolean checkIfLocationInBuffer(MapLocation loc){

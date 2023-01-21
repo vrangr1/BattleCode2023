@@ -63,6 +63,10 @@ public class BotCarrier extends Utils{
     private static final int FLEE_EXTRAPOLATE_UNSQUARED_DISTANCE = 4;
     private static int FLEE_ROUNDS = 10;
     private static final boolean USING_CIRCULAR_EXPLORATION = true;
+    private static final boolean STORING_EXPLORED_LOCATIONS = false;
+    private static MapLocation[] exploredLocations;
+    private static final int EXPLORED_LOCATIONS_MAX_SIZE = 10;
+    private static int exploredLocationsCount = 0;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -360,8 +364,10 @@ public class BotCarrier extends Utils{
             if (USING_CIRCULAR_EXPLORATION){
                 if (otherTypeWell == null) movementWrapperForCircularExplore();
                 else{
-                    if (!otherTypeWell.equals(CircularExplore.getCenterLocation()))
+                    if (!otherTypeWell.equals(CircularExplore.getCenterLocation())){
                         CircularExplore.updateCenterLocation(otherTypeWell);
+                        addLocationToExplored(otherTypeWell);
+                    }
                     movementWrapperForCircularExplore();
                 }
             }
@@ -744,9 +750,47 @@ public class BotCarrier extends Utils{
         return prioritizedResource;
     }
 
+    private static boolean isLocationExplored(MapLocation loc){
+        switch(exploredLocationsCount){
+            case 10:
+                if (loc.equals(exploredLocations[9])) return true;
+            case 9:
+                if (loc.equals(exploredLocations[8])) return true;
+            case 8:
+                if (loc.equals(exploredLocations[7])) return true;
+            case 7:
+                if (loc.equals(exploredLocations[6])) return true;
+            case 6:
+                if (loc.equals(exploredLocations[5])) return true;
+            case 5:
+                if (loc.equals(exploredLocations[4])) return true;
+            case 4:
+                if (loc.equals(exploredLocations[3])) return true;
+            case 3:
+                if (loc.equals(exploredLocations[2])) return true;
+            case 2:
+                if (loc.equals(exploredLocations[1])) return true;
+            case 1:
+                if (loc.equals(exploredLocations[0])) return true;
+            case 0:
+                return false;
+            default: break;
+        }
+        assert false;
+        return false;
+    }
+
+    private static void addLocationToExplored(MapLocation loc){
+        if (!STORING_EXPLORED_LOCATIONS) return;
+        if (exploredLocationsCount == EXPLORED_LOCATIONS_MAX_SIZE) return;
+        exploredLocations[exploredLocationsCount++] = loc;
+    }
+
     private static boolean toExploreOrNotToExplore(MapLocation obtainedLoc){
         currentLocation = rc.getLocation();
-        return otherTypeWell == null || currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
+        if (otherTypeWell == null) return  true;
+        if (STORING_EXPLORED_LOCATIONS && isLocationExplored(obtainedLoc) && !Comms.checkIfLocationSaved(obtainedLoc)) return false;
+        return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
     }
 
     /**
@@ -769,8 +813,10 @@ public class BotCarrier extends Utils{
         }
         else if (commsLoc != null && toExploreOrNotToExplore(commsLoc)) setWellDestination(commsLoc);
         else if (otherTypeWell != null) {
-            if (!otherTypeWell.equals(CircularExplore.getCenterLocation()))
+            if (!otherTypeWell.equals(CircularExplore.getCenterLocation())){
+                addLocationToExplored(otherTypeWell);
                 CircularExplore.updateCenterLocation(otherTypeWell);
+            }
             carrierStatus = Status.EXPLORE_FOR_WELLS;
             exploringForWells = true;
             movementDestination = null;
@@ -823,8 +869,10 @@ public class BotCarrier extends Utils{
                 desperationIndex = 0;
                 movementDestination = null;
                 carrierStatus = Status.EXPLORE_FOR_WELLS;
-                if (!otherTypeWell.equals(CircularExplore.getCenterLocation()))
+                if (!otherTypeWell.equals(CircularExplore.getCenterLocation())){
                     CircularExplore.updateCenterLocation(otherTypeWell);
+                    addLocationToExplored(otherTypeWell);
+                }
                 movementWrapperForCircularExplore();
                 return;
             }
