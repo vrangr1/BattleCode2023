@@ -11,7 +11,7 @@ public class BuilderWrapper extends Utils {
     // private static ResourceType writePrioritizedResource = ResourceType.NO_RESOURCE;
     // private static boolean carrierBuilt = true;
     private static int carriersBuilt;
-    private static final double RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+    private static double RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
     private static final double RESOURCE_ELIXIR_NORMAL_RATIO = 1;
     private static int carrierResourceCount = 0;
     private static int updatesResourceCount = 0;
@@ -22,6 +22,23 @@ public class BuilderWrapper extends Utils {
         SIMPLEBUILDER,
         SAVVYBUILDER
     };
+
+    private static void updatePrioritizationRatio(){
+        if (MAP_SIZE < 900) RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+        else if (MAP_SIZE < 1600){
+            if (rc.getRoundNum() < 50)
+            RESOURCE_MANA_ADAMANTIUM_RATIO = 3;
+            else if (rc.getRoundNum() < 100)
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
+            else RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+        }
+        else{
+            if (rc.getRoundNum() < 50)
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 3;
+            else if (rc.getRoundNum() < 150) RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
+            else RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+        }
+    }
 
     private static final BUILDERS CURRENT_BUILDER = BUILDERS.SIMPLEBUILDER;
 
@@ -48,6 +65,7 @@ public class BuilderWrapper extends Utils {
         adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         mana = rc.getResourceAmount(ResourceType.MANA);
         elixir = rc.getResourceAmount(ResourceType.ELIXIR);
+        updatePrioritizationRatio();
         if (carriersBuilt > 0){
             assert rc.getRoundNum() > 1 : "round num correctness";
             assert headquarterMessageIndex != -1 : "headquarter message index correctness";

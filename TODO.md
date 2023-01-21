@@ -32,9 +32,10 @@
 - [x] Increase radius if revolution complete in looping around hqs too.
 ~~- [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.~~
 ~~- [ ] Attack carriers by carriers~~
+- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?
+- [ ] When near hq and about to deposit resources, don't flee.
 - [ ] If carrying anchor and encountered enemy occupied island with no enemy to defend, squat and free.
 - [ ] Refine toExploreOrNotToExplore heuristic
-- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?
 - [ ] Test flee rounds counts.
 - [ ] Test mining of resources enroute to another location
 - [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
