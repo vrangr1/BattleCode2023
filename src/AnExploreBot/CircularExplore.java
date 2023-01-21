@@ -46,9 +46,26 @@ public class CircularExplore extends Utils{
 
     public static void updateCenterLocation(MapLocation loc){ // Used to set center location to given well location
         // MIN_DISTANCE_FROM_HQ_TO_EXPLORE = GameConstants.MAX_DISTANCE_BETWEEN_WELLS - UNIT_TYPE.visionRadiusSquared; // 80 for carriers
-        isCenterHQ = false;
+        isCenterHQ = true;
         MIN_DISTANCE_FROM_HQ_TO_EXPLORE = WELL_INITIAL_EXPLORE_RADIUS;
         PERIMETER_BUFFER = WELL_INITIAL_EXPLORE_RADIUS;
+        startedExplore = true;
+        
+        reachedPerimeter = false;
+        currentDistanceFromHQ = -1;
+        revolutionStartLocation = null;
+        revolutionStartRound = -1;
+        lastDir = null;
+        centerLocation = loc;
+        currentLocation = rc.getLocation();
+        centerLocationDir = currentLocation.directionTo(centerLocation);
+        decideRotationDirection();
+    }
+
+    public static void updateCenterLocationForLauncher(MapLocation loc){
+        isCenterHQ = false;
+        MIN_DISTANCE_FROM_HQ_TO_EXPLORE = RobotType.HEADQUARTERS.actionRadiusSquared;
+        PERIMETER_BUFFER = MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
         startedExplore = true;
         
         reachedPerimeter = false;
@@ -74,7 +91,7 @@ public class CircularExplore extends Utils{
         // if (rc.getID() == 13837)
         //     System.out.println("explore");
         if (!reachedPerimeter) return reachPerimeter();
-        if (checkRevolutionComplete()){
+        if (checkRevolutionComplete() && isCenterHQ){
             updateRevolution();
             return explore();
         }
