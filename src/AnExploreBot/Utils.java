@@ -346,7 +346,7 @@ public class Utils extends Globals{
         // return null;
     }
 
-    public static void commsCleaner(int vNonHQEnemies) throws GameActionException{
+    public static void combatCommsCleaner(int vNonHQEnemies) throws GameActionException{
         MapLocation combatLoc = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (!rc.canWriteSharedArray(0, 0)) return;
         if (combatLoc == null)  return;

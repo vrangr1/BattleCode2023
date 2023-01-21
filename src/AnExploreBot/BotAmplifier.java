@@ -37,7 +37,7 @@ public class BotAmplifier extends Explore{
         updateVision();
         findAndWriteWellLocationsToComms();
         Comms.surveyForIslandsAmplifiers();
-        // commsCleaner();
+        combatCommsCleaner(vNonHQEnemies);
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
         if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
             tryToBackUpToMaintainMaxRangeAmplifier();

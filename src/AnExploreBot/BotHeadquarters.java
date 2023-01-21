@@ -19,7 +19,7 @@ public class BotHeadquarters extends Utils{
 
     public static void updateEveryTurn() throws GameActionException{
         Comms.wipeCountChannels();
-        commsCleaner(vNonHQEnemies);
+        combatCommsCleaner(vNonHQEnemies);
     }
 
     public static void runHeadquarters() throws GameActionException{

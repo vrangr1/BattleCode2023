@@ -67,13 +67,8 @@ public class BotLauncher extends CombatUtils{
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
-            else{
-                cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
-                if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1){
-                    if (rc.canAttack(cloudLocations[0])){
-                        rc.attack(cloudLocations[0]);
-                    }
-                }
+            else {
+                attackCloud();
             }
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Des flag " + destinationFlag + 
@@ -599,6 +594,30 @@ public class BotLauncher extends CombatUtils{
 		}
 		return false;
 	}
+
+    private static void attackCloud() throws GameActionException{
+        if (!rc.isActionReady()) return;
+        cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
+        MapLocation cloudAttackLocation = null;
+        if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1){
+            int bestDistance = 0;
+            int count = 1;
+            for (int i = cloudLocations.length; --i >= 0;){
+                int curDistance = rc.getLocation().distanceSquaredTo(cloudLocations[i]);
+                if (curDistance == bestDistance) count++;
+                if (curDistance > bestDistance){
+                    count = 1;
+                    bestDistance = curDistance;
+                }
+                if (rng.nextInt(count) == 0){
+                    cloudAttackLocation = cloudLocations[i];
+                }
+            }
+        }
+        if (cloudAttackLocation != null && rc.canAttack(cloudAttackLocation)){
+            rc.attack(cloudAttackLocation);
+        }
+    }
 
     // private static Direction findBestDirCloser(MapLocation hostileLoc) throws GameActionException{
         
