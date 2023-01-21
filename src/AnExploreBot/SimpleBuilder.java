@@ -173,7 +173,7 @@ public class SimpleBuilder extends Utils{
 
     private static boolean tryBuildLauncher() throws GameActionException{
         int soldierReq = 1;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100) soldierReq = 2;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) soldierReq = 2;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, soldierReq)) {
             return false;
         }
@@ -200,7 +200,7 @@ public class SimpleBuilder extends Utils{
             return false;
 
         int carrierReq = 2;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100) carrierReq = 4;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) carrierReq = 4;
 
         if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, carrierReq)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
