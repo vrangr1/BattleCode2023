@@ -549,7 +549,7 @@ public class BotCarrier extends Utils{
     private static void carrierAnchorMode() throws GameActionException{
         // I have an anchor. So singularly focusing on getting it to the first island I can find.
         // TODO: Add conditions and actions for behavior under attack.
-        if (returnEarly) return;
+        if (returnEarly || isFleeing) return;
         if (rc.canPlaceAnchor() && rc.senseAnchor(rc.senseIsland(rc.getLocation())) == null){
             carrierStatus = Status.PLACING_ANCHOR;
             rc.placeAnchor();
@@ -744,6 +744,11 @@ public class BotCarrier extends Utils{
         return prioritizedResource;
     }
 
+    private static boolean toExploreOrNotToExplore(MapLocation obtainedLoc){
+        currentLocation = rc.getLocation();
+        return otherTypeWell == null || currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
+    }
+
     /**
      * Find a Well location from which resources are to be collected. First try to find in comms. If that location is null or not in vision, try to find out if there's a location in vision that is better
      * @throws GameActionException
@@ -762,7 +767,7 @@ public class BotCarrier extends Utils{
             setWellDestination(commsLoc);
             return;
         }
-        else if (commsLoc != null && (otherTypeWell == null || rc.getLocation().distanceSquaredTo(commsLoc) < rc.getLocation().distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5))) setWellDestination(commsLoc);
+        else if (commsLoc != null && toExploreOrNotToExplore(commsLoc)) setWellDestination(commsLoc);
         else if (otherTypeWell != null) {
             if (!otherTypeWell.equals(CircularExplore.getCenterLocation()))
                 CircularExplore.updateCenterLocation(otherTypeWell);

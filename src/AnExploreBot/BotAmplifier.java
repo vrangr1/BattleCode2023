@@ -1,7 +1,6 @@
 package AnExploreBot;
 
 import battlecode.common.*;
-import AnExploreBot.Comms.COMM_TYPE;
 import AnExploreBot.path.Nav;
 
 public class BotAmplifier extends Explore{
