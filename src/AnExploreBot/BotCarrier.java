@@ -67,6 +67,7 @@ public class BotCarrier extends Utils{
     private static MapLocation[] exploredLocations;
     private static final int EXPLORED_LOCATIONS_MAX_SIZE = 10;
     private static int exploredLocationsCount = 0;
+    private static int movesLeftBeforeDeath = -1;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -108,6 +109,7 @@ public class BotCarrier extends Utils{
         exploringForWells = false;
         fleeTarget = null;
         lastRetreatDirection = null;
+        movesLeftBeforeDeath = 2 * (rc.getHealth() / RobotType.LAUNCHER.damage);
         setMineOnlyManaRoundLimit();
         setFleeRounds();
         rng = new Random(rc.getID());
@@ -241,6 +243,7 @@ public class BotCarrier extends Utils{
         currentLocation = rc.getLocation();
         otherTypeWell = null;
         updateVision();
+        movesLeftBeforeDeath = 2 * (rc.getHealth() / RobotType.LAUNCHER.damage);
         Comms.writeSavedLocations();
         if (TRY_TO_FLEE){
             if (!isFleeing && canSeeMilitaryUnit()){
@@ -898,7 +901,7 @@ public class BotCarrier extends Utils{
 
     private static void gatherResources() throws GameActionException{
         // TODO: Add conditions and actions for behavior under attack here too.
-        if (returnEarly || isFleeing) return;
+        if (returnEarly || (isFleeing && shouldIFlee())) return;
         if (movingToIsland) resetIslandVariables();
         updateCarrier();
         if (rc.getAnchor() != null){
@@ -995,48 +998,21 @@ public class BotCarrier extends Utils{
         return bestRetreatDir;
     }
 
+    private static boolean shouldIFlee() throws GameActionException{
+        if (!returnToHQ) return true;
+        assert movementDestination != null;
+        int dist = rc.getLocation().distanceSquaredTo(movementDestination);
+        return dist > (movesLeftBeforeDeath*movesLeftBeforeDeath);
+    }
+
     private static boolean tryToFlee(RobotInfo[] visibleHostiles) throws GameActionException {
-        int closestHostileDistSq = Integer.MAX_VALUE;
-        MapLocation lCR = rc.getLocation();
-        for (RobotInfo hostile : visibleHostiles) {
-            if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
-            int distSq = lCR.distanceSquaredTo(hostile.location);
-            if (distSq < closestHostileDistSq) {
-                closestHostileDistSq = distSq;
-            }
-        }
         
-        // We don't want to get out of our max range
-        // if (closestHostileDistSq > rc.getType().actionRadiusSquared) return false;
-        
-        Direction bestRetreatDir = null;
-        int bestDistSq = closestHostileDistSq;
-        // int bestRubble = rc.senseRubble(rc.getLocation());
-
-        for (Direction dir : directions) {
-            if (!rc.canMove(dir)) continue;
-            MapLocation dirLoc = lCR.add(dir);
-            // int dirLocRubble = rc.senseRubble(dirLoc);
-            // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
-
-            int smallestDistSq = Integer.MAX_VALUE;
-            for (RobotInfo hostile : visibleHostiles) {
-                if (!hostile.type.canAttack()) continue;
-                int distSq = hostile.location.distanceSquaredTo(dirLoc);
-                if (distSq < smallestDistSq) {
-                    smallestDistSq = distSq;
-                }
-            }
-            if (smallestDistSq > bestDistSq) {
-                bestDistSq = smallestDistSq;
-                bestRetreatDir = dir;
-                // bestRubble = dirLocRubble;
-            }
-        }
+        Direction bestRetreatDir = getRetreatDirection(visibleHostiles);
         if (bestRetreatDir != null) {
             // rc.setIndicatorString("Backing: " + bestRetreatDir);
-            carrierStatus = Status.FLEEING;
             lastRetreatDirection = bestRetreatDir;
+            if (!shouldIFlee()) return false;
+            carrierStatus = Status.FLEEING;
             rc.move(bestRetreatDir);
             return true;
         }
@@ -1045,7 +1021,7 @@ public class BotCarrier extends Utils{
 
     private static void fleeIfNeedTo() throws GameActionException{
         if (!TRY_TO_FLEE || !isFleeing) return;
-        if (!rc.isMovementReady()) // Can't do anything...
+        if (!rc.isMovementReady() || !shouldIFlee()) // Can't do anything...
             return;
         carrierStatus = Status.FLEEING;
         Direction dir = getRetreatDirection(visibleEnemies);
