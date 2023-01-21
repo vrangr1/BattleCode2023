@@ -48,8 +48,6 @@ public class BuilderWrapper extends Utils {
         adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         mana = rc.getResourceAmount(ResourceType.MANA);
         elixir = rc.getResourceAmount(ResourceType.ELIXIR);
-        // System.out.println("")
-        // if (writePrioritizedResource != ResourceType.NO_RESOURCE){
         if (carriersBuilt > 0){
             assert rc.getRoundNum() > 1 : "round num correctness";
             assert headquarterMessageIndex != -1 : "headquarter message index correctness";
@@ -167,8 +165,10 @@ public class BuilderWrapper extends Utils {
 
     private static MapLocation findNearestWellForCarrier(ResourceType pResourceType) throws GameActionException{
         currentLocation = rc.getLocation();
+        BotCarrier.otherTypeWell = null;
         MapLocation senseLoc = BotCarrier.findNearestWellInVision(prioritizedResource);
         if (senseLoc != null) return senseLoc;
+        if (BotCarrier.otherTypeWell != null) return BotCarrier.otherTypeWell;
         MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(pResourceType));
         if (commsLoc != null) return commsLoc;
         return null;

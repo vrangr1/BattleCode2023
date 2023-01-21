@@ -9,23 +9,46 @@ public class CircularExplore extends Utils{
     private static MapLocation centerLocation = null, revolutionStartLocation;
     private static int MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
     private static int currentDistanceFromHQ = -1;
-    private static final int PERIMETER_BUFFER = 5;
+    private static int PERIMETER_BUFFER = 7;
     private static int revolutionStartRound = -1;
     private static Direction lastDir, centerLocationDir;
     private static final int EXTRAPOLATION_DISTANCE_UNSQUARED = 5;
     private static final int REVOLUTION_COMPLETE_SQ_DISTANCE = 6, REVOLUTION_BEGUN_ROUND_BUFFER = 6;
     private static boolean isCenterHQ = false;
+    private static boolean rotateAntiClockwise = true;
+    private static MapLocation lastOnTheMapLocation = null;
+    private static final int WELL_INITIAL_EXPLORE_RADIUS = 18;
+    public static final boolean DEBUG_PRINT = false;
+    public static final int DEBUG_ID = 13473;
+    private static final int MAX_EXPLORE_ROUNDS_ALLOWED = 40;
+    private static int exploreRoundCount = 0;
     
     ///////////////////////// Public Methods /////////////////////////
 
     public static void updateCenterLocation() throws GameActionException{ // Used to set center location to nearest hq
         startExploration();
+        exploreRoundCount = 0;
+    }
+
+    public static MapLocation getCenterLocation(){
+        return centerLocation;
+    }
+
+    public static void updateCenterLocation(int k) throws GameActionException{ // Used to set center location to kth (1-indexed) nearest hq
+        if (k == 1) updateCenterLocation();
+        else{
+            initExplore();
+            startedExplore = true;
+            isCenterHQ = true;
+            centerLocation = Comms.findKthNearestHeadquarter(k);
+        }
     }
 
     public static void updateCenterLocation(MapLocation loc){ // Used to set center location to given well location
         // MIN_DISTANCE_FROM_HQ_TO_EXPLORE = GameConstants.MAX_DISTANCE_BETWEEN_WELLS - UNIT_TYPE.visionRadiusSquared; // 80 for carriers
         isCenterHQ = false;
-        MIN_DISTANCE_FROM_HQ_TO_EXPLORE = 4;
+        MIN_DISTANCE_FROM_HQ_TO_EXPLORE = WELL_INITIAL_EXPLORE_RADIUS;
+        PERIMETER_BUFFER = WELL_INITIAL_EXPLORE_RADIUS;
         startedExplore = true;
         
         reachedPerimeter = false;
@@ -33,15 +56,21 @@ public class CircularExplore extends Utils{
         revolutionStartLocation = null;
         revolutionStartRound = -1;
         lastDir = null;
-        centerLocationDir = null;
-        
         centerLocation = loc;
+        currentLocation = rc.getLocation();
+        centerLocationDir = currentLocation.directionTo(centerLocation);
+        decideRotationDirection();
     }
 
     public static MapLocation explore() throws GameActionException{
         if (!startedExplore)
             startExploration();
         updateDetails();
+        if (exploreRoundCount > MAX_EXPLORE_ROUNDS_ALLOWED){
+            // System.out.println("Max explore rounds reached");
+            MapLocation temp = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(BotCarrier.getLocalPrioritizedResource()));
+            if (temp != null) return temp;
+        }
         // if (rc.getID() == 13837)
         //     System.out.println("explore");
         if (!reachedPerimeter) return reachPerimeter();
@@ -52,15 +81,15 @@ public class CircularExplore extends Utils{
         return computeNextTangentialLocation();
     }
 
-    // public static void printStatus(){
-    //     rc.setIndicatorString("center: " + centerLocation + "centerDir: " + centerLocationDir + "lastDir: " + lastDir + "currentDist: " + currentDistanceFromHQ + "reachedPerimeter: " + reachedPerimeter);
-    // }
+    public static void printStatus(){
+        rc.setIndicatorString("center: " + centerLocation + "centerDir: " + centerLocationDir + "lastDir: " + lastDir + "currentDist: " + currentDistanceFromHQ + "reachedPerimeter: " + reachedPerimeter);
+    }
 
-    // public static void printStatus(MapLocation loc){
-    //     rc.setIndicatorString("loc: " + loc + ";center: " + centerLocation + ";centerDir: " + centerLocationDir + ";lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter);
-    //     if (rc.getID() == 13837)
-    //         System.out.println("loc: " + loc + ";center: " + centerLocation + ";centerDir: " + centerLocationDir + ";lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter + ";revStartLoc: " + revolutionStartLocation + ";revStartRound: " + revolutionStartRound + "\n");
-    // }
+    public static void printStatus(MapLocation loc){
+        rc.setIndicatorString("loc: " + loc + ";center: " + centerLocation + ";centerDir: " + centerLocationDir + ";lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter);
+        if (rc.getID() == DEBUG_ID)
+            System.out.println("loc: " + loc + ";center: " + centerLocation + ";centerDir: " + centerLocationDir + "; anticlockwise: " + rotateAntiClockwise + "; lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter + ";revStartLoc: " + revolutionStartLocation + ";revStartRound: " + revolutionStartRound + "\n");
+    }
 
 
     ///////////////////////// Private Methods /////////////////////////
@@ -68,14 +97,17 @@ public class CircularExplore extends Utils{
     private static void initExplore(){
         // MIN_DISTANCE_FROM_HQ_TO_EXPLORE = GameConstants.MIN_NEAREST_AD_DISTANCE - UNIT_TYPE.visionRadiusSquared; // 80 for carriers
         MIN_DISTANCE_FROM_HQ_TO_EXPLORE = 35;
+        PERIMETER_BUFFER = 35;
         isCenterHQ = true;
+        exploreRoundCount = 0;
         resetExplore();
     }
 
     private static void updateRevolution(){
-        // if (rc.getID() == 13837)
-        //     System.out.println("Revolution complete");
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+            System.out.println("Revolution complete");
         MIN_DISTANCE_FROM_HQ_TO_EXPLORE += 15;
+        PERIMETER_BUFFER = MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
         isCenterHQ = false;
         reachedPerimeter = false;
         currentDistanceFromHQ = -1;
@@ -85,17 +117,37 @@ public class CircularExplore extends Utils{
         centerLocationDir = null;
     }
 
+    private static void decideRotationDirection(){
+        MapLocation loc1, loc2;
+        Direction dir1 = centerLocationDir.rotateLeft().rotateLeft();
+        Direction dir2 = centerLocationDir.rotateRight().rotateRight();
+        loc1 = extrapolateAndReturn(dir1);
+        loc2 = extrapolateAndReturn(dir2);
+        if (loc1.distanceSquaredTo(CENTER_OF_THE_MAP) < loc2.distanceSquaredTo(CENTER_OF_THE_MAP))
+            rotateAntiClockwise = false;
+        else
+            rotateAntiClockwise = true;
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+            System.out.println("rotating anticlockwise: " + rotateAntiClockwise);
+    }
+
     private static void startExploration() throws GameActionException{
         initExplore();
         startedExplore = true;
         isCenterHQ = true;
         centerLocation = Comms.findNearestHeadquarter();
+        currentLocation = rc.getLocation();
+        centerLocationDir = currentLocation.directionTo(centerLocation);
+        decideRotationDirection();
     }
 
     private static void updateDetails(){
         currentLocation = rc.getLocation();
         currentDistanceFromHQ = currentLocation.distanceSquaredTo(centerLocation);
         centerLocationDir = currentLocation.directionTo(centerLocation);
+        lastOnTheMapLocation = null;
+        exploreRoundCount++;
+        // rotateAntiClockwise = true;
     }
 
 
@@ -117,14 +169,15 @@ public class CircularExplore extends Utils{
     private static MapLocation goToPerimeter(){
         if (checkIfDistanceInBuffer(currentDistanceFromHQ))
             return null;
-        if (currentDistanceFromHQ > MIN_DISTANCE_FROM_HQ_TO_EXPLORE + PERIMETER_BUFFER)
+        if (currentDistanceFromHQ > MIN_DISTANCE_FROM_HQ_TO_EXPLORE + PERIMETER_BUFFER){
             return centerLocation;
+        }
         Direction dir;
         dir = centerLocationDir.opposite();
         MapLocation temp = currentLocation.add(dir);
         if (rc.onTheMap(temp)){
-            // if (rc.getID() == 13837)
-            //     System.out.println("Going to perimeter; curLoc: " + currentLocation + "; center: " + centerLocation + "; dir: " + dir);
+            if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+                System.out.println("Going to perimeter; curLoc: " + currentLocation + "; center: " + centerLocation + "; dir: " + dir);
             return extrapolateAndReturn(dir);
         }
         if (lastDir != null){
@@ -267,6 +320,8 @@ public class CircularExplore extends Utils{
     }
 
     private static void setupRevolution(){
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+            System.out.println("reached perimeter");
         reachedPerimeter = true;
         revolutionStartLocation = currentLocation;
         revolutionStartRound = rc.getRoundNum();
@@ -276,6 +331,7 @@ public class CircularExplore extends Utils{
 
     private static boolean checkIfLocationInBuffer(MapLocation loc){
         if (!rc.onTheMap(loc)) return false;
+        lastOnTheMapLocation = loc;
         int dist = loc.distanceSquaredTo(centerLocation);
         return checkIfDistanceInBuffer(dist);
     }
@@ -284,7 +340,51 @@ public class CircularExplore extends Utils{
         return dist <= MIN_DISTANCE_FROM_HQ_TO_EXPLORE + PERIMETER_BUFFER && dist >= MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
     }
 
+    private static Direction updateDirection(Direction dir){
+        if (rotateAntiClockwise)
+            return dir.rotateRight();
+        else return dir.rotateLeft();
+    }
+
+    private static MapLocation locationComputationIteration(){
+        Direction dir;
+        MapLocation temp;
+        lastOnTheMapLocation = null;
+        // dir = centerLocationDir.rotateRight();
+        dir = updateDirection(centerLocationDir);
+        temp = currentLocation.add(dir);
+        lastDir = dir;
+        if (checkIfLocationInBuffer(temp))
+            return extrapolateAndReturn(dir);
+        // dir = dir.rotateRight();
+        dir = updateDirection(dir);
+        lastDir = dir;
+        temp = currentLocation.add(dir);
+        if (checkIfLocationInBuffer(temp))
+            return extrapolateAndReturn(dir);
+        dir = updateDirection(dir);
+        lastDir = dir;
+        temp = currentLocation.add(dir);
+        if (checkIfLocationInBuffer(temp))
+            return extrapolateAndReturn(dir);
+        return null;
+    }
+
     private static MapLocation computeNextTangentialLocation() throws GameActionException{
+        // boolean withinBuffer = checkIfDistanceInBuffer(currentLocation.distanceSquaredTo(centerLocation));
+        MapLocation nextLoc = locationComputationIteration();
+        if (nextLoc != null) return nextLoc;
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID) 
+            System.out.println("flipping rotation direction");
+        rotateAntiClockwise = !rotateAntiClockwise;
+        nextLoc = locationComputationIteration();
+        if (nextLoc != null) return nextLoc;
+        return Explore.explore();
+        // assert false : "rc.getID(): " + rc.getID() + "rn: " + rc.getRoundNum() + " currentLocation: " + currentLocation + " centerLocation: " + centerLocation + " centerLocationDir: " + centerLocationDir + " currentDistanceFromHQ: " + currentDistanceFromHQ;
+        // return null;
+    }
+
+    private static MapLocation computeNextTangentialLocation1() throws GameActionException{
         Direction dir;
         MapLocation temp;
         if (currentDistanceFromHQ > MIN_DISTANCE_FROM_HQ_TO_EXPLORE + PERIMETER_BUFFER){
@@ -312,7 +412,7 @@ public class CircularExplore extends Utils{
                 return extrapolateAndReturn(lastDir);
             }
         }
-
+        lastOnTheMapLocation = null;
         dir = centerLocationDir.rotateRight();
         temp = currentLocation.add(dir);
         lastDir = dir;
@@ -328,8 +428,18 @@ public class CircularExplore extends Utils{
         temp = currentLocation.add(dir);
         if (checkIfLocationInBuffer(temp))
             return extrapolateAndReturn(dir);
-        assert false : "rc.getID(): " + rc.getID() + "rn: " + rc.getRoundNum() + " currentLocation: " + currentLocation + " centerLocation: " + centerLocation + " centerLocationDir: " + centerLocationDir + " currentDistanceFromHQ: " + currentDistanceFromHQ;
-        return null;
+        if (lastOnTheMapLocation != null) {
+            lastDir = currentLocation.directionTo(lastOnTheMapLocation);
+            return extrapolateAndReturn(lastDir);
+        }
+        updateCenterLocation(2);
+        if (centerLocation == null){
+            resetExplore();
+            return Explore.explore(true);
+        }
+        return explore();
+        // assert false : "rc.getID(): " + rc.getID() + "rn: " + rc.getRoundNum() + " currentLocation: " + currentLocation + " centerLocation: " + centerLocation + " centerLocationDir: " + centerLocationDir + " currentDistanceFromHQ: " + currentDistanceFromHQ;
+        // return null;
     }
 
     private static MapLocation reachPerimeter() throws GameActionException{

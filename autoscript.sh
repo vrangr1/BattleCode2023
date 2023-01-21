@@ -25,8 +25,8 @@ fi
 
 count=0
 # Sorted the maps by size
-for i in SmallElements AllElements Pizza DefaultMap BatSignal Tacocat Hah Eyelands\
-    Scatter Diagonal Cat
+for i in SmallElements AllElements PairedProgramming Pizza Rewind DefaultMap BatSignal Tacocat Hah Eyelands\
+    Scatter Diagonal Cat Forest Grievance
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]
@@ -84,7 +84,10 @@ echo "Elapsed time: $elapsed seconds"
 #  Sun                  : 25 x 25 : 625
 #  BowAndArrow          : 35 x 25 : 875
 #  AllElements          : 30 x 30 : 900
+#  Dreamy               : 30 x 30 : 900  clouds++
+#  PairedProgramming    : 45 x 20 : 900  clouds++ (hqs in clouds)
 #  Pizza                : 30 x 30 : 900
+#  Rewind               : 30 x 30 : 900  clouds++ (hqs in corners surrounded by clouds)
 #  DefaultMap           : 32 x 32 : 1024
 #  KingdomRush          : 45 x 24 : 1080
 #  BatSignal            : 60 x 20 : 1200
@@ -98,10 +101,12 @@ echo "Elapsed time: $elapsed seconds"
 #  Frog                 : 39 x 39 : 1521
 #  ArtistRendition      : 40 x 40 : 1600
 #  Diagonal             : 40 x 40 : 1600
+#  Turtle               : 40 x 40 : 1600 clouds++
 #  Pit                  : 60 x 30 : 1800
 ## CloudyOctDoors       : 45 x 45 : 2025
 #  Pathfind             : 45 x 45 : 2025
 ## OctDoors             : 45 x 45 : 2025
 #  Cat                  : 50 x 50 : 2500
+#  Forest               : 60 x 60 : 3600 clouds++
 ## GrandRing            : 60 x 60 : 3600
 #  Grievance            : 60 x 60 : 3600

@@ -361,9 +361,9 @@ public class Utils extends Globals{
         double x = source.x, y = source.y;
         x += (Math.cos(angle)*(double)unsquaredDistance);
         y += (Math.sin(angle)*(double)unsquaredDistance);
-        // if (rc.getID() == 13837){
-        //     System.out.println("source: " + source + "; dir: " + dir + "; angle: " + angle + " extrapolated location: [" + (int)x + ", " + (int)y + "]");
-        // }
+        if (CircularExplore.DEBUG_PRINT && rc.getID() == CircularExplore.DEBUG_ID){
+            System.out.println("source: " + source + "; dir: " + dir + "; angle: " + angle + " extrapolated location: [" + (int)x + ", " + (int)y + "]");
+        }
         return new MapLocation((int)x, (int)y);
     }
 

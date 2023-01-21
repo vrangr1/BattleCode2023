@@ -896,8 +896,9 @@ public class Comms extends Utils{
      */
     public static MapLocation findKthNearestHeadquarter(int k) throws GameActionException{
         if (rc.getRoundNum() == 1) assert false;
-        if (sortedHeadquarters != null) return sortedHeadquarters[k-1];
         int headquarterCount = getHeadquartersCount();
+        if (k > headquarterCount) return null;
+        if (sortedHeadquarters != null) return sortedHeadquarters[k-1];
         sortedHeadquarters = new MapLocation[headquarterCount];
         currentLocation = rc.getLocation();
         MapLocation[] headquarters = getAlliedHeadquartersLocationsList();
@@ -1203,7 +1204,14 @@ public class Comms extends Utils{
     // SAVING UNWRITTEN LOCATIONS //////////
     ////////////////////////////////////////
 
-
+    public static void writeOrSaveLocation(MapLocation loc, SHAFlag flag) throws GameActionException{
+        if (rc.canWriteSharedArray(0, 0)){
+            COMM_TYPE type = getCOMM_TYPEFromSHAFlag(flag);
+            if (!findIfLocationAlreadyPresent(loc, type, flag))
+            writeAndOverwriteLesserPriorityMessage(type, loc, flag);
+        }
+        else saveThisLocation(loc, flag);
+    }
 
     public static void saveThisLocation(MapLocation loc, SHAFlag flag) throws GameActionException{
         if (locationsToWrite == null){
@@ -1273,7 +1281,7 @@ public class Comms extends Utils{
             COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[savedLocationsCount]);
             assert type != null : "Invalid SHAFlag";
             assert type != COMM_TYPE.HEADQUARTER : "Invalid SHAFlag";
-            writeAndOverwriteLesserPriorityMessage(COMM_TYPE.COMBAT, locationsToWrite[savedLocationsCount], locationsToWriteFlags[savedLocationsCount]);
+            writeAndOverwriteLesserPriorityMessage(type, locationsToWrite[savedLocationsCount], locationsToWriteFlags[savedLocationsCount]);
             if (Clock.getBytecodesLeft() < 200) return false;
         }
         savedLocationsCount = 0;

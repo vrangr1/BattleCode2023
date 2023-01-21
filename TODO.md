@@ -22,23 +22,32 @@
 - [x] Desperation index
 - [x] Replace hasMilitaryUnit with a non carrier one
 - [x] Mine only mana on smaller and medium size maps until some certain round.
-- [ ] Store island and wells locations locally and write it to comms later on.
-- [ ] Fix 
+- [x] Store island and wells locations locally and write it to comms later on.
+- [x] Write combat locations
+- [ ] Overwrite older locations in savedLocations.
+- [ ] What's happening with saving locations and writing them.
+- [ ] Test flee rounds counts.
+- [ ] Test mining of resources enroute to another location
+- [ ] 
+- [ ] Experiment with mining immediately after first move. Remove bugs.
+- [ ] Check save location's performance.
+- [ ] Carrier mining loss due to movement wrapper (run auto script)
+- [x] Do the new explore where you use the well near hq to find other wells
+- [ ] Try removing the need for Explore.explore() in the worst case scenario in Circular Explore.
 - [ ] Fix fleeing code
 - [ ] Avoid overcrowding
-- [ ] Write combat locations
 - [ ] Work on generation of elixir
 - [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
-- [ ] Attack carriers by carriers
+~~- [ ] Attack carriers by carriers~~
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order
 ~~- [ ] If using bot counts for build order prioritization, use amplifier count as a confidence factor on how trustworthy each bot count is.~~
 - [x] Fix amplifier excess production.
 - [x] verify well designation by hq for carrier.
-- [ ] Anchor production too low now. Fix
+- [x] Anchor production too low now. Fix
+- [x] Spawn launchers when our hq can see enemy hq
 - [ ] Set optimal build location properly (carriers and launchers done)
-- [ ] Spawn launchers when our hq can see enemy hq
 
 ## Launchers
 
