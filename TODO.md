@@ -28,13 +28,16 @@
 - [x] Do the new explore where you use the well near hq to find other wells
 ~~- [ ] What's happening with saving locations and writing them.~~
 - [x] Flee if carrying anchors also
-- [ ] Overwrite older locations in savedLocations.
-- [ ] Refine toExploreOrNotToExplore heuristic
-- [ ] Increase radius if revolution complete in looping around hqs too.
+- [x] Overwrite older locations in savedLocations.
+- [x] Increase radius if revolution complete in looping around hqs too.
+~~- [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.~~
+~~- [ ] Attack carriers by carriers~~
 - [ ] If carrying anchor and encountered enemy occupied island with no enemy to defend, squat and free.
-- [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
+- [ ] Refine toExploreOrNotToExplore heuristic
+- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?
 - [ ] Test flee rounds counts.
 - [ ] Test mining of resources enroute to another location
+- [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
 - [ ] Experiment with mining immediately after first move. Remove bugs.
 - [ ] Check save location's performance.
 - [ ] Carrier mining loss due to movement wrapper (run auto script)
@@ -42,8 +45,6 @@
 - [ ] Fix fleeing code
 - [ ] Avoid overcrowding
 - [ ] Work on generation of elixir
-- [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.
-~~- [ ] Attack carriers by carriers~~
 
 ## Explore:
 - [ ] Add function to allow launchers to circle around a location at a distance.

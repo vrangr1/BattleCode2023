@@ -74,7 +74,7 @@ public class CircularExplore extends Utils{
         // if (rc.getID() == 13837)
         //     System.out.println("explore");
         if (!reachedPerimeter) return reachPerimeter();
-        if (checkRevolutionComplete() && !isCenterHQ){
+        if (checkRevolutionComplete()){
             updateRevolution();
             return explore();
         }
