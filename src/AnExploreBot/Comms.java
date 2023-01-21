@@ -24,13 +24,14 @@ public class Comms extends Utils{
     private static final int STANDARD_ANCHOR_SCORE_CHANNEL = 5;
     private static final int LAUNCHER_COUNT_CHANNEL = 6;
     private static final int AMPLIFIER_COUNT_CHANNEL = 7;
+    public static final int SYMMETRY_CHANNEL = 8;
     // private static final int ACCELERATING_ANCHOR_COUNT_CHANNEL = 6;
-    public static final int START_CHANNEL_BANDS = 8;
+    public static final int START_CHANNEL_BANDS = 9;
     private static final int MAX_HEADQUARTERS_CHANNELS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 10;
     private static final int ISLAND_CHANNELS_COUNT = 10;
-    private static final int AMPLIFIER_CHANNELS_COUNT = 4;
+    private static final int AMPLIFIER_CHANNELS_COUNT = 3;
     private static final int COMBAT_CHANNELS_COUNT = 20;
 
     // ununsed channels count: 0 (in the case of max count of headquarters (i.e. 4))
