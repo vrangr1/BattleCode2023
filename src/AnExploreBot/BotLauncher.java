@@ -133,10 +133,11 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
+    // TODO: Check why this is not triggering
     private static void simplePursuit() throws GameActionException{
         if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
             launcherState = Status.GUARDING;
-            boolean willDieIfPursuit = prevTurnHostile.getType().canAttack() && rc.getHealth() <= prevTurnHostile.getType().damage;
+            boolean willDieIfPursuit = CombatUtils.isMilitaryUnit(prevTurnHostile.getType()) && rc.getHealth() <= prevTurnHostile.getType().damage;
             if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryForcedMoveInDirection(prevTurnHostile.location)){
                 launcherState = Status.PURSUING;
             }
@@ -544,7 +545,7 @@ public class BotLauncher extends CombatUtils{
 		int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (RobotInfo hostile : visibleHostiles) {
-			if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
+			if (!CombatUtils.isMilitaryUnit(hostile.type) && hostile.type != RobotType.HEADQUARTERS) continue;
 			int distSq = lCR.distanceSquaredTo(hostile.location);
 			if (distSq < closestHostileDistSq) {
 				closestHostileDistSq = distSq;
@@ -570,7 +571,7 @@ public class BotLauncher extends CombatUtils{
 			int smallestDistSq = Integer.MAX_VALUE;
 			for (int j  = visibleHostiles.length; --j >= 0;) {
                 RobotInfo hostile = visibleHostiles[j];
-				if (!hostile.type.canAttack()) continue;
+				if (!CombatUtils.isMilitaryUnit(hostile.type)) continue;
 				int distSq = hostile.location.distanceSquaredTo(dirLoc);
 				if (distSq < smallestDistSq) {
 					smallestDistSq = distSq;
