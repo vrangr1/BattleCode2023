@@ -24,6 +24,7 @@ public class Movement extends Utils{
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
                 if (!rc.canMove(direction)) continue;
+                if (rc.senseMapInfo(dirLoc).getCurrentDirection() == direction.opposite()) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
                 double rubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(MY_TEAM) * 10.0;
                 if ((rubble <= bestRubble || rubble == 0)) {
@@ -65,6 +66,7 @@ public class Movement extends Utils{
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
                 if (!rc.canMove(direction)) continue;
+                if (rc.senseMapInfo(dirLoc).getCurrentDirection() == direction.opposite()) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
                 double rubble = 0.0; // rc.senseRubble(dirLoc);
                 if ((rubble <= bestRubble || rubble == 0)) {

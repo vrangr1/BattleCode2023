@@ -341,17 +341,17 @@ public class BotLauncher extends CombatUtils{
 	}
 
     private static boolean retreatIfOutnumbered() throws GameActionException {
-		RobotInfo closestHostileThatAttacksUs = null;
+		RobotInfo closestHosAttack = null;
 		int closestDistSq = Integer.MAX_VALUE;
 		int numHostilesThatAttackUs = 0;
 		for (int i = visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-			if (hostile.type == RobotType.LAUNCHER || hostile.type == RobotType.DESTABILIZER) {
+			if (isMilitaryUnit(hostile.type)) {
 				int distSq = hostile.location.distanceSquaredTo(rc.getLocation());
 				if (distSq <= hostile.type.actionRadiusSquared) {
 					if (distSq < closestDistSq) {
 						closestDistSq = distSq;
-						closestHostileThatAttacksUs = hostile;
+						closestHosAttack = hostile;
 					}
 					numHostilesThatAttackUs += 1;
 				}
@@ -363,18 +363,15 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		int numAlliesAttackingClosestHostile = 0;
-		if (rc.getLocation().distanceSquaredTo(closestHostileThatAttacksUs.location) <= UNIT_TYPE.actionRadiusSquared) {
+		if (rc.getLocation().distanceSquaredTo(closestHosAttack.location) <= UNIT_TYPE.actionRadiusSquared) {
 			numAlliesAttackingClosestHostile += 1;
 		}
 
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHostileThatAttacksUs.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHosAttack.location, UNIT_TYPE.actionRadiusSquared, MY_TEAM);
 		for (int i = nearbyAllies.length; --i >= 0;) {
             RobotInfo ally = nearbyAllies[i];
-			if (ally.type == RobotType.LAUNCHER || ally.type == RobotType.DESTABILIZER) {
-				if (ally.location.distanceSquaredTo(closestHostileThatAttacksUs.location)
-						<= ally.type.actionRadiusSquared) {
-					numAlliesAttackingClosestHostile += 1;
-				}
+			if (isMilitaryUnit(ally.type)) {
+				numAlliesAttackingClosestHostile += 1;
 			}
 		}
 		
@@ -383,10 +380,12 @@ public class BotLauncher extends CombatUtils{
 		} 
 		if (numAlliesAttackingClosestHostile == numHostilesThatAttackUs) {
 			if (numHostilesThatAttackUs == 1) {
-				if (rc.getHealth() >= closestHostileThatAttacksUs.health) {
+                if (Math.ceil((double)rc.getHealth()/closestHosAttack.getType().damage) >= 
+                    Math.ceil((double)closestHosAttack.health/ UNIT_TYPE.damage)) {
 					return false;
 				}
-			} else {
+			} 
+            else {
 				return false;
 			}
 		}
