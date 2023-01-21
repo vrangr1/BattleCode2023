@@ -72,7 +72,7 @@ public class BotLauncher extends CombatUtils{
             }
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Des flag " + destinationFlag + 
-            " Bytecodes left " + Clock.getBytecodesLeft());
+            " Mov status " + rc.isMovementReady());
     }
 
     private static void setBaseDestination() throws GameActionException {
@@ -542,29 +542,29 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
-		int closestHostileDistSq = Integer.MAX_VALUE;
+		int minHosDist = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (RobotInfo hostile : visibleHostiles) {
 			if (!CombatUtils.isMilitaryUnit(hostile.type) && hostile.type != RobotType.HEADQUARTERS) continue;
 			int distSq = lCR.distanceSquaredTo(hostile.location);
-			if (distSq < closestHostileDistSq) {
-				closestHostileDistSq = distSq;
+			if (distSq < minHosDist) {
+				minHosDist = distSq;
 			}
 		}
 		
-        // We don't want to get out of our max range
-		if (closestHostileDistSq > rc.getType().actionRadiusSquared) return false;
+        // We don't want to get out of our max range, not in this function
+		if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
-		int bestDistSq = closestHostileDistSq;
-        // int bestRubble = rc.senseRubble(rc.getLocation());
+		int bestDistSq = minHosDist;
+        double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
 
 		for (Direction dir : directions) {
 			if (!rc.canMove(dir)) continue;
 			MapLocation dirLoc = lCR.add(dir);
-            // int dirLocRubble = rc.senseRubble(dirLoc);
+            // double dirLocRubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
             // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
-            if (rc.senseCloud(dirLoc)){
+            if (rc.senseCloud(dirLoc) && !rc.isActionReady()){
                 bestRetreatDir = dir;
                 break;
             }
@@ -580,7 +580,6 @@ public class BotLauncher extends CombatUtils{
 			if (smallestDistSq > bestDistSq) {
 				bestDistSq = smallestDistSq;
 				bestRetreatDir = dir;
-                // bestRubble = dirLocRubble;
 			}
 		}
 		if (bestRetreatDir != null) {
@@ -597,14 +596,17 @@ public class BotLauncher extends CombatUtils{
         cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
         MapLocation cloudAttackLocation = null;
         if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1){
-            int bestDistance = 0;
-            int count = 1;
+            int bestDistance = 4;
+            int count = 0;
             for (int i = cloudLocations.length; --i >= 0;){
                 int curDistance = rc.getLocation().distanceSquaredTo(cloudLocations[i]);
                 if (curDistance == bestDistance) count++;
-                if (curDistance > bestDistance){
+                else if (curDistance > bestDistance){
                     count = 1;
                     bestDistance = curDistance;
+                }
+                else{
+                    continue;
                 }
                 if (rng.nextInt(count) == 0){
                     cloudAttackLocation = cloudLocations[i];
@@ -612,6 +614,7 @@ public class BotLauncher extends CombatUtils{
             }
         }
         if (cloudAttackLocation != null && rc.canAttack(cloudAttackLocation)){
+            destinationFlag += " aC " + cloudAttackLocation + " clen " + cloudLocations.length;
             rc.attack(cloudAttackLocation);
         }
     }

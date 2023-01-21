@@ -95,9 +95,12 @@ public class BotAmplifier extends Explore{
                 if (CombatUtils.isMilitaryUnit(visibleAllies[i].type)){
                     int curDistance = rc.getLocation().distanceSquaredTo(visibleAllies[i].location);
                     if (curDistance == bestDistance) count++;
-                    if (curDistance > bestDistance){
+                    else if (curDistance > bestDistance){
                         count = 1;
                         bestDistance = curDistance;
+                    }
+                    else{
+                        continue;
                     }
                     if (rng.nextInt(count) == 0){
                         shepherdUnit = visibleAllies[i];

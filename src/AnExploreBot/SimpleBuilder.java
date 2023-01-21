@@ -199,8 +199,8 @@ public class SimpleBuilder extends Utils{
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1))
             return false;
 
-        int carrierReq = 2;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) carrierReq = 4;
+        int carrierReq = 1;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) carrierReq = 3;
 
         if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, carrierReq)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
@@ -271,6 +271,12 @@ public class SimpleBuilder extends Utils{
         }
         while(rc.isActionReady() && builtUnit){
             builtUnit = false;
+            if (rc.getRoundNum() == 1){
+                if (tryBuildLauncher()) {
+                    builtUnit = true;
+                    continue;
+                }
+            }
             if (tryBuildStandardAnchor()) {
                 builtUnit = true;
                 continue;
