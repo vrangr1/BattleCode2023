@@ -125,7 +125,7 @@ public class CircularExplore extends Utils{
             System.out.println("Revolution complete");
         MIN_DISTANCE_FROM_HQ_TO_EXPLORE += 15;
         PERIMETER_BUFFER = MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
-        isCenterHQ = false;
+        // isCenterHQ = false;
         reachedPerimeter = false;
         currentDistanceFromHQ = -1;
         revolutionStartLocation = null;
