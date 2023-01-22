@@ -249,17 +249,32 @@ public class Globals {
     }
 
     public static MapLocation defaultEnemyLocation() throws GameActionException{
-        for (int i = rememberedEnemyHQLocations.length; --i >= 0;) {
-            if (rememberedEnemyHQLocations[i] != null){
-                if (checkIfSymmetry(SYMMETRY.values()[i])){
-                    return rememberedEnemyHQLocations[i];
+        if (MAP_SIZE <= 2500){
+            for (int i = rememberedEnemyHQLocations.length; --i >= 0;) {
+                if (rememberedEnemyHQLocations[i] != null){
+                    if (checkIfSymmetry(SYMMETRY.values()[i])){
+                        return rememberedEnemyHQLocations[i];
+                    }
+                    else{
+                        rememberedEnemyHQLocations[i] = null;
+                        mapSymmetry[i] = false;
+                    }
                 }
-                else{
-                    rememberedEnemyHQLocations[i] = null;
-                    mapSymmetry[i] = false;
+            }   
+        }
+        else{
+            for (int i = 0; i < rememberedEnemyHQLocations.length; i++) {
+                if (rememberedEnemyHQLocations[i] != null){
+                    if (checkIfSymmetry(SYMMETRY.values()[i])){
+                        return rememberedEnemyHQLocations[i];
+                    }
+                    else{
+                        rememberedEnemyHQLocations[i] = null;
+                        mapSymmetry[i] = false;
+                    }
                 }
-            }
-        }   
+            }   
+        }
         return CENTER_OF_THE_MAP;
     }
 

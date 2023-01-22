@@ -24,6 +24,7 @@ public class SimpleBuilder extends Utils{
     // private static final int MIN_WAIT_AMPLIFIERS = 25;
     private static final double MISCOUNT_FACTOR = 5;
     public static final int INIT_ANCHOR_SCORE = 50;
+    public static int anchorCountDown = 20;
 
     static class BuildRobotLoc {
         MapLocation loc;
@@ -228,12 +229,15 @@ public class SimpleBuilder extends Utils{
         if (!rc.canBuildAnchor(Anchor.STANDARD)) return false;
         System.out.println("Built standard anchor");
         rc.buildAnchor(Anchor.STANDARD);
+        anchorCountDown = (20 - rc.getRoundNum()/200) * Comms.getHeadquartersCount();
         Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
         BuilderWrapper.sendAnchorCollectionCommand();
         return true;
     }
 
     private static boolean tryBuildStandardAnchor() throws GameActionException{
+        anchorCountDown--;
+        if (anchorCountDown > 0) return false;
         if (rc.getNumAnchors(Anchor.STANDARD) >= 2) return false;
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
         if (rc.getRobotCount() > MAP_SIZE / 4) return buildOurAnchor();
