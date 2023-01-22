@@ -112,6 +112,7 @@ public class Globals {
     public static final boolean END_EARLY = false;
     public static final int END_EARLY_ROUND_NUM = 1000;
     public static boolean[] mapSymmetry = {true, true, true}; // {Vertical, Horizontal, Rotational}
+    public static MapLocation[] alliedHQLocs;
 
     public static void initGlobals(RobotController rc1) throws GameActionException{
         rc = rc1;
@@ -146,6 +147,7 @@ public class Globals {
         getParentHQLocation();
         rememberedEnemyHQLocations = new MapLocation[4];
         if (UNIT_TYPE != RobotType.HEADQUARTERS){
+            alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
             guessEnemyHQLocation();
         }
     }
@@ -157,7 +159,7 @@ public class Globals {
             parentHQLocation = Comms.findNearestHeadquarter();
         }
         if (parentHQLocation == null) {
-            parentHQLocation =  new MapLocation(0,0);
+            parentHQLocation = new MapLocation(0,0);
         }
     }
 

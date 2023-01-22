@@ -17,6 +17,7 @@ public class BotLauncher extends CombatUtils{
         RETREATING,
         CLOUD_WORK, // In the clouds
         STANDOFF,
+        CIRCLING,
     }
 
     private static Status launcherState;
@@ -33,6 +34,7 @@ public class BotLauncher extends CombatUtils{
     private static RobotInfo prevTurnHostile = null;
     private static MapLocation prevTurnLocation = null;
     private static String destinationFlag = "";
+    private static MapLocation circleLocation = null;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -79,13 +81,27 @@ public class BotLauncher extends CombatUtils{
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
             if (enemyHQ == null && rememberedEnemyHQLocations[i] != null &&
-                rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) < UNIT_TYPE.visionRadiusSquared){
+                rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared){
                 rememberedEnemyHQLocations[i] = null;
                 mapSymmetry[i] = false;
             }
         }
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
             if (rc.getRoundNum() <= BIRTH_ROUND + 1){
+                // for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
+                //     if (rememberedEnemyHQLocations[i] != null){
+                //         currentDestination = rememberedEnemyHQLocations[i];
+                //         for (int j= alliedHQLocs.length; --j >= 0;){
+                //             if (alliedHQLocs[j] != null && !alliedHQLocs[j].equals(parentHQLocation)){
+                //                 if (alliedHQLocs[j].distanceSquaredTo(rememberedEnemyHQLocations[i]) < 
+                //                     parentHQLocation.distanceSquaredTo(rememberedEnemyHQLocations[i])){
+                //                     currentDestination = CENTER_OF_THE_MAP;
+                //                     break;
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
                 if (rememberedEnemyHQLocations[2] != null)
                     currentDestination = rememberedEnemyHQLocations[2];
                 else if (rememberedEnemyHQLocations[0] != null) 
@@ -93,7 +109,7 @@ public class BotLauncher extends CombatUtils{
                 else if (rememberedEnemyHQLocations[1] != null) 
                     currentDestination = rememberedEnemyHQLocations[1];
             }
-            else{
+            else {
                 int shortestDist = Integer.MAX_VALUE;
                 for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
                     if (rememberedEnemyHQLocations[i] != null){
@@ -108,7 +124,7 @@ public class BotLauncher extends CombatUtils{
 
         }
         pathing.setNewDestination(currentDestination);
-        destinationFlag = "sBD";
+        destinationFlag = "sBD " + currentDestination;
         launcherState = Status.MARCHING;
     }
 
@@ -128,6 +144,7 @@ public class BotLauncher extends CombatUtils{
         boolean currentlyInCloud = rc.senseCloud(rc.getLocation());
         if (!currentlyInCloud || launcherState != Status.CLOUD_WORK) return;
         if (currentlyInCloud && (launcherState == Status.MARCHING || launcherState == Status.EXPLORE)) {
+            destinationFlag += " cW";
             launcherState = Status.CLOUD_WORK;
             return;
         }
@@ -140,6 +157,7 @@ public class BotLauncher extends CombatUtils{
             boolean willDieIfPursuit = CombatUtils.isMilitaryUnit(prevTurnHostile.getType()) && rc.getHealth() <= prevTurnHostile.getType().damage;
             if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryForcedMoveInDirection(prevTurnHostile.location)){
                 launcherState = Status.PURSUING;
+                destinationFlag += " sP";
             }
         }
     }
@@ -170,7 +188,7 @@ public class BotLauncher extends CombatUtils{
         }
         if (nearestLoc != null){
             currentDestination = nearestLoc;
-            destinationFlag = "sEI";
+            destinationFlag += " sEI";
             sendIslandLocation(nearestLoc);
             launcherState = Status.ISLAND_WORK;
             return true;
@@ -304,6 +322,7 @@ public class BotLauncher extends CombatUtils{
             return false;
 	    pathing.setAndMoveToDestination(closestHostile.location);
         if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
+            destinationFlag += " tM2APU";
             launcherState = Status.PURSUING;
             return true;
         }
@@ -422,11 +441,11 @@ public class BotLauncher extends CombatUtils{
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
                 if(tryMoveToHelpAlly(closestHostile)) {
-                    destinationFlag += "1 " + closestHostile.location.toString();
+                    destinationFlag += " 1 " + closestHostile.location.toString();
                     return true;
                 }
                 if(tryMoveToAttackProductionUnit(closestHostile)) {
-                    destinationFlag += "2";
+                    destinationFlag += " 2";
                     return true;
                 }
             }
@@ -439,15 +458,15 @@ public class BotLauncher extends CombatUtils{
             }
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (tryMoveToHelpAlly(closestHostile)) {
-                destinationFlag += "3";
+                destinationFlag += " 3";
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
             if (tryMoveToEngageOutnumberedEnemy(closestHostile)) {
-                destinationFlag += "4";
+                destinationFlag += " 4";
                 return true;
             }
             if (tryMoveToAttackProductionUnit(closestHostile)) {
-                destinationFlag += "5";
+                destinationFlag += " 5";
                 return true;
             }
         }
@@ -485,7 +504,7 @@ public class BotLauncher extends CombatUtils{
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null){
                 currentDestination = combatLocation;
-                destinationFlag = "fNCL";
+                destinationFlag += " fNCL";
                 pathing.setNewDestination(currentDestination);
                 launcherState = Status.MARCHING;
                 return true;
@@ -509,7 +528,7 @@ public class BotLauncher extends CombatUtils{
         else if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
             rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
                 currentDestination = nearestCombatLocation;
-                destinationFlag = "cCD";
+                destinationFlag += " cCD";
                 launcherState = Status.MARCHING;
         }
     }
@@ -520,10 +539,17 @@ public class BotLauncher extends CombatUtils{
                 MapLocation targetLocation = tryToBackUpFromEnemyHQ(enemyHQ);
                 if (targetLocation != null){
                     currentDestination = targetLocation;
-                    destinationFlag = "cEHQ";
+                    destinationFlag += " cEHQ";
                     launcherState = Status.MARCHING;
                 }
             }
+            // if (launcherState != Status.CIRCLING && circleLocation != enemyHQ.location){
+            //     CircularExplore.updateCenterLocationForLauncher(enemyHQ.location);
+            //     circleLocation = enemyHQ.location;
+            //     launcherState = Status.CIRCLING;
+            // }
+            // destinationFlag = "cEHQ";
+            // pathing.setAndMoveToDestination(CircularExplore.explore());
         }
     }
 

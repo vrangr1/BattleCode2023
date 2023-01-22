@@ -1,5 +1,7 @@
 package AnExploreBot;
 
+import AnExploreBot.Comms.COMM_TYPE;
+import AnExploreBot.Comms.SHAFlag;
 import battlecode.common.*;
 
 public class Utils extends Globals{
