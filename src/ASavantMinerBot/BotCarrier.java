@@ -72,6 +72,8 @@ public class BotCarrier extends Utils{
     private static int exploredLocationsCount = 0;
     private static int movesLeftBeforeDeath = -1;
     public static final boolean DEBUG_PRINT = false;
+    private static final boolean DOING_EARLY_MANA_DEPOSITION = false;
+    private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 10;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -228,22 +230,22 @@ public class BotCarrier extends Utils{
         assert matched : "matched; round num: " + rc.getRoundNum() + "; id: " + rc.getID() + "; currentLocation: " + rc.getLocation() + "; targetLoc: " + givenLoc;
     }
 
-    private static boolean isMilitaryUnit(RobotInfo robotInfo){
+    private static boolean isMilitaryUnit(RobotInfo robotInfo) throws GameActionException{
         switch(robotInfo.type){
             case LAUNCHER: 
             case DESTABILIZER: return true;
-            case HEADQUARTERS: return (robotInfo.getLocation().distanceSquaredTo(rc.getLocation()) <= RobotType.HEADQUARTERS.actionRadiusSquared);
+            case HEADQUARTERS: return (rc.getAnchor() == null && robotInfo.getLocation().distanceSquaredTo(rc.getLocation()) <= RobotType.HEADQUARTERS.actionRadiusSquared);
             default: return false;
         }
     }
 
-    private static boolean canSeeMilitaryUnit(){
+    private static boolean canSeeMilitaryUnit() throws GameActionException{
         for (int i = visibleEnemies.length; --i >= 0;)
             if (isMilitaryUnit(visibleEnemies[i])) return true;
         return false;
     }
 
-    private static int vicinityMilitaryCount(){
+    private static int vicinityMilitaryCount() throws GameActionException{
         int count = 0;
         for (int i = visibleEnemies.length; --i >= 0;)
             if (isMilitaryUnit(visibleEnemies[i])) count++;
@@ -262,7 +264,8 @@ public class BotCarrier extends Utils{
         updateVision();
         exploreDest1 = null;
         exploreDest2 = null;
-        movesLeftBeforeDeath = 2 * (rc.getHealth() / RobotType.LAUNCHER.damage);
+        movesLeftBeforeDeath = (rc.getHealth() / RobotType.LAUNCHER.damage);
+        if (rc.getWeight() <= 2) movesLeftBeforeDeath *= 2;
         Comms.writeSavedLocations();
         if (TRY_TO_FLEE){
             if (!isFleeing && canSeeMilitaryUnit()){
@@ -397,15 +400,18 @@ public class BotCarrier extends Utils{
         }
     }
 
-    private static void updateCarrier() throws GameActionException{
-        if (exploringForWells){
-            exploreForWells(false);
-            return;
-        }
+    private static void doIReturnToHQ() throws GameActionException{
         currentInventoryWeight = rc.getWeight();
         if (!returnToHQ && currentInventoryWeight >= amountToCollect()){
             returnToHQ = true;
             movementDestination = Comms.findNearestHeadquarter();
+        }
+        else if (DOING_EARLY_MANA_DEPOSITION && !returnToHQ && isFleeing){
+            MapLocation hqLoc = Comms.findNearestHeadquarter();
+            if (rc.getResourceAmount(ResourceType.MANA) > EARLY_MANA_DEPOSTION_THRESHOLD && rc.getLocation().distanceSquaredTo(hqLoc) <= movesLeftBeforeDeath * movesLeftBeforeDeath){
+                returnToHQ = true;
+                movementDestination = hqLoc;
+            }
         }
         if (returnToHQ && movementDestination == null)
             movementDestination = Comms.findNearestHeadquarter();
@@ -413,6 +419,14 @@ public class BotCarrier extends Utils{
             carrierStatus = Status.TRANSIT_RES_DEP;
             movementDestination = Comms.findNearestHeadquarter();
         }
+    }
+
+    private static void updateCarrier() throws GameActionException{
+        if (exploringForWells){
+            exploreForWells(false);
+            return;
+        }
+        doIReturnToHQ();
         collectedElixir = rc.getResourceAmount(ResourceType.ELIXIR);
         collectedMana = rc.getResourceAmount(ResourceType.MANA);
         collectedAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
@@ -1060,8 +1074,8 @@ public class BotCarrier extends Utils{
     }
 
     private static boolean shouldIFlee() throws GameActionException{
-        if (!returnToHQ) return true;
-        assert movementDestination != null;
+        if (!returnToHQ && !movingToIsland) return true;
+        assert movementDestination != null: "rn: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation() + "; id: " + rc.getID() + "";
         int dist = rc.getLocation().distanceSquaredTo(movementDestination);
         return dist > (movesLeftBeforeDeath*movesLeftBeforeDeath);
     }
