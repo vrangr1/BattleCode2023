@@ -19,7 +19,7 @@ public class CircularExplore extends Utils{
     private static MapLocation lastOnTheMapLocation = null;
     private static final int WELL_INITIAL_EXPLORE_RADIUS = 18;
     public static final boolean DEBUG_PRINT = false;
-    public static final int DEBUG_ID = 13473;
+    public static final int DEBUG_ID = 13749;
     private static final int MAX_EXPLORE_ROUNDS_ALLOWED = 40;
     private static int exploreRoundCount = 0;
     
@@ -64,7 +64,7 @@ public class CircularExplore extends Utils{
 
     public static void updateCenterLocationForLauncher(MapLocation loc){
         isCenterHQ = false;
-        MIN_DISTANCE_FROM_HQ_TO_EXPLORE = RobotType.HEADQUARTERS.actionRadiusSquared;
+        MIN_DISTANCE_FROM_HQ_TO_EXPLORE = RobotType.HEADQUARTERS.actionRadiusSquared + 5;
         PERIMETER_BUFFER = MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
         startedExplore = true;
         
@@ -83,7 +83,7 @@ public class CircularExplore extends Utils{
         if (!startedExplore)
             startExploration();
         updateDetails();
-        if (exploreRoundCount > MAX_EXPLORE_ROUNDS_ALLOWED){
+        if (UNIT_TYPE == RobotType.CARRIER && exploreRoundCount > MAX_EXPLORE_ROUNDS_ALLOWED){
             // System.out.println("Max explore rounds reached");
             MapLocation temp = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(BotCarrier.getLocalPrioritizedResource()));
             if (temp != null) return temp;
