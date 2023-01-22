@@ -281,4 +281,8 @@ public class Movement extends Utils{
         return false;
     }
 
+    public static void legionMining() throws GameActionException{
+        return;
+    }
+
 }

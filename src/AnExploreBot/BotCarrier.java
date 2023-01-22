@@ -600,34 +600,51 @@ public class BotCarrier extends Utils{
     private static void collectResources() throws GameActionException{
         if (!rc.isActionReady() || returnToHQ) return;
         WellInfo[] adjacentWells = rc.senseNearbyWells(2);
-        if (adjacentWells.length == 0) return;
-        int i = rng.nextInt(adjacentWells.length), amount;
-        
-        WellInfo curWell = adjacentWells[i];
-        if (curWell.getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
+        if (adjacentWells.length == 0) 
             return;
-        Comms.writeOrSaveLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));
-        amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());
-        if (amount < 0){
+        
+        // First mine for priority resource.
+        for (int i = adjacentWells.length - 1; i >= 0; i--){
+            if (!rc.isActionReady() || returnToHQ) return;
+            if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
+                continue;
+            WellInfo curWell = adjacentWells[i];
+            Comms.writeOrSaveLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));    
+            collectionWrapper(curWell);
+        }
+
+        // Then for the other resource
+        for (int i = adjacentWells.length - 1; i >= 0; i--){
+            if (!rc.isActionReady() || returnToHQ) return;
+            WellInfo curWell = adjacentWells[i];  
+            collectionWrapper(curWell);
+        }
+    }
+
+    private static void collectionWrapper(WellInfo curWell) throws GameActionException{
+        int amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());  
+        if (amount <= 0){
             returnToHQ = true;
             movementDestination = Comms.findNearestHeadquarter();
             return;
-        }
-        rc.collectResource(curWell.getMapLocation(), amount);
-        currentInventoryWeight += amount;
-        switch(curWell.getResourceType()){
-            case ADAMANTIUM: collectedAdamantium += amount; break;
-            case MANA: collectedMana += amount; break;
-            case ELIXIR: collectedElixir += amount; break;
-            default: assert false;
-        }
-        carrierStatus = Status.COLLECTING_RESOURCES;
-        collectedResourcesThisTurn = true;
-        desperationIndex = 0;
-        
-        if (currentInventoryWeight >= amountToCollect()){
-            returnToHQ = true;
-            movementDestination = Comms.findNearestHeadquarter();
+        }      
+        if (rc.canCollectResource(curWell.getMapLocation(), amount)){
+            rc.collectResource(curWell.getMapLocation(), amount);
+            currentInventoryWeight += amount;
+            switch(curWell.getResourceType()){
+                case ADAMANTIUM: collectedAdamantium += amount; break;
+                case MANA: collectedMana += amount; break;
+                case ELIXIR: collectedElixir += amount; break;
+                default: assert false;
+            }
+            carrierStatus = Status.COLLECTING_RESOURCES;
+            collectedResourcesThisTurn = true;
+            desperationIndex = 0;
+            if (currentInventoryWeight >= amountToCollect()){
+                returnToHQ = true;
+                movementDestination = Comms.findNearestHeadquarter();
+                return;
+            }
         }
     }
 
