@@ -114,6 +114,21 @@ public class Globals {
     public static boolean[] mapSymmetry = {true, true, true}; // {Vertical, Horizontal, Rotational}
     public static MapLocation[] alliedHQLocs;
 
+    public static enum SYMMETRY{
+        VERTICAL(0b100),
+        HORIZONTAL(0b010),
+        ROTATIONAL(0b001);
+
+        int symVal = 0;
+        SYMMETRY(int symmetry){
+            this.symVal = symmetry;
+        }
+
+        int getSym(){
+            return symVal;
+        }
+    }
+
     public static void initGlobals(RobotController rc1) throws GameActionException{
         rc = rc1;
         pathing = new Pathing();
@@ -145,7 +160,7 @@ public class Globals {
         ISLAND_COUNT = rc.getIslandCount();
         Comms.initCommunicationsArray();
         getParentHQLocation();
-        rememberedEnemyHQLocations = new MapLocation[4];
+        rememberedEnemyHQLocations = new MapLocation[3];
         if (UNIT_TYPE != RobotType.HEADQUARTERS){
             alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
             guessEnemyHQLocation();
@@ -189,16 +204,34 @@ public class Globals {
         rememberedEnemyHQLocations[0] = new MapLocation(MAP_WIDTH - parentHQLocation.x - 1, parentHQLocation.y);
         rememberedEnemyHQLocations[1] = new MapLocation(parentHQLocation.x - 1, MAP_HEIGHT - parentHQLocation.y - 1);
         rememberedEnemyHQLocations[2] = new MapLocation(MAP_WIDTH - parentHQLocation.x - 1, MAP_HEIGHT - parentHQLocation.y - 1);
+        for (int i = SYMMETRY.values().length; --i >= 0;) {
+            if (!checkIfSymmetry(SYMMETRY.values()[i])){
+                mapSymmetry[i] = false;
+                rememberedEnemyHQLocations[i] = null;
+            } 
+        }
         MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
+        MapLocation[] enemyHQs = Comms.getEnemyHeadquartersLocationsList();
         for (int i = alliedHQs.length; --i >= 0;) {
             if (alliedHQs[i] == null) continue;
             for (int j = rememberedEnemyHQLocations.length; --j >= 0;) {         
                 if (rememberedEnemyHQLocations[j] == null) continue;
                 int hqDistance = alliedHQs[i].distanceSquaredTo(rememberedEnemyHQLocations[j]);
-                if (hqDistance > RobotType.HEADQUARTERS.visionRadiusSquared) continue;
-                else{
-                    rememberedEnemyHQLocations[j] = null;
-                    mapSymmetry[j] = false;
+                if (hqDistance <= RobotType.HEADQUARTERS.visionRadiusSquared) {
+                    boolean flag = false;
+                    for (int k = enemyHQs.length; --k >= 0;) {
+                        if (enemyHQs[k] == null) continue;
+                        if (enemyHQs[k].equals(rememberedEnemyHQLocations[j])){
+                            flag = true;
+                        }
+                    }
+                    if (!flag){
+                        if (checkIfSymmetry(SYMMETRY.values()[j])){
+                            removeSymmetry(SYMMETRY.values()[j], "2");
+                        }
+                        rememberedEnemyHQLocations[j] = null;
+                        mapSymmetry[j] = false;
+                    }
                 }
             }
         }
@@ -210,13 +243,34 @@ public class Globals {
             guessDestination = Comms.findNearestEnemyHeadquarterLocation();
         }
         if (guessDestination.equals(CENTER_OF_THE_MAP)){
-            if (rememberedEnemyHQLocations[2] != null)  
-                guessDestination = rememberedEnemyHQLocations[2];
-            else if (rememberedEnemyHQLocations[0] != null) 
-                guessDestination = rememberedEnemyHQLocations[0];
-            else if (rememberedEnemyHQLocations[1] != null) 
-                guessDestination = rememberedEnemyHQLocations[1];
+            guessDestination = defaultEnemyLocation();
         }
         return guessDestination;
+    }
+
+    public static MapLocation defaultEnemyLocation() throws GameActionException{
+        for (int i = rememberedEnemyHQLocations.length; --i >= 0;) {
+            if (rememberedEnemyHQLocations[i] != null){
+                if (checkIfSymmetry(SYMMETRY.values()[i])){
+                    return rememberedEnemyHQLocations[i];
+                }
+                else{
+                    rememberedEnemyHQLocations[i] = null;
+                    mapSymmetry[i] = false;
+                }
+            }
+        }   
+        return CENTER_OF_THE_MAP;
+    }
+
+    public static boolean checkIfSymmetry(SYMMETRY sym) throws GameActionException{
+        return (rc.readSharedArray(Comms.SYMMETRY_CHANNEL) & sym.getSym()) == sym.getSym();
+    }
+
+    public static void removeSymmetry(SYMMETRY sym, String s) throws GameActionException{
+        int symVal = rc.readSharedArray(Comms.SYMMETRY_CHANNEL);
+        symVal = symVal ^ sym.getSym();
+        if (rc.canWriteSharedArray(0, 0))
+            rc.writeSharedArray(Comms.SYMMETRY_CHANNEL, symVal);
     }
 }

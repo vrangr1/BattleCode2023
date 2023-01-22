@@ -80,34 +80,25 @@ public class BotLauncher extends CombatUtils{
     private static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
-            if (enemyHQ == null && rememberedEnemyHQLocations[i] != null &&
-                rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared){
+            if (!mapSymmetry[i])
+                removeSymmetry(SYMMETRY.values()[i], "3");
+            if (!checkIfSymmetry(SYMMETRY.values()[i])){
+                mapSymmetry[i] = false;
+                rememberedEnemyHQLocations[i] = null;
+            }
+            else if (enemyHQ == null && rememberedEnemyHQLocations[i] != null &&
+                rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared &&
+                rc.canSenseLocation(rememberedEnemyHQLocations[i])){
                 rememberedEnemyHQLocations[i] = null;
                 mapSymmetry[i] = false;
+                if (checkIfSymmetry(SYMMETRY.values()[i])){
+                    removeSymmetry(SYMMETRY.values()[i], "1");
+                }
             }
         }
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
             if (rc.getRoundNum() <= BIRTH_ROUND + 1){
-                // for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
-                //     if (rememberedEnemyHQLocations[i] != null){
-                //         currentDestination = rememberedEnemyHQLocations[i];
-                //         for (int j= alliedHQLocs.length; --j >= 0;){
-                //             if (alliedHQLocs[j] != null && !alliedHQLocs[j].equals(parentHQLocation)){
-                //                 if (alliedHQLocs[j].distanceSquaredTo(rememberedEnemyHQLocations[i]) < 
-                //                     parentHQLocation.distanceSquaredTo(rememberedEnemyHQLocations[i])){
-                //                     currentDestination = CENTER_OF_THE_MAP;
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
-                if (rememberedEnemyHQLocations[2] != null)
-                    currentDestination = rememberedEnemyHQLocations[2];
-                else if (rememberedEnemyHQLocations[0] != null) 
-                    currentDestination = rememberedEnemyHQLocations[0];
-                else if (rememberedEnemyHQLocations[1] != null) 
-                    currentDestination = rememberedEnemyHQLocations[1];
+                currentDestination = defaultEnemyLocation();
             }
             else {
                 int shortestDist = Integer.MAX_VALUE;

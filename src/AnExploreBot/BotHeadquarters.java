@@ -15,6 +15,7 @@ public class BotHeadquarters extends Utils{
         BuilderWrapper.initBuilder();
         if (TRACKING_LAUNCHER_COUNT) Comms.resetRobotCount(RobotType.LAUNCHER);
         if (TRACKING_AMPLIFIER_COUNT) Comms.resetRobotCount(RobotType.AMPLIFIER);
+        rc.writeSharedArray(Comms.SYMMETRY_CHANNEL, 0b111);
     }
 
     public static void updateEveryTurn() throws GameActionException{

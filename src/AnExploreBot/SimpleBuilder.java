@@ -141,11 +141,11 @@ public class SimpleBuilder extends Utils{
     }
 
     private static int updateAmplifierScore(int oldScore){
-        return oldScore + 15;
+        return oldScore + 20;
     }
 
     private static int updateStandardAnchorScore(int oldScore) {
-        return oldScore + 20;
+        return oldScore + 30;
     }
     
     private static int updateScore(RobotType type, int oldScore){
@@ -216,7 +216,7 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean shouldBuildAmplifier() throws GameActionException{
-        return Math.min(carrierScore, launcherScore + 2) >= 10 + amplifierScore && rc.getRoundNum() >= 15;
+        return launcherScore >= 10 + amplifierScore && rc.getRoundNum() >= 100;
     }
 
     private static boolean shouldBuildAnchor() throws GameActionException{
@@ -234,11 +234,10 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean tryBuildStandardAnchor() throws GameActionException{
-        if (rc.getNumAnchors(Anchor.STANDARD) > 2) return false;
-        if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
+        if (rc.getNumAnchors(Anchor.STANDARD) >= 2) return false;
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
-        // if (rc.getRoundNum() < 40) return false;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100) return buildOurAnchor();
+        if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 70) return buildOurAnchor();
         if (carrierScore + launcherScore < standardAnchorScore) return false;
         return buildOurAnchor();
     }
