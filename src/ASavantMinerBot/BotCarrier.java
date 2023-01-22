@@ -602,7 +602,7 @@ public class BotCarrier extends Utils{
         WellInfo[] adjacentWells = rc.senseNearbyWells(2);
         if (adjacentWells.length == 0) 
             return;
-        
+        MapLocation chosenWell = null;
         // First mine for priority resource.
         for (int i = adjacentWells.length - 1; i >= 0; i--){
             if (!rc.isActionReady() || returnToHQ) return;
@@ -611,6 +611,7 @@ public class BotCarrier extends Utils{
             WellInfo curWell = adjacentWells[i];
             Comms.writeOrSaveLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));    
             collectionWrapper(curWell);
+            chosenWell = curWell.getMapLocation();
         }
 
         // Then for the other resource
@@ -618,6 +619,11 @@ public class BotCarrier extends Utils{
             if (!rc.isActionReady() || returnToHQ) return;
             WellInfo curWell = adjacentWells[i];  
             collectionWrapper(curWell);
+            if (chosenWell == null) chosenWell = curWell.getMapLocation();
+        }
+
+        if (!returnToHQ && chosenWell != null){
+            Movement.legionMining(chosenWell);
         }
     }
 

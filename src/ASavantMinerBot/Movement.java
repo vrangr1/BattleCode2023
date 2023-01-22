@@ -281,8 +281,33 @@ public class Movement extends Utils{
         return false;
     }
 
-    public static void legionMining() throws GameActionException{
-        return;
+    public static void legionMining(MapLocation chosenWell) throws GameActionException{
+        if (!rc.isMovementReady()) return;
+        if (rc.getWeight() >= 38) return;
+        int chosenDist = 0;
+        int count = 0;
+        Direction chosenNewDirection = null;
+        for (int i = directions.length; --i >= 0; ) {
+            MapLocation newLocation = rc.getLocation().add(directions[i]);
+            if (chosenWell.distanceSquaredTo(newLocation) > 2) continue;
+            int newLocationDist = newLocation.distanceSquaredTo(rc.getLocation());
+            if (rc.canMove(directions[i]) &&rc.senseMapInfo(newLocation).getCurrentDirection() == Direction.CENTER) {
+                if (newLocationDist == chosenDist) count++;
+                else if (newLocationDist > chosenDist) {
+                    count = 1;
+                    chosenDist = newLocationDist;
+                }
+                else{
+                    continue;
+                }
+                if (rng.nextInt(count) == 0){
+                    chosenNewDirection = directions[i];
+                }
+            }
+        }
+        if (chosenNewDirection != null){
+            rc.move(chosenNewDirection);
+        }
     }
 
 }
