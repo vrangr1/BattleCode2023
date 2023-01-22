@@ -102,10 +102,10 @@ public class CircularExplore extends Utils{
         rc.setIndicatorString("center: " + centerLocation + "centerDir: " + centerLocationDir + "lastDir: " + lastDir + "currentDist: " + currentDistanceFromHQ + "reachedPerimeter: " + reachedPerimeter);
     }
 
-    public static void printStatus(MapLocation loc){
-        rc.setIndicatorString("loc: " + loc + ";center: " + centerLocation + ";centerDir: " + centerLocationDir + ";lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter);
+    public static void printStatus(MapLocation loc1, MapLocation loc2){
+        rc.setIndicatorString("loc: " + loc1 + "; loc2: " + loc2 + "; center: " + centerLocation + ";centerDir: " + centerLocationDir + ";lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter);
         if (rc.getID() == DEBUG_ID)
-            System.out.println("loc: " + loc + ";center: " + centerLocation + ";centerDir: " + centerLocationDir + "; anticlockwise: " + rotateAntiClockwise + "; lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter + ";revStartLoc: " + revolutionStartLocation + ";revStartRound: " + revolutionStartRound + "\n");
+            System.out.println("loc1: " + loc1 + "; loc2: " + loc2 + "; center: " + centerLocation + ";centerDir: " + centerLocationDir + "; anticlockwise: " + rotateAntiClockwise + "; lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter + ";revStartLoc: " + revolutionStartLocation + ";revStartRound: " + revolutionStartRound + "\n");
     }
 
 

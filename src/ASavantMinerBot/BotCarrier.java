@@ -23,7 +23,10 @@ public class BotCarrier extends Utils{
         ANCHOR_NOT_FOUND,
         DESPERATE,
         OCCUPIED__FINDING_ANOTHER_ISLAND,
-        FLEEING
+        FLEEING,
+        SEARCHING_FOR_WELL,
+        NORMAL,
+        TOO_MUCH_BYTECODES_RET_EARLY,
     }
 
     private static boolean movingToIsland = false;
@@ -51,10 +54,10 @@ public class BotCarrier extends Utils{
     private static final int MAX_IGNORED_ISLAND_COUNT = 100;
     private static int ignoredIslandLocationsCount = 0;
     private static int hqIndex;
-    private static MapLocation exploreDest;
+    private static MapLocation exploreDest1, exploreDest2;
     private static final int EXCESS_RESOURCES = 3;
     private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 50;
-    private static final boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
+    private static boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
     private static int MINE_ONLY_MANA_TILL_ROUND;
     private static boolean exploringForWells = false;
     private static MapLocation fleeTarget = null;
@@ -68,12 +71,17 @@ public class BotCarrier extends Utils{
     private static final int EXPLORED_LOCATIONS_MAX_SIZE = 10;
     private static int exploredLocationsCount = 0;
     private static int movesLeftBeforeDeath = -1;
+    public static final boolean DEBUG_PRINT = false;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
         hqIndex = Comms.getHeadquarterIndex(loc);
         hqIndex = Comms.START_CHANNEL_BANDS + hqIndex * Comms.CHANNELS_COUNT_PER_HEADQUARTER + 2;
         return hqIndex;
+    }
+
+    private static void setInitialMineOnlyManaStrat(){
+        // if (MAP_SIZE > 2500) INITIAL_MINE_ONLY_MANA_STRAT = false;
     }
 
     private static void setMineOnlyManaRoundLimit(){
@@ -105,10 +113,12 @@ public class BotCarrier extends Utils{
         collectAnchorHQidx = -1;
         returnEarly = false;
         otherTypeWell = null;
-        exploreDest = null;
+        exploreDest1 = null;
+        exploreDest2 = null;
         exploringForWells = false;
         fleeTarget = null;
         lastRetreatDirection = null;
+        setInitialMineOnlyManaStrat();
         movesLeftBeforeDeath = 2 * (rc.getHealth() / RobotType.LAUNCHER.damage);
         setMineOnlyManaRoundLimit();
         setFleeRounds();
@@ -124,7 +134,7 @@ public class BotCarrier extends Utils{
         for (int i = 0; i < ISLAND_COUNT; i++)
             islandViable[i] = true;
         ignoreLocations = new boolean[MAP_HEIGHT * MAP_WIDTH];
-        if (Clock.getBytecodesLeft() < 6000){
+        if (Clock.getBytecodesLeft() < 3000){
             returnEarly = true;
             return;
         }
@@ -152,23 +162,23 @@ public class BotCarrier extends Utils{
 
     private static void movementWrapper() throws GameActionException{
         if (rc.isMovementReady()){
-            exploreDest = Explore.explore(randomExploration);
-            pathing.setAndMoveToDestination(exploreDest);
+            exploreDest1 = Explore.explore(randomExploration);
+            pathing.setAndMoveToDestination(exploreDest1);
         }
         if (rc.isMovementReady()){
-            exploreDest = Explore.explore(randomExploration);
-            Nav.goTo(exploreDest);
+            exploreDest2 = Explore.explore(randomExploration);
+            Nav.goTo(exploreDest2);
         }
     }
 
     private static void movementWrapperForCircularExplore() throws GameActionException{
         if (rc.isMovementReady()){
-            exploreDest = CircularExplore.explore();
-            pathing.setAndMoveToDestination(exploreDest);
+            exploreDest1 = CircularExplore.explore();
+            pathing.setAndMoveToDestination(exploreDest1);
         }
         if (rc.isMovementReady()){
-            exploreDest = CircularExplore.explore();
-            Nav.goTo(exploreDest);
+            exploreDest2 = CircularExplore.explore();
+            Nav.goTo(exploreDest2);
         }
     }
 
@@ -238,17 +248,22 @@ public class BotCarrier extends Utils{
     }
 
     private static void updateOverall() throws GameActionException{
-        if (returnEarly) return;
+        carrierStatus = Status.NORMAL;
+        if (returnEarly){
+            carrierStatus = Status.TOO_MUCH_BYTECODES_RET_EARLY;
+            return;
+        }
         returnEarly = false;
         currentLocation = rc.getLocation();
         otherTypeWell = null;
         updateVision();
+        exploreDest1 = null;
+        exploreDest2 = null;
         movesLeftBeforeDeath = 2 * (rc.getHealth() / RobotType.LAUNCHER.damage);
         Comms.writeSavedLocations();
         if (TRY_TO_FLEE){
             if (!isFleeing && canSeeMilitaryUnit()){
                 isFleeing = true;
-                returnEarly = true;
                 fleeCount = FLEE_ROUNDS;
                 if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
                 return;
@@ -360,8 +375,9 @@ public class BotCarrier extends Utils{
         carrierStatus = Status.EXPLORE_FOR_WELLS;
         if (movementDestination != null){
             exploringForWells = false;
-            if (!rc.canWriteSharedArray(0, 0))
-                Comms.saveThisLocation(movementDestination, Comms.resourceFlag(rType));
+            carrierStatus = Status.TRANSIT_TO_WELL;
+            setWellDestination(movementDestination);
+            Comms.writeOrSaveLocation(movementDestination, Comms.resourceFlag(rType));
         }
         else{
             if (USING_CIRCULAR_EXPLORATION){
@@ -474,7 +490,9 @@ public class BotCarrier extends Utils{
         MapLocation commsLoc = findNearestIslandInComms();
         if (commsLoc != null && rc.canSenseLocation(commsLoc)) return commsLoc;
         MapLocation senseLoc = findNearestIslandInVision();
-        if (senseLoc != null && rc.canWriteSharedArray(0, 0))
+        if (senseLoc != null && rc.canWriteSharedArray(0, 0) 
+        // && !Comms.findIfLocationAlreadyPresent(senseLoc, Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND)
+        )
             Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.ISLAND, senseLoc, Comms.SHAFlag.UNOCCUPIED_ISLAND);
         if (senseLoc != null && commsLoc != null){
             if (currentLocation.distanceSquaredTo(commsLoc) <= currentLocation.distanceSquaredTo(senseLoc))
@@ -558,7 +576,11 @@ public class BotCarrier extends Utils{
     private static void carrierAnchorMode() throws GameActionException{
         // I have an anchor. So singularly focusing on getting it to the first island I can find.
         // TODO: Add conditions and actions for behavior under attack.
-        if (returnEarly || isFleeing) return;
+        if (returnEarly) {
+            carrierStatus = Status.TOO_MUCH_BYTECODES_RET_EARLY;
+            return;
+        }
+        if (isFleeing && shouldIFlee()) return;
         if (rc.canPlaceAnchor() && rc.senseAnchor(rc.senseIsland(rc.getLocation())) == null){
             carrierStatus = Status.PLACING_ANCHOR;
             rc.placeAnchor();
@@ -816,6 +838,9 @@ public class BotCarrier extends Utils{
         currentLocation = rc.getLocation();
         if (otherTypeWell == null) return  true;
         if (STORING_EXPLORED_LOCATIONS && isLocationExplored(obtainedLoc) && !Comms.checkIfLocationSaved(obtainedLoc)) return false;
+        // if (MAP_SIZE < 1000)
+        //     return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
+        // else if (MAP_SIZE < 1600)
         return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
     }
 
@@ -826,13 +851,18 @@ public class BotCarrier extends Utils{
      */
     private static void getAndSetWellLocation() throws GameActionException{
         otherTypeWell = null;
-        MapLocation senseLoc = findNearestWellInVision(getLocalPrioritizedResource());
-        if (senseLoc != null && rc.canWriteSharedArray(0, 0)){
-            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, Comms.resourceFlag(prioritizedResource));
+        ResourceType rType = getLocalPrioritizedResource();
+        Comms.SHAFlag flag = Comms.resourceFlag(rType);
+        MapLocation senseLoc = findNearestWellInVision(rType);
+        carrierStatus = Status.SEARCHING_FOR_WELL;
+        if (senseLoc != null && rc.canWriteSharedArray(0, 0) 
+        // && !Comms.findIfLocationAlreadyPresent(senseLoc, Comms.COMM_TYPE.WELLS, flag)
+        ){
+            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, flag);
             setWellDestination(senseLoc);
             return;
         }
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(getLocalPrioritizedResource()));
+        MapLocation commsLoc = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, flag);
         if (commsLoc != null && rc.canSenseLocation(commsLoc)){
             setWellDestination(commsLoc);
             return;
@@ -880,17 +910,18 @@ public class BotCarrier extends Utils{
             collectResources();
             return;
         }
-        if (desperationIndex == 5)
-            desperationIndex = 12;
+        // if (desperationIndex == 5)
+        //     desperationIndex = 12;
         // If outside of action radius
         if (!rc.canActLocation(movementDestination)){
             otherTypeWell = null;
-            MapLocation senseLoc = findNearestWellInVision(getLocalPrioritizedResource());
+            MapLocation senseLoc = null;
+            senseLoc = findNearestWellInVision(getLocalPrioritizedResource());
             if (senseLoc == null && otherTypeWell == null){
                 rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
                 carrierStatus = Status.TRANSIT_TO_WELL;
             }
-            else if (senseLoc == null){
+            else if (senseLoc == null && Clock.getBytecodesLeft() > 1500){
                 exploringForWells = true;
                 desperationIndex = 0;
                 movementDestination = null;
@@ -902,7 +933,7 @@ public class BotCarrier extends Utils{
                 movementWrapperForCircularExplore();
                 return;
             }
-            else{
+            else if (senseLoc != null){
                 Comms.writeOrSaveLocation(senseLoc, Comms.resourceFlag(getLocalPrioritizedResource()));
                 setWellDestination(senseLoc);
             }
@@ -924,7 +955,11 @@ public class BotCarrier extends Utils{
 
     private static void gatherResources() throws GameActionException{
         // TODO: Add conditions and actions for behavior under attack here too.
-        if (returnEarly || (isFleeing && shouldIFlee())) return;
+        if (returnEarly) {
+            carrierStatus = Status.TOO_MUCH_BYTECODES_RET_EARLY;
+            return;
+        }
+        if (isFleeing && shouldIFlee()) return;
         if (movingToIsland) resetIslandVariables();
         updateCarrier();
         if (rc.getAnchor() != null){
@@ -970,8 +1005,8 @@ public class BotCarrier extends Utils{
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
         else if (carrierStatus == Status.EXPLORE_FOR_WELLS || carrierStatus == Status.EXPLORE_FOR_ISLANDS){
             if (CircularExplore.DEBUG_PRINT && CircularExplore.DEBUG_ID == rc.getID())
-            CircularExplore.printStatus(exploreDest);
-            else rc.setIndicatorString(carrierStatus.toString() + " " + exploreDest);
+            CircularExplore.printStatus(exploreDest1, exploreDest2);
+            else rc.setIndicatorString(carrierStatus.toString() + " " + exploreDest1 + " " + exploreDest2);
         }
         else
             rc.setIndicatorString(carrierStatus.toString());

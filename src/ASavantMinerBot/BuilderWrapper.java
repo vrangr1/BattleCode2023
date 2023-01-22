@@ -32,12 +32,16 @@ public class BuilderWrapper extends Utils {
                 RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
             else RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
         }
+        // else if (MAP_SIZE <= 2500){
         else{
             if (rc.getRoundNum() < 50)
                 RESOURCE_MANA_ADAMANTIUM_RATIO = 3;
             else if (rc.getRoundNum() < 150) RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
             else RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
         }
+        // else{
+        //     RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+        // }
     }
 
     private static final BUILDERS CURRENT_BUILDER = BUILDERS.SIMPLEBUILDER;

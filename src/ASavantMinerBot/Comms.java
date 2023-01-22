@@ -29,9 +29,9 @@ public class Comms extends Utils{
     public static final int START_CHANNEL_BANDS = 9;
     private static final int MAX_HEADQUARTERS_CHANNELS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
-    private static final int WELLS_CHANNELS_COUNT = 10;
+    private static final int WELLS_CHANNELS_COUNT = 13;
     private static final int ISLAND_CHANNELS_COUNT = 10;
-    private static final int AMPLIFIER_CHANNELS_COUNT = 3;
+    private static final int AMPLIFIER_CHANNELS_COUNT = 0;
     private static final int COMBAT_CHANNELS_COUNT = 20;
 
     // ununsed channels count: 0 (in the case of max count of headquarters (i.e. 4))
@@ -262,6 +262,7 @@ public class Comms extends Utils{
     private static void allocateChannels(COMM_TYPE type, int channelCount) throws GameActionException{
         if (channelCount + channelsUsed > TOTAL_CHANNELS_COUNT)
             throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "Too many channels being used");
+        if (channelCount == 0) return;
         type.channelStart = channelsUsed;
         type.channelStop = channelsUsed + channelCount - 1;
         channelsUsed += channelCount;
@@ -1281,6 +1282,8 @@ public class Comms extends Utils{
         if (checkIfLocationSaved(loc)) return;
 
         if (findIfLocationAlreadyPresent(loc, getCOMM_TYPEFromSHAFlag(flag), flag)) return;
+        if (BotCarrier.DEBUG_PRINT)
+            System.out.println("Saved location: " + loc + " with flag: " + flag);
         locationsToWrite[savedLocationsCount] = loc;
         locationsToWriteFlags[savedLocationsCount++] = flag;
     }
@@ -1294,8 +1297,11 @@ public class Comms extends Utils{
             COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[count]);
             assert type != null : "Invalid SHAFlag";
             assert type != COMM_TYPE.HEADQUARTER : "Invalid SHAFlag";
+            if (findIfLocationAlreadyPresent(locationsToWrite[count], type, locationsToWriteFlags[count])) continue;
+            if (BotCarrier.DEBUG_PRINT)
+                System.out.println("Writing saved location: " + locationsToWrite[count] + " with flag: " + locationsToWriteFlags[count]);
             writeAndOverwriteLesserPriorityMessage(type, locationsToWrite[count], locationsToWriteFlags[count]);
-            if (Clock.getBytecodesLeft() < 200) {
+            if (Clock.getBytecodesLeft() < 300) {
                 savedLocationsCount = count;
                 wrapAround = false;
                 return false;

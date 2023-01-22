@@ -5,7 +5,7 @@
 - [x] Headquarter count: Fix.
 - [x] Lesser or equal priority message overwriting. If none found, overwrite oldest message.
 ~~- [ ] Add dedicated channels for maintaining count of units~~
-- [ ] Free up 3 bits for symmetry stuff.
+- [x] Free up 3 bits for symmetry stuff.
 - [ ] Flushing the queues
 
 ## Carriers
@@ -32,15 +32,20 @@
 - [x] Increase radius if revolution complete in looping around hqs too.
 ~~- [ ] Possibly transfer resources from a hq that has abundant resources to an hq with less resources.~~
 ~~- [ ] Attack carriers by carriers~~
-- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?
-- [ ] When near hq and about to deposit resources, don't flee.
+- [x] When near hq and about to deposit resources, don't flee.
+~~- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?~~
+- [ ] Increase adamantium collection on larger maps
+- [ ] Possible overcrowding fix: Trigger explore when not mining and greater than a threshold number of carriers in vision.
+- [ ] Find out how to improve production in BowAndArrow (noBFSplz match)
+- [ ] Shift all movementWrappers to the end of the code PROPERLY.
+- [ ] Fix flee from enemy hq. Perhaps use circular explore to circumvent?
 - [ ] If carrying anchor and encountered enemy occupied island with no enemy to defend, squat and free.
 - [ ] Refine toExploreOrNotToExplore heuristic
-- [ ] Test flee rounds counts.
 - [ ] Test mining of resources enroute to another location
+- [ ] Check save location's performance.
+- [ ] Test flee rounds counts.
 - [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
 - [ ] Experiment with mining immediately after first move. Remove bugs.
-- [ ] Check save location's performance.
 - [ ] Carrier mining loss due to movement wrapper (run auto script)
 - [ ] Try removing the need for Explore.explore() in the worst case scenario in Circular Explore.
 - [ ] Fix fleeing code
@@ -48,7 +53,7 @@
 - [ ] Work on generation of elixir
 
 ## Explore:
-- [ ] Add function to allow launchers to circle around a location at a distance.
+- [x] Add function to allow launchers to circle around a location at a distance.
 
 ## Build Order:
 - [x] Perhaps use Ivan Geffner's build order
