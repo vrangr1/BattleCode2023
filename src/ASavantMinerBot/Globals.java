@@ -113,6 +113,7 @@ public class Globals {
     public static final int END_EARLY_ROUND_NUM = 1000;
     public static boolean[] mapSymmetry = {true, true, true}; // {Vertical, Horizontal, Rotational}
     public static MapLocation[] alliedHQLocs;
+    public static RobotInfo shepherdUnit;
 
     public static enum SYMMETRY{
         VERTICAL(0b100),
@@ -165,6 +166,7 @@ public class Globals {
             alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
             guessEnemyHQLocation();
         }
+        shepherdUnit = null;
     }
 
     public static void getParentHQLocation() throws GameActionException{

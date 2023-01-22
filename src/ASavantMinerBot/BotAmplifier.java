@@ -24,7 +24,6 @@ public class BotAmplifier extends Explore{
     private static int vNonHQCombatAllies = 0;  
     public static int enemyHQInVision = 0;
     private static MapLocation currentDestination;
-    private static RobotInfo shepherdUnit;
 
     public static void initAmplifier() throws GameActionException{
         amplifierState = Status.BORN;
@@ -70,7 +69,7 @@ public class BotAmplifier extends Explore{
         }
     }
 
-    private static MapLocation checkShepherdUnitLocation () throws GameActionException{
+    private static MapLocation checkShepherdUnitLocation() throws GameActionException{
         if (shepherdUnit != null){
             for (int i = visibleAllies.length; --i >= 0;) {
                 if (visibleAllies[i].ID == shepherdUnit.ID){

@@ -329,7 +329,7 @@ public class BotLauncher extends CombatUtils{
 					numNearbyHostiles += 1;
 			}
 		}
-		RobotInfo[] visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		int numNearbyAllies = 1; // Counts ourself
 		for (int i = visibleAllies.length; --i >= 0;) {
 			if (isMilitaryUnit(visibleAllies[i])) {
