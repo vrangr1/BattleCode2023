@@ -97,7 +97,9 @@ public class Pathing extends Utils {
     
     // Try to move to next cell in computed path
     public void moveTo(Direction dir) throws GameActionException {
-        rc.move(dir);
+        if (rc.canMove(dir)){
+            rc.move(dir);
+        }
         if (fuzzyMovesLeft > 0) {
             fuzzyMovesLeft--;
         }
