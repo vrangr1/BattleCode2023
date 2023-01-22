@@ -73,8 +73,8 @@ public class BotLauncher extends CombatUtils{
                 attackCloud();
             }
         }
-        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " Des flag " + destinationFlag + 
-            " Mov status " + rc.isMovementReady());
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " |Des flag " + destinationFlag + 
+            " |Can move " + rc.isMovementReady());
     }
 
     private static void setBaseDestination() throws GameActionException {
@@ -321,18 +321,18 @@ public class BotLauncher extends CombatUtils{
 	}
 
     private static boolean tryMoveToEngageOutnumberedEnemy(RobotInfo closestHostile) throws GameActionException {
-        if(closestHostile == null) return false;
-        //# if (closestHostile.location.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.actionRadiusSquared) return false;
+        if (closestHostile == null) return false;
+        if (isMilitaryUnit(closestHostile.type) && closestHostile.location.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.actionRadiusSquared) return false;
         int numNearbyHostiles = 0;
 		for (int i = visibleEnemies.length; --i >= 0;) {
-			if (visibleEnemies[i].type.canAttack()) {
+			if (isMilitaryUnit(visibleEnemies[i].type)) {
 					numNearbyHostiles += 1;
 			}
 		}
 		RobotInfo[] visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		int numNearbyAllies = 1; // Counts ourself
 		for (int i = visibleAllies.length; --i >= 0;) {
-			if (visibleAllies[i].type.canAttack() && visibleAllies[i].health >= visibleAllies[i].type.getMaxHealth()/2.0) {
+			if (isMilitaryUnit(visibleAllies[i])) {
 				numNearbyAllies += 1;
 			}
 		}
@@ -403,7 +403,9 @@ public class BotLauncher extends CombatUtils{
 		MapLocation retreatTarget = rc.getLocation();
 		for (int i = visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-			if (!(hostile.type == RobotType.LAUNCHER) || !(hostile.type == RobotType.DESTABILIZER)) continue;			
+            // TODO: The line below always returns true, making this function void
+            if (!(hostile.type == RobotType.LAUNCHER) || !(hostile.type == RobotType.DESTABILIZER)) 
+                continue;
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
 		if (!rc.getLocation().equals(retreatTarget)) {
@@ -420,10 +422,10 @@ public class BotLauncher extends CombatUtils{
             return false;
         }
 
-        if (rc.isMovementReady() && retreatIfOutnumbered()){
-            launcherState = Status.RETREATING;
-            return true;
-        }
+        // if (rc.isMovementReady() && retreatIfOutnumbered()){
+        //     launcherState = Status.RETREATING;
+        //     return true;
+        // }
 
         if (rc.isActionReady()){
             if (inRNonHQEnemies > 0) {
@@ -444,6 +446,7 @@ public class BotLauncher extends CombatUtils{
         if (rc.isMovementReady()){
             // Most important function
             if (inRNonHQEnemies > 0 && tryToBackUpToMaintainMaxRangeLauncher(visibleEnemies)) {
+                destinationFlag += " 2.5";
                 launcherState = Status.FLANKING;
                 return true;
             }

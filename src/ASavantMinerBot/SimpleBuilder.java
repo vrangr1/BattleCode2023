@@ -236,8 +236,9 @@ public class SimpleBuilder extends Utils{
     private static boolean tryBuildStandardAnchor() throws GameActionException{
         if (rc.getNumAnchors(Anchor.STANDARD) >= 2) return false;
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
+        if (rc.getRobotCount() > MAP_SIZE / 4) return buildOurAnchor();
         if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 70) return buildOurAnchor();
+        if (rc.getRobotCount() > 70 + Math.round(rc.getRobotCount()/500) * 20) return buildOurAnchor();
         if (carrierScore + launcherScore < standardAnchorScore) return false;
         return buildOurAnchor();
     }
