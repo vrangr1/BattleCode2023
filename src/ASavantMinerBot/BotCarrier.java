@@ -154,7 +154,7 @@ public class BotCarrier extends Utils{
     }
 
     private static void movementWrapper(MapLocation dest) throws GameActionException{
-        if (rc.isMovementReady()){
+        if (rc.isMovementReady() && Clock.getBytecodesLeft() > 3000){
             pathing.setAndMoveToDestination(dest);
         }
         // if (!returnToHQ && rc.getLocation().distanceSquaredTo(dest) <= 2 && rc.onTheMap(dest) && rc.isLocationOccupied(dest))
@@ -371,6 +371,10 @@ public class BotCarrier extends Utils{
         if (currentInventoryWeight == 0){
             returnToHQ = false;
             movementDestination = null;
+            getAndSetWellLocation();
+            // goToWell();
+            carrierStatus = Status.TRANSIT_TO_WELL;
+            movementWrapper(movementDestination);
         }
     }
 
@@ -855,10 +859,14 @@ public class BotCarrier extends Utils{
         currentLocation = rc.getLocation();
         if (otherTypeWell == null) return  true;
         if (STORING_EXPLORED_LOCATIONS && isLocationExplored(obtainedLoc) && !Comms.checkIfLocationSaved(obtainedLoc)) return false;
+        double wellDist = Math.sqrt(currentLocation.distanceSquaredTo(otherTypeWell));
+        double potentialDist = Math.min(Math.sqrt(GameConstants.MAX_DISTANCE_BETWEEN_WELLS), Math.min(MAP_HEIGHT, MAP_WIDTH)/4);
+        double expectedDist = wellDist + potentialDist;
+        return currentLocation.distanceSquaredTo(obtainedLoc) < expectedDist * expectedDist;
         // if (MAP_SIZE < 1000)
         //     return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
-        // else if (MAP_SIZE < 1600)
-        return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
+        // // else if (MAP_SIZE < 1600)
+        // return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
     }
 
     /**
@@ -938,7 +946,7 @@ public class BotCarrier extends Utils{
                 rc.setIndicatorString("moving to well: " + movementDestination + "; despId: " + desperationIndex);
                 carrierStatus = Status.TRANSIT_TO_WELL;
             }
-            else if (senseLoc == null && Clock.getBytecodesLeft() > 1500){
+            else if (senseLoc == null && !toExploreOrNotToExplore(movementDestination) && Clock.getBytecodesLeft() > 1500){
                 exploringForWells = true;
                 desperationIndex = 0;
                 movementDestination = null;
@@ -954,6 +962,7 @@ public class BotCarrier extends Utils{
                 Comms.writeOrSaveLocation(senseLoc, Comms.resourceFlag(getLocalPrioritizedResource()));
                 setWellDestination(senseLoc);
             }
+            carrierStatus = Status.TRANSIT_TO_WELL;
             movementWrapper(movementDestination);
             return;
         }
@@ -990,6 +999,10 @@ public class BotCarrier extends Utils{
                 carrierStatus = Status.TRANSIT_ANCHOR_COLLECTION;
             else carrierStatus = Status.TRANSIT_RES_DEP;
             movementWrapper(movementDestination);
+            collectedElixir = rc.getResourceAmount(ResourceType.ELIXIR);
+            collectedMana = rc.getResourceAmount(ResourceType.MANA);
+            collectedAdamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
+            transferResourcesToHQ();
             return;
         }
         collectResources();
@@ -1007,7 +1020,10 @@ public class BotCarrier extends Utils{
         }
         else{
             getAndSetWellLocation();
-            if (Clock.getBytecodesLeft() < 2000) return;
+            if (Clock.getBytecodesLeft() < 2000) {
+                movementWrapper(movementDestination);
+                return;
+            }
             goToWell();
             collectResources();
         }
