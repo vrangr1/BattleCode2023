@@ -56,7 +56,7 @@ public class BotCarrier extends Utils{
     private static int hqIndex;
     private static MapLocation exploreDest1, exploreDest2;
     private static final int EXCESS_RESOURCES = 3;
-    private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 50;
+    private static final int INCREASE_RESOURCE_COLLECTION_ROUND = 0;
     private static boolean INITIAL_MINE_ONLY_MANA_STRAT = true;
     private static int MINE_ONLY_MANA_TILL_ROUND;
     private static boolean exploringForWells = false;
@@ -82,6 +82,9 @@ public class BotCarrier extends Utils{
 
     private static void setInitialMineOnlyManaStrat(){
         // if (MAP_SIZE > 2500) INITIAL_MINE_ONLY_MANA_STRAT = false;
+        // if (MAP_SIZE < 900) INITIAL_MINE_ONLY_MANA_STRAT = true;
+        // else if (MAP_SIZE < 1600) INITIAL_MINE_ONLY_MANA_STRAT = false;
+        // else INITIAL_MINE_ONLY_MANA_STRAT = true;
     }
 
     private static void setMineOnlyManaRoundLimit(){
