@@ -25,6 +25,10 @@ public class CircularExplore extends Utils{
     
     ///////////////////////// Public Methods /////////////////////////
 
+    public static void resetCenterLocation(){
+        centerLocation = null;
+    }
+
     public static void updateCenterLocation() throws GameActionException{ // Used to set center location to nearest hq
         startExploration();
         exploreRoundCount = 0;

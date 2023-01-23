@@ -36,7 +36,6 @@ public class BotCarrier extends Utils{
     private static RobotInfo[] visibleEnemies;
     private static boolean returnToHQ = false;
     private static boolean collectedResourcesThisTurn = false;
-    private static boolean inPlaceForCollection = false;
     private static int collectedAdamantium = 0, collectedMana = 0, collectedElixir = 0;
     private static int desperationIndex = 0;
     private static boolean goingToCollectAnchor = false;
@@ -74,6 +73,7 @@ public class BotCarrier extends Utils{
     public static final boolean DEBUG_PRINT = false;
     private static final boolean DOING_EARLY_MANA_DEPOSITION = false;
     private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 10;
+    private static final int GEFFNERS_EXPLORE_TRIGGER = 15;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -112,7 +112,6 @@ public class BotCarrier extends Utils{
         collectedAdamantium = 0;
         collectedMana = 0;
         collectedElixir = 0;
-        inPlaceForCollection = false;
         desperationIndex = 0;
         goingToCollectAnchor = false;
         collectAnchorHQidx = -1;
@@ -177,6 +176,10 @@ public class BotCarrier extends Utils{
     }
 
     private static void movementWrapperForCircularExplore() throws GameActionException{
+        if (CircularExplore.getCenterLocation() == null){
+            movementWrapper(true);
+            return;
+        }
         if (rc.isMovementReady()){
             exploreDest1 = CircularExplore.explore();
             pathing.setAndMoveToDestination(exploreDest1);
@@ -675,6 +678,8 @@ public class BotCarrier extends Utils{
         if (amount <= 0){
             returnToHQ = true;
             movementDestination = Comms.findNearestHeadquarter();
+            carrierStatus = Status.TRANSIT_RES_DEP;
+            movementWrapper(movementDestination);
             return;
         }      
         if (rc.canCollectResource(curWell.getMapLocation(), amount)){
@@ -753,7 +758,6 @@ public class BotCarrier extends Utils{
 
     private static void setWellDestination(MapLocation loc){
         movementDestination = loc;
-        inPlaceForCollection = currentLocation.distanceSquaredTo(loc) <= 2;
         desperationIndex = 0;
     }
 
@@ -863,10 +867,6 @@ public class BotCarrier extends Utils{
         double potentialDist = Math.min(Math.sqrt(GameConstants.MAX_DISTANCE_BETWEEN_WELLS), Math.min(MAP_HEIGHT, MAP_WIDTH)/4);
         double expectedDist = wellDist + potentialDist;
         return currentLocation.distanceSquaredTo(obtainedLoc) < expectedDist * expectedDist;
-        // if (MAP_SIZE < 1000)
-        //     return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
-        // // else if (MAP_SIZE < 1600)
-        // return currentLocation.distanceSquaredTo(obtainedLoc) < currentLocation.distanceSquaredTo(otherTypeWell) + ((4*GameConstants.MAX_DISTANCE_BETWEEN_WELLS)/5);
     }
 
     /**
@@ -901,21 +901,15 @@ public class BotCarrier extends Utils{
             carrierStatus = Status.EXPLORE_FOR_WELLS;
             exploringForWells = true;
             movementDestination = null;
-            inPlaceForCollection = false;
         }
         else{
             carrierStatus = Status.EXPLORE_FOR_WELLS;
             exploringForWells = true;
             movementDestination = null;
-            inPlaceForCollection = false;
         }
     }
 
     private static void goToWell() throws GameActionException{
-        if (inPlaceForCollection){
-            collectResources();
-            return;
-        }
         if (!rc.isMovementReady()) return;
         if (movementDestination == null){
             assert carrierStatus == Status.EXPLORE_FOR_WELLS : "Movement destination is null but status is not explore for wells";
@@ -926,19 +920,28 @@ public class BotCarrier extends Utils{
         if (curDist <= 2) { // Reached location
             if (!rc.isLocationOccupied(movementDestination)){
                 Direction dir = currentLocation.directionTo(movementDestination);
-                if (rc.canMove(dir)){
+                if (rc.canMove(dir))
                     rc.move(dir);
-                    inPlaceForCollection = true;
-                }
             }
-            else inPlaceForCollection = true;
             collectResources();
             return;
         }
-        // if (desperationIndex == 5)
-        //     desperationIndex = 12;
+
+        // if (curDist <= UNIT_TYPE.visionRadiusSquared && curDist > 8){
+        //     int count = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM).length;
+        //     if (count > GEFFNERS_EXPLORE_TRIGGER){
+        //         exploringForWells = true;
+        //         desperationIndex = 0;
+        //         movementDestination = null;
+        //         carrierStatus = Status.EXPLORE_FOR_WELLS;
+        //         movementWrapper(true);
+        //         CircularExplore.resetCenterLocation();
+        //         return;
+        //     }
+        // }
+        // else 
         // If outside of action radius
-        if (!rc.canActLocation(movementDestination)){
+        if (curDist > UNIT_TYPE.actionRadiusSquared){
             otherTypeWell = null;
             MapLocation senseLoc = null;
             senseLoc = findNearestWellInVision(getLocalPrioritizedResource());
@@ -968,6 +971,7 @@ public class BotCarrier extends Utils{
         }
         // pathing.setAndMoveToDestination(movementDestination);
         movementWrapper(movementDestination);
+        carrierStatus = Status.TRANSIT_TO_WELL;
         if (desperationIndex < 5) return;
         if (rc.canWriteSharedArray(0, 0))
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource), movementDestination);
@@ -976,7 +980,6 @@ public class BotCarrier extends Utils{
         desperationIndex = 0;
         movementDestination = null;
         carrierStatus = Status.DESPERATE;
-        inPlaceForCollection = false;
     }
 
     private static void gatherResources() throws GameActionException{
@@ -1042,7 +1045,7 @@ public class BotCarrier extends Utils{
             else rc.setIndicatorString(carrierStatus.toString() + " " + exploreDest1 + " " + exploreDest2);
         }
         else
-            rc.setIndicatorString(carrierStatus.toString());
+            rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
         if (Clock.getBytecodesLeft() > 700){
             RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
             CombatUtils.sendGenericCombatLocation(visibleEnemies);
