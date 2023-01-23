@@ -928,20 +928,19 @@ public class BotCarrier extends Utils{
             return;
         }
 
-        // if (curDist <= UNIT_TYPE.visionRadiusSquared && curDist > 8){
-        //     int count = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM).length;
-        //     if (count > GEFFNERS_EXPLORE_TRIGGER){
-        //         exploringForWells = true;
-        //         desperationIndex = 0;
-        //         movementDestination = null;
-        //         carrierStatus = Status.EXPLORE_FOR_WELLS;
-        //         movementWrapper(true);
-        //         CircularExplore.resetCenterLocation();
-        //         return;
-        //     }
-        // }
-        // else 
-        if (curDist > UNIT_TYPE.actionRadiusSquared){
+        if (curDist <= UNIT_TYPE.visionRadiusSquared && curDist > 8){
+            int count = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM).length;
+            if (count > GEFFNERS_EXPLORE_TRIGGER){
+                exploringForWells = true;
+                desperationIndex = 0;
+                movementDestination = null;
+                carrierStatus = Status.EXPLORE_FOR_WELLS;
+                movementWrapper(true);
+                CircularExplore.resetCenterLocation();
+                return;
+            }
+        }
+        else if (curDist > UNIT_TYPE.actionRadiusSquared){
             // If outside of action radius
             otherTypeWell = null;
             MapLocation senseLoc = null;
