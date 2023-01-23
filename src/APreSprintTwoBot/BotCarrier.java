@@ -473,9 +473,11 @@ public class BotCarrier extends Utils{
      */
     public static MapLocation findNearestIslandInVision() throws GameActionException{
         int[] nearbyIslands = rc.senseNearbyIslands();
-        MapLocation nearestLoc = null;
+        MapLocation nearestLoc = null, loc;
         int nearestDist = -1, curDist;
-        for (int islandId : nearbyIslands){
+        int islandId;
+        for (int i = nearbyIslands.length; i-- > 0; ){
+            islandId = nearbyIslands[i];
             if (rc.senseTeamOccupyingIsland(islandId) != Team.NEUTRAL){
                 islandViable[islandId - 1] = false;
                 continue;
@@ -483,7 +485,8 @@ public class BotCarrier extends Utils{
             if (!islandViable[islandId - 1])
                 islandViable[islandId - 1] = true;
             MapLocation[] locations = rc.senseNearbyIslandLocations(islandId);
-            for (MapLocation loc : locations){
+            for (int j = locations.length; j-- > 0; ){
+                loc = locations[j];
                 curDist = currentLocation.distanceSquaredTo(loc);
                 if (nearestLoc == null || curDist < nearestDist){
                     nearestLoc = loc;
@@ -778,7 +781,10 @@ public class BotCarrier extends Utils{
         WellInfo[] nearbyWells = rc.senseNearbyWells();
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
-        for (WellInfo well : nearbyWells){
+        WellInfo well;
+        // for (WellInfo well : nearbyWells){
+        for (int i = nearbyWells.length; --i >= 0;){
+            well = nearbyWells[i];
             MapLocation loc = well.getMapLocation();
             curDist = currentLocation.distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
@@ -1065,25 +1071,29 @@ public class BotCarrier extends Utils{
     private static Direction getRetreatDirection(RobotInfo[] visibleHostiles) throws GameActionException{
         int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
-        for (RobotInfo hostile : visibleHostiles) {
+        RobotInfo hostile;
+        // for (RobotInfo hostile : visibleHostiles) {
+        for (int i = visibleHostiles.length; --i >= 0;) {
+            hostile = visibleHostiles[i];
             if (!hostile.type.canAttack() && hostile.type != RobotType.HEADQUARTERS) continue;
             int distSq = lCR.distanceSquaredTo(hostile.location);
             if (distSq < closestHostileDistSq) {
                 closestHostileDistSq = distSq;
             }
         }
-        Direction bestRetreatDir = null;
+        Direction bestRetreatDir = null, dir;
         int bestDistSq = closestHostileDistSq;
-        // int bestRubble = rc.senseRubble(rc.getLocation());
 
-        for (Direction dir : directions) {
+        for (int i = directions.length; --i >= 0;) {
+            dir = directions[i];
             if (!rc.canMove(dir)) continue;
             MapLocation dirLoc = lCR.add(dir);
             // int dirLocRubble = rc.senseRubble(dirLoc);
             // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
 
             int smallestDistSq = Integer.MAX_VALUE;
-            for (RobotInfo hostile : visibleHostiles) {
+            for (int j = visibleHostiles.length; --j >= 0;) {
+                hostile = visibleHostiles[j];
                 if (!hostile.type.canAttack()) continue;
                 int distSq = hostile.location.distanceSquaredTo(dirLoc);
                 if (distSq < smallestDistSq) {
