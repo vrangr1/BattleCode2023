@@ -73,7 +73,7 @@ public class BotCarrier extends Utils{
     public static final boolean DEBUG_PRINT = false;
     private static final boolean DOING_EARLY_MANA_DEPOSITION = false;
     private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 10;
-    private static final int GEFFNERS_EXPLORE_TRIGGER = 12;
+    private static int GEFFNERS_EXPLORE_TRIGGER = 12;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -87,6 +87,12 @@ public class BotCarrier extends Utils{
         // if (MAP_SIZE < 900) INITIAL_MINE_ONLY_MANA_STRAT = true;
         // else if (MAP_SIZE < 1600) INITIAL_MINE_ONLY_MANA_STRAT = false;
         // else INITIAL_MINE_ONLY_MANA_STRAT = true;
+    }
+
+    private static void setGeffnersExploreTrigger(){
+        if (MAP_SIZE < 1000) GEFFNERS_EXPLORE_TRIGGER = 20;
+        else if (MAP_SIZE <= 1600) GEFFNERS_EXPLORE_TRIGGER = 15;
+        else GEFFNERS_EXPLORE_TRIGGER = 12;
     }
 
     private static void setMineOnlyManaRoundLimit(){
@@ -123,6 +129,7 @@ public class BotCarrier extends Utils{
         fleeTarget = null;
         lastRetreatDirection = null;
         setInitialMineOnlyManaStrat();
+        setGeffnersExploreTrigger();
         movesLeftBeforeDeath = 2 * (rc.getHealth() / RobotType.LAUNCHER.damage);
         setMineOnlyManaRoundLimit();
         setFleeRounds();

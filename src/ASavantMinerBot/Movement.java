@@ -287,9 +287,12 @@ public class Movement extends Utils{
         int chosenDist = 0;
         int count = 0;
         Direction chosenNewDirection = null;
+        MapLocation enemyHQ = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = directions.length; --i >= 0; ) {
             MapLocation newLocation = rc.getLocation().add(directions[i]);
             if (chosenWell.distanceSquaredTo(newLocation) > 2) continue;
+            if (enemyHQ != null && newLocation.distanceSquaredTo(enemyHQ) <= RobotType.HEADQUARTERS.actionRadiusSquared)
+                continue;
             int newLocationDist = newLocation.distanceSquaredTo(rc.getLocation());
             if (rc.canMove(directions[i]) &&rc.senseMapInfo(newLocation).getCurrentDirection() == Direction.CENTER) {
                 if (newLocationDist == chosenDist) count++;
