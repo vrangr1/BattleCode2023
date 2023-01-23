@@ -300,6 +300,7 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		if (bestTarget != null && rc.canAttack(bestTarget.location)) {
+            updateInRangeEnemiesVision();
             rc.attack(bestTarget.location);
             prevTurnHostile = bestTarget;
             launcherState = Status.ATTACKING;
@@ -321,11 +322,14 @@ public class BotLauncher extends CombatUtils{
 				}
 			}
 		}
-		if (allyIsFighting) 
-			if (Movement.tryForcedMoveInDirection(closestHostileLocation)) {
-				launcherState = Status.FLANKING;
+		if (allyIsFighting) {
+            Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostileLocation));
+            if (bestDir != null) {
+                rc.move(bestDir);
+                launcherState = Status.FLANKING;
                 return true;
             }
+        }
 		return false;
 	}
 
@@ -351,7 +355,7 @@ public class BotLauncher extends CombatUtils{
 					numNearbyHostiles += 1;
 			}
 		}
-		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.actionRadiusSquared, MY_TEAM);
 		int numNearbyAllies = 1; // Counts ourself
 		for (int i = visibleAllies.length; --i >= 0;) {
 			if (isMilitaryUnit(visibleAllies[i])) {
@@ -359,7 +363,7 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		
-		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health)) {
+		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health) || rc.getHealth() <= 30) {
 			if (Movement.tryForcedMoveInDirection(closestHostile.location)){
                 launcherState = Status.FLANKING;
                 return true;
@@ -399,7 +403,7 @@ public class BotLauncher extends CombatUtils{
 			numAlliesAttackingClosestHostile += 1;
 		}
 
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHosAttack.location, UNIT_TYPE.actionRadiusSquared, MY_TEAM);
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(closestHosAttack.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		for (int i = nearbyAllies.length; --i >= 0;) {
             RobotInfo ally = nearbyAllies[i];
 			if (isMilitaryUnit(ally.type)) {
@@ -425,8 +429,7 @@ public class BotLauncher extends CombatUtils{
 		MapLocation retreatTarget = rc.getLocation();
 		for (int i = visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
-            // TODO: The line below always returns true, making this function void
-            if (!(hostile.type == RobotType.LAUNCHER) || !(hostile.type == RobotType.DESTABILIZER)) 
+            if (!isMilitaryUnit(hostile.getType())) 
                 continue;
 			retreatTarget = retreatTarget.add(hostile.location.directionTo(rc.getLocation()));
 		}
@@ -434,7 +437,13 @@ public class BotLauncher extends CombatUtils{
             if (rc.isActionReady() && inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
-			return Movement.tryMoveInDirection(retreatTarget);
+			Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(retreatTarget));
+            if (bestDir != null) {
+                destinationFlag += " " + bestDir;
+                rc.move(bestDir);
+                launcherState = Status.RETREATING;
+                return true;
+            }
 		}
 		return false;
 	}
@@ -444,10 +453,10 @@ public class BotLauncher extends CombatUtils{
             return false;
         }
 
-        // if (rc.isMovementReady() && retreatIfOutnumbered()){
-        //     launcherState = Status.RETREATING;
-        //     return true;
-        // }
+        if (rc.isMovementReady() && retreatIfOutnumbered()){
+            destinationFlag += " -1";
+            return true;
+        }
 
         if (rc.isActionReady()){
             if (inRNonHQEnemies > 0) {
@@ -466,13 +475,13 @@ public class BotLauncher extends CombatUtils{
             }
         }
         if (rc.isMovementReady()){
+            RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             // Most important function
             if (inRNonHQEnemies > 0 && tryToBackUpToMaintainMaxRangeLauncher(visibleEnemies)) {
                 destinationFlag += " 2.5";
                 launcherState = Status.FLANKING;
                 return true;
             }
-            RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (tryMoveToHelpAlly(closestHostile)) {
                 destinationFlag += " 3";
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
@@ -515,7 +524,7 @@ public class BotLauncher extends CombatUtils{
     private static boolean findNewCombatLocation() throws GameActionException{
         circleEnemyHQ();
         if (vNonHQEnemies == 0 && (currentDestination == null || (launcherState != Status.ISLAND_WORK && 
-            rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.visionRadiusSquared))){
+            rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.actionRadiusSquared))){
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null){
@@ -630,12 +639,14 @@ public class BotLauncher extends CombatUtils{
 		for (Direction dir : directions) {
 			if (!rc.canMove(dir)) continue;
 			MapLocation dirLoc = lCR.add(dir);
+            MapInfo dirLocMapInfo = rc.senseMapInfo(dirLoc);
             // double dirLocRubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
             // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
             if (rc.senseCloud(dirLoc) && !rc.isActionReady()){
                 bestRetreatDir = dir;
                 break;
             }
+            if (dirLocMapInfo.getCurrentDirection() != Direction.CENTER) continue; // Don't move into a moving tile
 			int smallestDistSq = Integer.MAX_VALUE;
 			for (int j  = visibleHostiles.length; --j >= 0;) {
                 RobotInfo hostile = visibleHostiles[j];

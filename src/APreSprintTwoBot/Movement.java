@@ -19,7 +19,7 @@ public class Movement extends Utils{
                 dirs = new Direction[] { forward, forward.rotateRight(), forward.rotateLeft()};
             }
             Direction bestDir = null;
-            double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) * 10.0;
+            double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) * 10.0 + 5;
             int currentDistSq = lCR.distanceSquaredTo(dest);
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
@@ -27,7 +27,7 @@ public class Movement extends Utils{
                 if (rc.senseMapInfo(dirLoc).getCurrentDirection() == direction.opposite()) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
                 double rubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(MY_TEAM) * 10.0;
-                if ((rubble <= bestRubble || rubble == 0)) {
+                if ((rubble < bestRubble || rubble == 0)) {
                     bestRubble = rubble;
                     bestDir = direction;
                 }
@@ -87,6 +87,31 @@ public class Movement extends Utils{
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static Direction combatMovement(RobotInfo[] visibleEnemies, Direction targetDir) throws GameActionException{
+        Direction movDirection = targetDir;
+        Direction[] possibleDirs = {movDirection, movDirection.rotateLeft(), movDirection.rotateRight()};
+        int maxDamageTaken = Integer.MAX_VALUE;
+        Direction bestDir = null;
+        for (int i = possibleDirs.length; --i >= 0;) {
+            MapLocation potDest = rc.getLocation().add(possibleDirs[i]);
+            int maxDamage = 0;
+            if (rc.canMove(possibleDirs[i])) {
+                for (int j = visibleEnemies.length; --j >= 0;) {
+                    if (CombatUtils.isMilitaryUnit(visibleEnemies[j]) && 
+                        visibleEnemies[j].location.distanceSquaredTo(potDest) <= visibleEnemies[j].getType().actionRadiusSquared) {
+                        maxDamage += visibleEnemies[j].getType().damage;
+                        break;
+                    }
+                }
+                if (maxDamage < maxDamageTaken) {
+                    maxDamageTaken = maxDamage;
+                    bestDir = possibleDirs[i];
+                }
+            }
+        }
+        return bestDir;
     }
 
     // Takes around 400 bytecodes to run 

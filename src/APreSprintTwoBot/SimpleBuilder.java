@@ -243,7 +243,7 @@ public class SimpleBuilder extends Utils{
         if (rc.getRobotCount() > MAP_SIZE / 4) return buildOurAnchor();
         if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
         if (rc.getRobotCount() > 70 + Math.round(rc.getRobotCount()/500) * 20) return buildOurAnchor();
-        if (carrierScore + launcherScore < standardAnchorScore) return false;
+        if (launcherScore < standardAnchorScore) return false;
         return buildOurAnchor();
     }
 
