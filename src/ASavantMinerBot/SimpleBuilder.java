@@ -174,7 +174,7 @@ public class SimpleBuilder extends Utils{
 
     private static boolean tryBuildLauncher() throws GameActionException{
         int soldierReq = 1;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) soldierReq = 2;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 120 + MAP_SIZE/80 || rc.getRoundNum() >= 1700) soldierReq = 2;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, soldierReq)) {
             return false;
         }

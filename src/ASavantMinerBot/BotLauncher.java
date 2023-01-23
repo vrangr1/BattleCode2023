@@ -35,6 +35,10 @@ public class BotLauncher extends CombatUtils{
     private static MapLocation prevTurnLocation = null;
     private static String destinationFlag = "";
     private static MapLocation circleLocation = null;
+    private static int minCircleDistance = 0;
+    private static int maxCircleDistance = 0;
+    private static boolean isClockwise = true;
+    private static int LOW_HEALTH_MARK = 30;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -52,6 +56,7 @@ public class BotLauncher extends CombatUtils{
         if (vNonHQEnemies == 0) {
             seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
             // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
+            // lowHealthCircle(); // [CUR_STATE] -> [CUR_STATE|MARCHING|CIRCLING]
         }
         bytecodeCheck(); //1
         tryToMicro();
@@ -153,6 +158,22 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
+    private static void lowHealthCircle() throws GameActionException {
+        if (vNonHQEnemies == 0 && rc.getHealth() <= LOW_HEALTH_MARK && rc.isMovementReady() && rc.getRoundNum() > 150){
+            if (rc.getLocation().distanceSquaredTo(parentHQLocation) <= 100 && launcherState != Status.ISLAND_WORK){
+                if (launcherState != Status.CIRCLING && circleLocation != parentHQLocation)
+                    setCircle(parentHQLocation, 10, 100);
+                circleWorks();
+                launcherState = Status.CIRCLING;
+            }
+            else{
+                currentDestination = parentHQLocation;
+                pathing.setAndMoveToDestination(currentDestination);
+                launcherState = Status.MARCHING;
+            }
+        }
+    }
+
     private static boolean seekEnemyIslandInVision() throws GameActionException {
         if (launcherState == Status.ISLAND_WORK && (rc.senseIsland(rc.getLocation()) != -1)) {
             return true;
@@ -197,6 +218,8 @@ public class BotLauncher extends CombatUtils{
             }
             bytecodeCheck(); //4
             if (launcherState == Status.MARCHING || launcherState == Status.ISLAND_WORK) {
+                if (currentDestination.equals(circleLocation))
+                    return;
                 pathing.moveToDestination();
                 if (rc.isMovementReady()){
                     Movement.tryMoveInDirection(currentDestination);
@@ -529,22 +552,49 @@ public class BotLauncher extends CombatUtils{
 
     private static void circleEnemyHQ() throws GameActionException{
         if (enemyHQInVision == visibleEnemies.length && enemyHQInVision > 0 && launcherState != Status.ISLAND_WORK){
-            if (rc.getLocation().distanceSquaredTo(enemyHQ.location) <= enemyHQ.type.actionRadiusSquared){
-                MapLocation targetLocation = tryToBackUpFromEnemyHQ(enemyHQ);
-                if (targetLocation != null){
-                    currentDestination = targetLocation;
-                    destinationFlag += " cEHQ";
-                    launcherState = Status.MARCHING;
-                }
+            visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+            if (launcherState != Status.CIRCLING && circleLocation != enemyHQ.location){
+                setCircle(enemyHQ.location, 9, 20);
+                launcherState = Status.CIRCLING;
             }
-            // if (launcherState != Status.CIRCLING && circleLocation != enemyHQ.location){
-            //     CircularExplore.updateCenterLocationForLauncher(enemyHQ.location);
-            //     circleLocation = enemyHQ.location;
-            //     launcherState = Status.CIRCLING;
-            // }
-            // destinationFlag = "cEHQ";
-            // pathing.setAndMoveToDestination(CircularExplore.explore());
+            destinationFlag = "cEHQ";
+            circleWorks();
         }
+    }
+
+    private static void setCircle(MapLocation cirCenter, int minDist, int maxDist) throws GameActionException{
+        circleLocation = cirCenter;
+        isClockwise = true;
+        minCircleDistance = minDist;
+        maxCircleDistance = maxDist;
+    }
+
+    private static void circleWorks() throws GameActionException{
+        Direction dirToCenter = rc.getLocation().directionTo(circleLocation);
+        if (!rc.isMovementReady()) return;
+        Direction[] dirs;
+        if (isClockwise){
+            dirs = new Direction[] {dirToCenter.rotateRight(), dirToCenter, dirToCenter.rotateRight().rotateRight(), 
+                dirToCenter.rotateRight().rotateRight().rotateRight(), dirToCenter.rotateRight().rotateRight().rotateRight().rotateRight()};
+        }
+        else{
+            dirs = new Direction[] {dirToCenter.rotateLeft(), dirToCenter, dirToCenter.rotateLeft().rotateLeft(), 
+                dirToCenter.rotateLeft().rotateLeft().rotateLeft(), dirToCenter.rotateLeft().rotateLeft().rotateLeft().rotateLeft()};
+        }
+        for (Direction dir: dirs){
+            MapLocation newLocation = rc.getLocation().add(dir);
+            if (!rc.canSenseLocation(newLocation)) continue;
+            int distance = newLocation.distanceSquaredTo(circleLocation);
+            if (distance <= minCircleDistance && distance <= rc.getLocation().distanceSquaredTo(circleLocation)) continue;
+            if (distance > maxCircleDistance) continue;
+            if (rc.senseMapInfo(newLocation).getCurrentDirection() != Direction.CENTER) continue;
+            if (rc.canMove(dir)){
+                rc.move(dir);
+                launcherState = Status.CIRCLING;
+                return;
+            }
+        }
+        isClockwise = !isClockwise;
     }
 
     public static void coverInCloud() throws GameActionException{
