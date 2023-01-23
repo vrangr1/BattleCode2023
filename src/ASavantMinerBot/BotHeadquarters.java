@@ -24,8 +24,11 @@ public class BotHeadquarters extends Utils{
     }
 
     public static void runHeadquarters() throws GameActionException{
-        if (rc.getRoundNum() == 2)
+        if (rc.getRoundNum() == 2){
             Comms.initCommunicationsArray();
+            alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
+            guessEnemyHQLocation();
+        }
         updateVisibleEnemiesInVision();
         BuilderWrapper.buildUnits(isEndangered);
         updateEveryTurn();

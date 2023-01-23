@@ -337,7 +337,7 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		
-		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() > closestHostile.health)) {
+		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health)) {
 			if (Movement.tryForcedMoveInDirection(closestHostile.location)){
                 launcherState = Status.FLANKING;
                 return true;
