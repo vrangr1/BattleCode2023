@@ -255,10 +255,10 @@ public class BotCarrier extends Utils{
         return false;
     }
 
-    private static int vicinityMilitaryCount() throws GameActionException{
+    private static int vicinityMilitaryCount(RobotInfo[] rInfos) throws GameActionException{
         int count = 0;
-        for (int i = visibleEnemies.length; --i >= 0;)
-            if (isMilitaryUnit(visibleEnemies[i])) count++;
+        for (int i = rInfos.length; --i >= 0;)
+            if (isMilitaryUnit(rInfos[i])) count++;
         return count;
     }
 
@@ -279,12 +279,17 @@ public class BotCarrier extends Utils{
         Comms.writeSavedLocations();
         if (TRY_TO_FLEE){
             if (!isFleeing && canSeeMilitaryUnit()){
-                isFleeing = true;
-                fleeCount = FLEE_ROUNDS;
-                if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
-                return;
+                RobotInfo[] alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+                int allyCount = vicinityMilitaryCount(alliedInfos);
+                int enemyCount = vicinityMilitaryCount(visibleEnemies);
+                if (allyCount < enemyCount){ 
+                    isFleeing = true;
+                    fleeCount = FLEE_ROUNDS;
+                    if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
+                    return;
+                }
             }
-            else if (isFleeing && vicinityMilitaryCount() == 0)
+            else if (isFleeing && vicinityMilitaryCount(visibleEnemies) == 0)
                 fleeCount = Math.max(0, fleeCount - 1);
             
             if (fleeCount == 0){
@@ -1111,7 +1116,8 @@ public class BotCarrier extends Utils{
 
     private static boolean shouldIFlee() throws GameActionException{
         if (!returnToHQ && !movingToIsland) return true;
-        assert movementDestination != null: "rn: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation() + "; id: " + rc.getID() + "";
+        // assert movementDestination != null: "rn: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation() + "; id: " + rc.getID() + "";
+        if (movementDestination == null) return true;
         int dist = rc.getLocation().distanceSquaredTo(movementDestination);
         return dist > (movesLeftBeforeDeath*movesLeftBeforeDeath);
     }
