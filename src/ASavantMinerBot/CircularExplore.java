@@ -112,6 +112,16 @@ public class CircularExplore extends Utils{
             System.out.println("loc1: " + loc1 + "; loc2: " + loc2 + "; center: " + centerLocation + ";centerDir: " + centerLocationDir + "; anticlockwise: " + rotateAntiClockwise + "; lastDir: " + lastDir + ";currentDist: " + currentDistanceFromHQ + ";reachedPerimeter: " + reachedPerimeter + ";revStartLoc: " + revolutionStartLocation + ";revStartRound: " + revolutionStartRound + "\n");
     }
 
+    public static void startExploration() throws GameActionException{
+        initExplore();
+        startedExplore = true;
+        isCenterHQ = true;
+        centerLocation = Comms.findNearestHeadquarter();
+        currentLocation = rc.getLocation();
+        centerLocationDir = currentLocation.directionTo(centerLocation);
+        decideRotationDirection();
+    }
+
 
     ///////////////////////// Private Methods /////////////////////////
 
@@ -150,16 +160,6 @@ public class CircularExplore extends Utils{
             rotateAntiClockwise = true;
         if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
             System.out.println("rotating anticlockwise: " + rotateAntiClockwise);
-    }
-
-    private static void startExploration() throws GameActionException{
-        initExplore();
-        startedExplore = true;
-        isCenterHQ = true;
-        centerLocation = Comms.findNearestHeadquarter();
-        currentLocation = rc.getLocation();
-        centerLocationDir = currentLocation.directionTo(centerLocation);
-        decideRotationDirection();
     }
 
     private static void updateDetails(){

@@ -73,7 +73,7 @@ public class BotCarrier extends Utils{
     public static final boolean DEBUG_PRINT = false;
     private static final boolean DOING_EARLY_MANA_DEPOSITION = false;
     private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 10;
-    private static final int GEFFNERS_EXPLORE_TRIGGER = 15;
+    private static final int GEFFNERS_EXPLORE_TRIGGER = 12;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -894,7 +894,7 @@ public class BotCarrier extends Utils{
         }
         else if (commsLoc != null && toExploreOrNotToExplore(commsLoc)) setWellDestination(commsLoc);
         else if (otherTypeWell != null) {
-            if (!otherTypeWell.equals(CircularExplore.getCenterLocation())){
+            if (CircularExplore.getCenterLocation() == null || !otherTypeWell.equals(CircularExplore.getCenterLocation())){
                 addLocationToExplored(otherTypeWell);
                 CircularExplore.updateCenterLocation(otherTypeWell);
             }
@@ -903,6 +903,7 @@ public class BotCarrier extends Utils{
             movementDestination = null;
         }
         else{
+            CircularExplore.startExploration();
             carrierStatus = Status.EXPLORE_FOR_WELLS;
             exploringForWells = true;
             movementDestination = null;
@@ -940,8 +941,8 @@ public class BotCarrier extends Utils{
         //     }
         // }
         // else 
-        // If outside of action radius
         if (curDist > UNIT_TYPE.actionRadiusSquared){
+            // If outside of action radius
             otherTypeWell = null;
             MapLocation senseLoc = null;
             senseLoc = findNearestWellInVision(getLocalPrioritizedResource());
