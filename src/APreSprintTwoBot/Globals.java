@@ -114,6 +114,7 @@ public class Globals {
     public static boolean[] mapSymmetry = {true, true, true}; // {Vertical, Horizontal, Rotational}
     public static MapLocation[] alliedHQLocs;
     public static RobotInfo shepherdUnit;
+    public static String destinationFlag = "";
 
     public static enum SYMMETRY{
         VERTICAL(0b100),
@@ -273,15 +274,24 @@ public class Globals {
                 }
             }
         }
-        else if (MAP_SIZE <= 2500){
-            for (int i = SYMMETRY.values().length; --i >= 0;) {
+        else {
+            double factor = 2;
+            int[] store = new int[] {2,1,0};
+            if (MAP_SIZE > 2500){
+                store = new int[] {0,1,2};
+            }
+            else if (Math.max(MAP_HEIGHT, MAP_WIDTH) >= 1.5 * Math.min(MAP_HEIGHT, MAP_WIDTH)){
+                store = new int[] {1,2,0};
+                factor = 1;
+            }
+            for (int i : store) {
                 if (checkIfSymmetry(SYMMETRY.values()[i])){
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation);
-                    int minDistance = parentHQLocation.distanceSquaredTo(closestEnemyHQ);
+                    double minDistance = (double) parentHQLocation.distanceSquaredTo(closestEnemyHQ);
                     for (int j = alliedHQLocs.length; --j >= 0;) {
-                        int currDistance = parentHQLocation.distanceSquaredTo(returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]));
-                        if (currDistance <= 1) continue;
-                        if (currDistance * 2 < minDistance){
+                        double currDistance = (double) parentHQLocation.distanceSquaredTo(returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]));
+                        if (currDistance <= 1.0) continue;
+                        if (currDistance * factor < minDistance){
                             minDistance = currDistance;
                             closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
                         }
@@ -291,19 +301,6 @@ public class Globals {
                     }
                 }
             }
-        }
-        else{
-            for (int i = 0; i < rememberedEnemyHQLocations.length; i++) {
-                if (rememberedEnemyHQLocations[i] != null){
-                    if (checkIfSymmetry(SYMMETRY.values()[i])){
-                        return rememberedEnemyHQLocations[i];
-                    }
-                    else{
-                        rememberedEnemyHQLocations[i] = null;
-                        mapSymmetry[i] = false;
-                    }
-                }
-            }   
         }
         return CENTER_OF_THE_MAP;
     }

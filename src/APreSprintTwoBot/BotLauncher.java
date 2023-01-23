@@ -33,7 +33,6 @@ public class BotLauncher extends CombatUtils{
     private static boolean standOff = false;
     private static RobotInfo prevTurnHostile = null;
     private static MapLocation prevTurnLocation = null;
-    private static String destinationFlag = "";
     private static MapLocation circleLocation = null;
     private static int minCircleDistance = 0;
     private static int maxCircleDistance = 0;
