@@ -289,7 +289,7 @@ public class SimpleBuilder extends Utils{
                 builtUnit = true;
                 continue;
             }
-            if (!endangered && tryBuildAmplifier()) {
+            if (!endangered && tryBuildAmplifier() && MAP_SIZE >= 2500) {
                 builtUnit = true;
                 continue;
             }
