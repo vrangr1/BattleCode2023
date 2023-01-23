@@ -839,6 +839,9 @@ public class Comms extends Utils{
         }
         if ((count <= 0 && rc.getRoundNum() > 1) || count > 4)
             throw new GameActionException(GameActionExceptionType.CANT_DO_THAT, "headquarter count can't be this. count: " + Integer.toString(count));
+        if (rc.getRoundNum() == 1){
+            return count;
+        }
         commsHeadquarterCount = count;
         COMM_TYPE.HEADQUARTER.channelStart = START_CHANNEL_BANDS;
         COMM_TYPE.HEADQUARTER.channelStop = START_CHANNEL_BANDS + count * CHANNELS_COUNT_PER_HEADQUARTER - 1;

@@ -260,6 +260,49 @@ public class Globals {
         return guessDestination;
     }
 
+    private static boolean isBottomLeftCorner(MapLocation loc){
+        return loc.x <= MAP_WIDTH / 5 && loc.y <= MAP_HEIGHT / 5;
+    }
+
+    private static boolean isBottomRightCorner(MapLocation loc){
+        return loc.x >= MAP_WIDTH - MAP_WIDTH / 5 && loc.y <= MAP_HEIGHT / 5;
+    }
+
+    private static boolean isTopLeftCorner(MapLocation loc){
+        return loc.x <= MAP_WIDTH / 5 && loc.y >= MAP_HEIGHT - MAP_HEIGHT / 5;
+    }
+
+    private static boolean isTopRightCorner(MapLocation loc){
+        return loc.x >= MAP_WIDTH - MAP_WIDTH / 5 && loc.y >= MAP_HEIGHT - MAP_HEIGHT / 5;
+    }
+
+    public static boolean areHQsCornered() throws GameActionException{
+        int hqCount = Comms.getHeadquartersCount();
+        MapLocation[] alliedHQs = Comms.getAlliedHeadquartersLocationsList();
+        boolean topLeft = false, topRight = false, bottomLeft = false, bottomRight = false;
+        MapLocation loc;
+        for (int i = hqCount; i-- > 0;) {
+            loc = alliedHQs[i];
+            // if (UNIT_TYPE == RobotType.LAUNCHER && rc.getRoundNum() <= BIRTH_ROUND + 1) System.out.println("HQ " + i + " " + loc);
+            if (loc == null || loc.x == -1) continue;
+            if (isBottomLeftCorner(loc)) bottomLeft = true;
+            else if (isBottomRightCorner(loc)) bottomRight = true;
+            else if (isTopLeftCorner(loc)) topLeft = true;
+            else if (isTopRightCorner(loc)) topRight = true;
+        }
+        // if (UNIT_TYPE == RobotType.LAUNCHER && rc.getRoundNum() <= BIRTH_ROUND + 1){
+        //     System.out.println("TOP LEFT: " + topLeft);
+        //     System.out.println("TOP RIGHT: " + topRight);
+        //     System.out.println("BOTTOM LEFT: " + bottomLeft);
+        //     System.out.println("BOTTOM RIGHT: " + bottomRight);
+        // }
+        if (bottomLeft && bottomRight) return true;
+        if (bottomLeft && topLeft) return true;
+        if (bottomRight && topRight) return true;
+        if (topLeft && topRight) return true;
+        return false;
+    }
+
     public static MapLocation defaultEnemyLocation() throws GameActionException{
         if (UNIT_TYPE == RobotType.HEADQUARTERS){
             for (int i = rememberedEnemyHQLocations.length; --i >= 0;) {
@@ -277,7 +320,7 @@ public class Globals {
         else {
             double factor = 2;
             int[] store = new int[] {2,1,0};
-            if (MAP_SIZE > 2500){
+            if (MAP_SIZE > 2500 || areHQsCornered()){
                 store = new int[] {0,1,2};
             }
             else if (Math.max(MAP_HEIGHT, MAP_WIDTH) >= 1.5 * Math.min(MAP_HEIGHT, MAP_WIDTH)){

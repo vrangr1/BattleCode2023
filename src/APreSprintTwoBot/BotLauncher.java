@@ -82,6 +82,16 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void setBaseDestination() throws GameActionException {
+        if (areHQsCornered()){
+            currentDestination = defaultEnemyLocation();
+            pathing.setNewDestination(currentDestination);
+            destinationFlag = "sBD " + currentDestination;
+            // if (rc.getRoundNum() <= BIRTH_ROUND + 1){
+            //     System.out.println("id: " + rc.getID() + "; rn: " + rc.getRoundNum() + "; currentDest" + currentDestination + "; curLoc: " + rc.getLocation());
+            // }
+            launcherState = Status.MARCHING;
+            return;
+        }
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
             if (!mapSymmetry[i])
