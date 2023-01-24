@@ -199,7 +199,10 @@ public class Globals {
         myHealth = curHealth;
     }
 
-    public static MapLocation returnEnemyOnSymmetry(SYMMETRY mapSym, MapLocation allyHQ) {
+    public static MapLocation returnEnemyOnSymmetry(SYMMETRY mapSym, MapLocation allyHQ) throws GameActionException{
+        if (!checkIfSymmetry(mapSym)){
+            return null;
+        }
         switch(mapSym) {
             case VERTICAL:
                 return new MapLocation(MAP_WIDTH - allyHQ.x - 1, allyHQ.y);
@@ -330,18 +333,57 @@ public class Globals {
             for (int i : store) {
                 if (checkIfSymmetry(SYMMETRY.values()[i])){
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation);
+                    if (closestEnemyHQ == null) continue;
                     double minDistance = (double) parentHQLocation.distanceSquaredTo(closestEnemyHQ);
                     for (int j = alliedHQLocs.length; --j >= 0;) {
-                        double currDistance = (double) parentHQLocation.distanceSquaredTo(returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]));
+                        if (alliedHQLocs[j] == null) continue;
+                        MapLocation alliedHQEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
+                        if (alliedHQEnemyHQ == null) continue;
+                        double currDistance = (double) parentHQLocation.distanceSquaredTo(alliedHQEnemyHQ);
                         if (currDistance <= 1.0) continue;
                         if (currDistance * factor < minDistance){
                             minDistance = currDistance;
-                            closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
+                            closestEnemyHQ = alliedHQEnemyHQ;
                         }
                     }
                     if (closestEnemyHQ != null){
                         return closestEnemyHQ;
                     }
+                }
+            }
+        }
+        return CENTER_OF_THE_MAP;
+    }
+
+    public static MapLocation defaultEnemyLocationWithExclusion(MapLocation excludeHQ) throws GameActionException{
+        double factor = 2;
+        int[] store = new int[] {2,1,0};
+        if (MAP_SIZE > 2500 || areHQsCornered()){
+            store = new int[] {0,1,2};
+        }
+        else if (Math.max(MAP_HEIGHT, MAP_WIDTH) >= 1.5 * Math.min(MAP_HEIGHT, MAP_WIDTH)){
+            store = new int[] {1,2,0};
+            factor = 1;
+        }
+        for (int i : store) {
+            if (checkIfSymmetry(SYMMETRY.values()[i])){
+                MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation);
+                if (closestEnemyHQ == null) continue;
+                double minDistance = (double) parentHQLocation.distanceSquaredTo(closestEnemyHQ);
+                for (int j = alliedHQLocs.length; --j >= 0;) {
+                    if (alliedHQLocs[j] == null) continue;
+                    MapLocation alliedHQEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
+                    if (alliedHQEnemyHQ == null) continue;
+                    if (Comms.getHeadquartersCount() > 1 && alliedHQEnemyHQ.equals(excludeHQ)) continue;
+                    double currDistance = (double) parentHQLocation.distanceSquaredTo(alliedHQEnemyHQ);
+                    if (currDistance <= 1.0) continue;
+                    if (currDistance * factor < minDistance){
+                        minDistance = currDistance;
+                        closestEnemyHQ = alliedHQEnemyHQ;
+                    }
+                }
+                if (closestEnemyHQ != null){
+                    return closestEnemyHQ;
                 }
             }
         }

@@ -29,6 +29,7 @@ public class BotLauncher extends CombatUtils{
     public static int vNonHQEnemies = 0;
     public static int inRNonHQEnemies = 0;
     public static int enemyHQInVision = 0;
+    public static int vNonHQCombatAllies = 0;
     private static RobotInfo enemyHQ = null;
     private static boolean standOff = false;
     private static RobotInfo prevTurnHostile = null;
@@ -38,6 +39,9 @@ public class BotLauncher extends CombatUtils{
     private static int maxCircleDistance = 0;
     private static boolean isClockwise = true;
     private static int LOW_HEALTH_MARK = 30;
+    private static int circlingCount;
+    private static int CIRCLE_CHECK = 30;
+    private static MapLocation excludeHQ = null;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -53,9 +57,16 @@ public class BotLauncher extends CombatUtils{
         findAndWriteWellLocationsToComms();
         bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
-            seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
+            boolean seekingIsland = false;
+            seekingIsland = seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
             // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
             // lowHealthCircle(); // [CUR_STATE] -> [CUR_STATE|MARCHING|CIRCLING]
+            // if (!seekingIsland){
+            //     if (doIdling()){
+            //         rc.setIndicatorString("Idling");
+            //         return;
+            //     }
+            // }
         }
         bytecodeCheck(); //1
         tryToMicro();
@@ -82,13 +93,10 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void setBaseDestination() throws GameActionException {
-        if (areHQsCornered()){
+        if (areHQsCornered() && rc.getRoundNum() <= BIRTH_ROUND + 1){
             currentDestination = defaultEnemyLocation();
             pathing.setNewDestination(currentDestination);
             destinationFlag = "sBD " + currentDestination;
-            // if (rc.getRoundNum() <= BIRTH_ROUND + 1){
-            //     System.out.println("id: " + rc.getID() + "; rn: " + rc.getRoundNum() + "; currentDest" + currentDestination + "; curLoc: " + rc.getLocation());
-            // }
             launcherState = Status.MARCHING;
             return;
         }
@@ -133,6 +141,16 @@ public class BotLauncher extends CombatUtils{
         launcherState = Status.MARCHING;
     }
 
+    private static boolean doIdling() throws GameActionException {
+        if (vNonHQEnemies == 0 && rc.getRoundNum() > 150 && rc.getRoundNum() <= BIRTH_ROUND + 1){
+            updateVisibleAlliesVision();
+            if (vNonHQCombatAllies == 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void previousTurnResolution() throws GameActionException {
         standOff = false;
         destinationFlag = "";
@@ -169,17 +187,21 @@ public class BotLauncher extends CombatUtils{
 
     private static void lowHealthCircle() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.getHealth() <= LOW_HEALTH_MARK && rc.isMovementReady() && rc.getRoundNum() > 150){
-            if (rc.getLocation().distanceSquaredTo(parentHQLocation) <= 100 && launcherState != Status.ISLAND_WORK){
-                if (launcherState != Status.CIRCLING && circleLocation != parentHQLocation)
-                    setCircle(parentHQLocation, 10, 100);
-                circleWorks();
-                launcherState = Status.CIRCLING;
-            }
-            else{
-                currentDestination = parentHQLocation;
-                pathing.setAndMoveToDestination(currentDestination);
-                launcherState = Status.MARCHING;
-            }
+            setCircleDestination(parentHQLocation, 10, 100);
+        }
+    }
+
+    private static void setCircleDestination(MapLocation circleDestination, int minDist, int maxDist) throws GameActionException {
+        if (rc.getLocation().distanceSquaredTo(circleDestination) <= maxDist && launcherState != Status.ISLAND_WORK){
+            if (launcherState != Status.CIRCLING && circleLocation != circleDestination)
+                setCircle(circleDestination, minDist, maxDist);
+            circleWorks();
+            launcherState = Status.CIRCLING;
+        }
+        else{
+            currentDestination = circleDestination;
+            pathing.setAndMoveToDestination(currentDestination);
+            launcherState = Status.MARCHING;
         }
     }
 
@@ -244,6 +266,17 @@ public class BotLauncher extends CombatUtils{
     public static void updateVision() throws GameActionException {
         updateVisibleEnemiesVision();
         updateInRangeEnemiesVision();
+    }
+
+    public static void updateVisibleAlliesVision() throws GameActionException{
+        vNonHQCombatAllies = 0;
+        visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+        vNonHQCombatAllies = 0;
+        for (int i = visibleAllies.length; --i >= 0;) {
+            if (isMilitaryUnit(visibleAllies[i].type)) {
+                vNonHQCombatAllies++;
+            }
+        }
     }
     
     public static void updateVisibleEnemiesVision() throws GameActionException{
@@ -575,9 +608,11 @@ public class BotLauncher extends CombatUtils{
             visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
             if (launcherState != Status.CIRCLING && circleLocation != enemyHQ.location){
                 setCircle(enemyHQ.location, 9, 20);
+                circlingCount = 0;
                 launcherState = Status.CIRCLING;
             }
-            destinationFlag = "cEHQ";
+            circlingCount++;
+            destinationFlag += "| cEHQ" + circlingCount;
             circleWorks();
         }
     }
