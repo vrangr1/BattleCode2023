@@ -665,7 +665,7 @@ public class BotCarrier extends Utils{
             return;
         MapLocation chosenWell = null;
         // First mine for priority resource.
-        for (int i = adjacentWells.length - 1; i >= 0; i--){
+        for (int i = adjacentWells.length; i-- > 0;){
             if (!rc.isActionReady() || returnToHQ) return;
             if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
                 continue;
@@ -674,10 +674,12 @@ public class BotCarrier extends Utils{
             collectionWrapper(curWell);
             chosenWell = curWell.getMapLocation();
         }
-
+        if (returnToHQ) return;
         // Then for the other resource
-        for (int i = adjacentWells.length - 1; i >= 0; i--){
+        for (int i = adjacentWells.length; i-- > 0;){
             if (!rc.isActionReady() || returnToHQ) return;
+            if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
+                continue;
             WellInfo curWell = adjacentWells[i];  
             collectionWrapper(curWell);
             if (chosenWell == null) chosenWell = curWell.getMapLocation();

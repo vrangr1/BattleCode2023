@@ -25,7 +25,7 @@ fi
 
 count=0
 # Sorted the maps by size
-for i in SmallElements Clown AllElements PairedProgramming Pizza Rewind DefaultMap BatSignal Tacocat Hah Eyelands\
+for i in SmallElements Clown AllElements PairedProgramming Pizza Rewind DefaultMap KingdomRush BatSignal Tacocat Hah Eyelands\
     Rectangle Frog Scatter Diagonal Cat Forest
     # CloudyOctDoors OctDoors #GrandRing
 do
