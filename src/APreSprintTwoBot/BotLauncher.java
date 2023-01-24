@@ -1,7 +1,7 @@
 package APreSprintTwoBot;
 
 import battlecode.common.*;
-
+import APreSprintTwoBot.path.Nav;
 public class BotLauncher extends CombatUtils{
 
     private enum Status {
@@ -160,7 +160,7 @@ public class BotLauncher extends CombatUtils{
         if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
             launcherState = Status.GUARDING;
             boolean willDieIfPursuit = CombatUtils.isMilitaryUnit(prevTurnHostile.getType()) && rc.getHealth() <= prevTurnHostile.getType().damage;
-            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryForcedMoveInDirection(prevTurnHostile.location)){
+            if (!willDieIfPursuit && rc.isMovementReady() && Movement.tryFlagMoveInDirection(prevTurnHostile.location, false)){
                 launcherState = Status.PURSUING;
                 destinationFlag += " sP";
             }
@@ -231,7 +231,7 @@ public class BotLauncher extends CombatUtils{
                     return;
                 pathing.moveToDestination();
                 if (rc.isMovementReady()){
-                    Movement.tryMoveInDirection(currentDestination);
+                    Nav.goTo(currentDestination);
                 }
             }
             else if (launcherState == Status.EXPLORE) {
@@ -324,7 +324,8 @@ public class BotLauncher extends CombatUtils{
 		
 		boolean allyIsFighting = false;
 		RobotInfo[] alliesAroundHostile = rc.senseNearbyRobots(closestHostileLocation, UNIT_TYPE.actionRadiusSquared, MY_TEAM);
-		for (int i = alliesAroundHostile.length; --i >= 0;) {
+		if (alliesAroundHostile.length == 0) return false;
+        for (int i = alliesAroundHostile.length; --i >= 0;) {
 			if (alliesAroundHostile[i].type.canAttack()) {
 				if (alliesAroundHostile[i].location.distanceSquaredTo(closestHostileLocation) <= alliesAroundHostile[i].type.actionRadiusSquared) {
 					allyIsFighting = true;
@@ -348,7 +349,7 @@ public class BotLauncher extends CombatUtils{
 		if (CombatUtils.isMilitaryUnit(closestHostile.type) || closestHostile.type == RobotType.HEADQUARTERS) 
             return false;
 	    pathing.setAndMoveToDestination(closestHostile.location);
-        if (!rc.isMovementReady() || Movement.tryMoveInDirection(closestHostile.location)) {
+        if (!rc.isMovementReady() || Movement.tryFlagMoveInDirection(closestHostile.location, true)) {
             destinationFlag += " tM2APU";
             launcherState = Status.PURSUING;
             return true;
@@ -365,6 +366,7 @@ public class BotLauncher extends CombatUtils{
 					numNearbyHostiles += 1;
 			}
 		}
+        if (numNearbyHostiles == 0) return false;
 		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.actionRadiusSquared, MY_TEAM);
 		int numNearbyAllies = 1; // Counts ourself
 		for (int i = visibleAllies.length; --i >= 0;) {
@@ -374,7 +376,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health) || rc.getHealth() <= 30) {
-			if (Movement.tryForcedMoveInDirection(closestHostile.location)){
+			if (Movement.tryFlagMoveInDirection(closestHostile.location, false)){
                 launcherState = Status.FLANKING;
                 return true;
             }
@@ -492,13 +494,13 @@ public class BotLauncher extends CombatUtils{
                 launcherState = Status.FLANKING;
                 return true;
             }
-            if (tryMoveToHelpAlly(closestHostile)) {
-                destinationFlag += " 3";
-                return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
-            }
             if (tryMoveToEngageOutnumberedEnemy(closestHostile)) {
                 destinationFlag += " 4";
                 return true;
+            }
+            if (tryMoveToHelpAlly(closestHostile)) {
+                destinationFlag += " 3";
+                return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
             if (tryMoveToAttackProductionUnit(closestHostile)) {
                 destinationFlag += " 5";

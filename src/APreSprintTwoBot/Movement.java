@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class Movement extends Utils{
     
-    public static boolean tryForcedMoveInDirection(MapLocation dest) throws GameActionException {
+    public static boolean tryFlagMoveInDirection(MapLocation dest, boolean quickFlag) throws GameActionException {
         try{
             if (dest == null) return false;
             if(!rc.isMovementReady()) return false;
@@ -24,15 +24,20 @@ public class Movement extends Utils{
             for (Direction direction : dirs) {
                 dirLoc = lCR.add(direction);
                 if (!rc.canMove(direction)) continue;
-                if (rc.senseMapInfo(dirLoc).getCurrentDirection() == direction.opposite()) continue;
                 if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
-                double rubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(MY_TEAM) * 10.0;
-                if ((rubble < bestRubble || rubble == 0)) {
+                MapInfo mapInfo = rc.senseMapInfo(dirLoc);
+                Direction currentDir = mapInfo.getCurrentDirection();
+                if (!quickFlag && currentDir != Direction.CENTER) continue;
+                if (currentDir != Direction.CENTER && currentDir != direction &&
+                    currentDir != direction.rotateLeft() && currentDir != direction.rotateRight())
+                    continue;
+                double rubble = mapInfo.getCooldownMultiplier(MY_TEAM) * 10.0;
+                if (rubble < bestRubble) {
                     bestRubble = rubble;
                     bestDir = direction;
                 }
             }
-        
+            destinationFlag += "| fMID " + dest;
             if (bestDir != null) {
                 rc.move(bestDir);
                 currentLocation = rc.getLocation();
@@ -47,47 +52,6 @@ public class Movement extends Utils{
         }
     }
 
-    public static boolean tryMoveInDirection(MapLocation dest) throws GameActionException {
-        try{
-            if(!rc.isMovementReady()) return false;
-            MapLocation lCR = rc.getLocation();
-            if (lCR.equals(dest)) return false;
-            Direction forward = lCR.directionTo(dest);
-            MapLocation dirLoc = null;
-            Direction[] dirs;
-            if (preferLeft(dest)) {
-                dirs = new Direction[] { forward, forward.rotateLeft(), forward.rotateRight()};         
-            } else {
-                dirs = new Direction[] { forward, forward.rotateRight(), forward.rotateLeft()};
-            }
-            Direction bestDir = null;
-            double bestRubble = 0.0; // rc.senseRubble(rc.getLocation());
-            int currentDistSq = lCR.distanceSquaredTo(dest);
-            for (Direction direction : dirs) {
-                dirLoc = lCR.add(direction);
-                if (!rc.canMove(direction)) continue;
-                if (rc.senseMapInfo(dirLoc).getCurrentDirection() == direction.opposite()) continue;
-                if (bestDir != null && dirLoc.distanceSquaredTo(dest) > currentDistSq) continue;
-                double rubble = 0.0; // rc.senseRubble(dirLoc);
-                if ((rubble <= bestRubble || rubble == 0)) {
-                    bestRubble = rubble;
-                    bestDir = direction;
-                }
-            }
-        
-            if (bestDir != null) {
-                rc.move(bestDir);
-                currentLocation = rc.getLocation();
-                return true;
-            }
-            return false;
-        }
-        catch (Exception e) {
-            System.out.println("Exception in tryMoveInDirection: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public static Direction combatMovement(RobotInfo[] visibleEnemies, Direction targetDir) throws GameActionException{
         Direction movDirection = targetDir;
