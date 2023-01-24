@@ -35,8 +35,8 @@ public class BotLauncher extends CombatUtils{
     private static RobotInfo prevTurnHostile = null;
     private static MapLocation prevTurnLocation = null;
     private static MapLocation circleLocation = null;
-    private static int minCircleDistance = 0;
-    private static int maxCircleDistance = 0;
+    private static int minCircleDistance = 10000;
+    private static int maxCircleDistance = 10000;
     private static boolean isClockwise = true;
     private static int LOW_HEALTH_MARK = 30;
     private static int circlingCount;
@@ -89,7 +89,7 @@ public class BotLauncher extends CombatUtils{
             }
         }
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " |Des flag " + destinationFlag + 
-            " |Can move " + rc.isMovementReady());
+            " |Can move " + rc.isMovementReady() + "| cicL " + circleLocation);
     }
 
     private static void setBaseDestination() throws GameActionException {
@@ -249,11 +249,16 @@ public class BotLauncher extends CombatUtils{
             }
             bytecodeCheck(); //4
             if (launcherState == Status.MARCHING || launcherState == Status.ISLAND_WORK) {
-                if (currentDestination.equals(circleLocation))
+                if (currentDestination.equals(circleLocation) && rc.getLocation().distanceSquaredTo(circleLocation) <= maxCircleDistance){
                     return;
+                }
                 pathing.moveToDestination();
                 if (rc.isMovementReady()){
+                    destinationFlag += "| mANMC2  " + circleLocation;
                     Nav.goTo(currentDestination);
+                }
+                else{
+                    destinationFlag += "| mANMC1  " + circleLocation;
                 }
             }
             else if (launcherState == Status.EXPLORE) {
