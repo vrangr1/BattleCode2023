@@ -16,6 +16,7 @@ public class BuilderWrapper extends Utils {
     private static int carrierResourceCount = 0;
     private static int updatesResourceCount = 0;
     private static ResourceType[] writePrioritizedResources;
+    private static int manaWellNearby = 0;
 
     private enum BUILDERS{
         CWBUILDER,
@@ -23,7 +24,19 @@ public class BuilderWrapper extends Utils {
         SAVVYBUILDER
     };
 
-    private static void updatePrioritizationRatio(){
+    private static boolean canSeeManaWell() throws GameActionException{
+        WellInfo[] wells = rc.senseNearbyWells(ResourceType.MANA);
+        return wells.length > 0;
+    }
+
+    private static void updatePrioritizationRatio() throws GameActionException{
+        // if (manaWellNearby == 0){
+        //     manaWellNearby = canSeeManaWell() ? 2 : 1;
+        // }
+        // if (manaWellNearby == 2){
+        //     RESOURCE_MANA_ADAMANTIUM_RATIO = 4;
+        //     return;
+        // }
         if (MAP_SIZE < 900) RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
         else if (MAP_SIZE < 1600){
             if (rc.getRoundNum() < 50)
