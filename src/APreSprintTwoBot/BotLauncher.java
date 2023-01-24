@@ -61,12 +61,12 @@ public class BotLauncher extends CombatUtils{
             seekingIsland = seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
             // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
             // lowHealthCircle(); // [CUR_STATE] -> [CUR_STATE|MARCHING|CIRCLING]
-            // if (!seekingIsland){
-            //     if (doIdling()){
-            //         rc.setIndicatorString("Idling");
-            //         return;
-            //     }
-            // }
+            if (!seekingIsland && MAP_SIZE >= 1200){
+                if (doIdling()){
+                    rc.setIndicatorString("Idling");
+                    return;
+                }
+            }
         }
         bytecodeCheck(); //1
         tryToMicro();
