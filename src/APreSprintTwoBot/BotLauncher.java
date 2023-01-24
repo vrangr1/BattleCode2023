@@ -119,22 +119,7 @@ public class BotLauncher extends CombatUtils{
             }
         }
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
-            if (rc.getRoundNum() <= BIRTH_ROUND + 1){
-                currentDestination = defaultEnemyLocation();
-            }
-            else {
-                int shortestDist = Integer.MAX_VALUE;
-                for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
-                    if (rememberedEnemyHQLocations[i] != null){
-                        int dist = rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation());
-                        if (dist < shortestDist){
-                            shortestDist = dist;
-                            currentDestination = rememberedEnemyHQLocations[i];
-                        }
-                    }
-                }
-            }
-
+            currentDestination = defaultEnemyLocation();
         }
         pathing.setNewDestination(currentDestination);
         destinationFlag = "sBD " + currentDestination;
