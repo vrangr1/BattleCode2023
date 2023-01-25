@@ -507,7 +507,7 @@ public class BotCarrier extends Utils{
     private static MapLocation findNearestIslandInComms() throws GameActionException{
         MapLocation nearestLoc = null;
         int nearestDist = -1, curDist;
-        for (int i = Comms.COMM_TYPE.ISLAND.channelStart; i < Comms.COMM_TYPE.ISLAND.channelStop; i++){
+        for (int i = Comms.COMM_TYPE.NEUTRAL_ISLANDS.channelStart; i < Comms.COMM_TYPE.NEUTRAL_ISLANDS.channelStop; i++){
             int message = rc.readSharedArray(i);
             if (Comms.readSHAFlagFromMessage(message) != Comms.SHAFlag.UNOCCUPIED_ISLAND) continue;
             MapLocation loc = Comms.readLocationFromMessage(message);
@@ -534,7 +534,7 @@ public class BotCarrier extends Utils{
         if (senseLoc != null && rc.canWriteSharedArray(0, 0) 
         // && !Comms.findIfLocationAlreadyPresent(senseLoc, Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND)
         )
-            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.ISLAND, senseLoc, Comms.SHAFlag.UNOCCUPIED_ISLAND);
+            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.NEUTRAL_ISLANDS, senseLoc, Comms.SHAFlag.UNOCCUPIED_ISLAND);
         if (senseLoc != null && commsLoc != null){
             if (currentLocation.distanceSquaredTo(commsLoc) <= currentLocation.distanceSquaredTo(senseLoc))
                 return commsLoc;
@@ -560,7 +560,7 @@ public class BotCarrier extends Utils{
     private static void flagThisIsland(int islandId, MapLocation loc) throws GameActionException{
         islandViable[islandId - 1] = false;
         if (rc.canWriteSharedArray(0, 0))
-            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND, loc);
+            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.NEUTRAL_ISLANDS, Comms.SHAFlag.UNOCCUPIED_ISLAND, loc);
         else{
             int hash = hashLocation(loc);
             if (!ignoreLocations[hash]) ignoredIslandLocations[ignoredIslandLocationsCount++] = hash;
@@ -586,6 +586,7 @@ public class BotCarrier extends Utils{
                 carrierStatus = Status.PLACING_ANCHOR;
                 System.out.println("Placed Anchor!");
                 rc.placeAnchor();
+                Comms.writeOrSaveLocation(rc.getLocation(), Comms.SHAFlag.OUR_ISLAND);
                 resetIslandVariables();
             }
             return;
@@ -610,6 +611,7 @@ public class BotCarrier extends Utils{
         // islandViable[targetedIslandId - 1] = false;
         assert movementDestination != null : "movementDestination != null";
         flagThisIsland(targetedIslandId, movementDestination);
+        Comms.wipeOrSaveLocation(movementDestination, Comms.SHAFlag.UNOCCUPIED_ISLAND);
         resetIslandVariables();
         // TODO: Might wanna add find and move command here later on.
     }
@@ -625,6 +627,7 @@ public class BotCarrier extends Utils{
         if (rc.canPlaceAnchor() && rc.senseAnchor(rc.senseIsland(rc.getLocation())) == null){
             carrierStatus = Status.PLACING_ANCHOR;
             rc.placeAnchor();
+            Comms.writeOrSaveLocation(rc.getLocation(), Comms.SHAFlag.OUR_ISLAND);
             resetIslandVariables();
             getAndSetWellLocation();
             goToWell();
@@ -1075,6 +1078,7 @@ public class BotCarrier extends Utils{
         if (Clock.getBytecodesLeft() > 700)
             Comms.surveyForIslands();
         Comms.writeSavedLocations();
+        Comms.wipeSavedLocations();
     }
 
     private static Direction getRetreatDirection(RobotInfo[] visibleHostiles) throws GameActionException{

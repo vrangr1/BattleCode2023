@@ -30,9 +30,10 @@ public class Comms extends Utils{
     private static final int MAX_HEADQUARTERS_CHANNELS_COUNT = 12;
     public static final int CHANNELS_COUNT_PER_HEADQUARTER = 3;
     private static final int WELLS_CHANNELS_COUNT = 13;
-    private static final int ISLAND_CHANNELS_COUNT = 10;
+    private static final int OUR_ISLANDS_CHANNELS_COUNT = 4;
+    private static final int NEUTRAL_ISLAND_CHANNELS_COUNT = 10;
     private static final int AMPLIFIER_CHANNELS_COUNT = 0;
-    private static final int COMBAT_CHANNELS_COUNT = 20;
+    private static final int COMBAT_CHANNELS_COUNT = 16;
 
     // ununsed channels count: 0 (in the case of max count of headquarters (i.e. 4))
     private static final int TOTAL_CHANNELS_COUNT = COMMS_VARCOUNT; // 64
@@ -56,6 +57,14 @@ public class Comms extends Utils{
     private static final boolean OVERWRITE_OLDER_SAVED_LOCATIONS = true;
     private static boolean wrapAround = false;
 
+    // Wiping or saving locations stuff
+    private static MapLocation[] locationsToWipe = null;
+    private static SHAFlag[] locationsToWipeFlags = null;
+    private static int locationsToWipeCount = 0;
+    private static final int MAX_LOCATIONS_TO_WIPE = 10;
+    private static final boolean OVERWRITE_OLDER_WIPED_LOCATIONS = true;
+    private static boolean wipeWrapAround = false;
+
     
 
 
@@ -78,8 +87,11 @@ public class Comms extends Utils{
         MANA_WELL_LOCATION,                 // 0x6
         ELIXIR_WELL_LOCATION,               // 0x7
 
+        // OUR_ISLANDS CHANNELS MESSAGES' TYPES
+        OUR_ISLAND,                         // 0x8
+
         // ISLAND CHANNELS MESSAGES' TYPES
-        OCCUPIED_ISLAND,                    // 0x8
+        // OCCUPIED_ISLAND,                    // 0x8
         UNOCCUPIED_ISLAND,                  // 0x9
 
         // COMBAT CHANNELS MESSAGES' TYPES
@@ -110,11 +122,12 @@ public class Comms extends Utils{
     private static SHAFlag[] SHAFlags = SHAFlag.values();
 
     public static enum COMM_TYPE{
-        WELLS,          // 0x0
-        COMBAT,         // 0x1
-        ISLAND,         // 0x2
-        HEADQUARTER,    // 0x3
-        AMPLIFIER;      // 0x4
+        WELLS,           // 0x0
+        COMBAT,          // 0x1
+        OUR_ISLANDS,     // 0x2
+        NEUTRAL_ISLANDS, // 0x3
+        HEADQUARTER,     // 0x4
+        AMPLIFIER;       // 0x5
 
         public int channelStart, channelStop, channelHead, channelHeadArrayLocationIndex;
     }
@@ -243,8 +256,9 @@ public class Comms extends Utils{
             case COLLECT_ANCHOR : return COMM_TYPE.HEADQUARTER;
             case AMPLIFIER_LOCATION : return COMM_TYPE.AMPLIFIER;
             case ANCHOR_DEFENSE_NEEDED : return COMM_TYPE.AMPLIFIER;
-            case OCCUPIED_ISLAND : return COMM_TYPE.ISLAND;
-            case UNOCCUPIED_ISLAND : return COMM_TYPE.ISLAND;
+            // case OCCUPIED_ISLAND : return COMM_TYPE.ISLAND;
+            case OUR_ISLAND: return COMM_TYPE.OUR_ISLANDS;
+            case UNOCCUPIED_ISLAND : return COMM_TYPE.NEUTRAL_ISLANDS;
             case COMBAT_LOCATION : return COMM_TYPE.COMBAT;
             case CLOUD_COMBAT_LOCATION : return COMM_TYPE.COMBAT;
             case ARRAY_HEAD : break;
@@ -313,10 +327,15 @@ public class Comms extends Utils{
         locationsToWriteFlags = null;
         wrapAround = false;
         savedLocationsCount = 0;
+        locationsToWipe = null;
+        locationsToWipeFlags = null;
+        wipeWrapAround = false;
+        locationsToWipeCount = 0;
         headquarterChannelsInit();
         if (rc.getRoundNum() == 1) return;
         allocateChannels(COMM_TYPE.WELLS, WELLS_CHANNELS_COUNT);
-        allocateChannels(COMM_TYPE.ISLAND, ISLAND_CHANNELS_COUNT);
+        allocateChannels(COMM_TYPE.OUR_ISLANDS, OUR_ISLANDS_CHANNELS_COUNT);
+        allocateChannels(COMM_TYPE.NEUTRAL_ISLANDS, NEUTRAL_ISLAND_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.AMPLIFIER, AMPLIFIER_CHANNELS_COUNT);
         allocateChannels(COMM_TYPE.COMBAT, COMBAT_CHANNELS_COUNT);
     }
@@ -1170,7 +1189,7 @@ public class Comms extends Utils{
     public static void surveyForIslands() throws GameActionException{
         // if (!rc.canWriteSharedArray(0, 0) && rc.getRoundNum() < 3) return;
         boolean canWrite = rc.canWriteSharedArray(0,0);
-        COMM_TYPE type = COMM_TYPE.ISLAND;
+        COMM_TYPE type = COMM_TYPE.NEUTRAL_ISLANDS;
         int[] islandIDs = rc.senseNearbyIslands();
         MapLocation[] locations;
         if (islandIDs.length == 0) return;
@@ -1190,7 +1209,7 @@ public class Comms extends Utils{
      */
     public static void surveyForIslandsAmplifiers() throws GameActionException{
         if (rc.getRoundNum() < 2) return;
-        COMM_TYPE type = COMM_TYPE.ISLAND;
+        COMM_TYPE type = COMM_TYPE.NEUTRAL_ISLANDS;
         int[] islandIDs = rc.senseNearbyIslands();
         MapLocation[] locations;
         if (islandIDs.length == 0) return;
@@ -1294,7 +1313,7 @@ public class Comms extends Utils{
     public static boolean writeSavedLocations() throws GameActionException{
         if (locationsToWrite == null || savedLocationsCount == 0) return true;
         if (!rc.canWriteSharedArray(0, 0)) return false;
-        if (Clock.getBytecodesLeft() < 300) return false;
+        if (Clock.getBytecodesLeft() < 500) return false;
         int count = OVERWRITE_OLDER_SAVED_LOCATIONS && wrapAround ? 20 : savedLocationsCount;
         while(count-->0){
             COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[count]);
@@ -1304,7 +1323,7 @@ public class Comms extends Utils{
             if (BotCarrier.DEBUG_PRINT)
                 System.out.println("Writing saved location: " + locationsToWrite[count] + " with flag: " + locationsToWriteFlags[count]);
             writeAndOverwriteLesserPriorityMessage(type, locationsToWrite[count], locationsToWriteFlags[count]);
-            if (Clock.getBytecodesLeft() < 300) {
+            if (Clock.getBytecodesLeft() < 500) {
                 savedLocationsCount = count;
                 wrapAround = false;
                 return false;
@@ -1312,6 +1331,96 @@ public class Comms extends Utils{
         }
         savedLocationsCount = 0;
         wrapAround = false;
+        return true;
+    }
+
+    
+
+    ////////////////////////////////////////
+    // SAVING LOCATIONS TO WIPE ////////////
+    ////////////////////////////////////////
+
+    public static void wipeOrSaveLocation(MapLocation loc, SHAFlag flag) throws GameActionException{
+        if (rc.canWriteSharedArray(0, 0)){
+            COMM_TYPE type = getCOMM_TYPEFromSHAFlag(flag);
+            wipeThisLocationFromChannels(type, flag, loc);
+        }
+        else saveThisLocationToWipe(loc, flag);
+    }
+
+    public static boolean checkIfLocationSavedToWipe(MapLocation loc){
+        int count = OVERWRITE_OLDER_WIPED_LOCATIONS && wipeWrapAround ? 10 : locationsToWipeCount;
+        switch(count){
+            case 10:
+                if (locationsToWipe[9].equals(loc)) return true;
+            case 9:
+                if (locationsToWipe[8].equals(loc)) return true;
+            case 8:
+                if (locationsToWipe[7].equals(loc)) return true;
+            case 7:
+                if (locationsToWipe[6].equals(loc)) return true;
+            case 6:
+                if (locationsToWipe[5].equals(loc)) return true;
+            case 5:
+                if (locationsToWipe[4].equals(loc)) return true;
+            case 4:
+                if (locationsToWipe[3].equals(loc)) return true;
+            case 3:
+                if (locationsToWipe[2].equals(loc)) return true;
+            case 2:
+                if (locationsToWipe[1].equals(loc)) return true;
+            case 1:
+                if (locationsToWipe[0].equals(loc)) return true;
+            case 0: return false;
+            default: break;
+        }
+        assert false;
+        return false;
+    }
+
+    public static void saveThisLocationToWipe(MapLocation loc, SHAFlag flag) throws GameActionException{
+        if (locationsToWipe == null){
+            locationsToWipe = new MapLocation[MAX_LOCATIONS_TO_WIPE];
+            locationsToWipeFlags = new SHAFlag[MAX_LOCATIONS_TO_WIPE];
+            locationsToWipeCount = 0;
+        }
+        if (locationsToWipeCount >= MAX_LOCATIONS_TO_WIPE){
+            if (!OVERWRITE_OLDER_WIPED_LOCATIONS) return;
+            wipeWrapAround = true;
+            locationsToWipeCount = 0;
+        }
+        
+        if (checkIfLocationSavedToWipe(loc)) return;
+
+        if (!findIfLocationAlreadyPresent(loc, getCOMM_TYPEFromSHAFlag(flag), flag)) return;
+        if (BotCarrier.DEBUG_PRINT)
+            System.out.println("Saved location: " + loc + " with flag: " + flag);
+        locationsToWipe[locationsToWipeCount] = loc;
+        locationsToWipeFlags[locationsToWipeCount++] = flag;
+    }
+
+    public static boolean wipeSavedLocations() throws GameActionException{
+        if (locationsToWipe == null || locationsToWipeCount == 0) return true;
+        if (!rc.canWriteSharedArray(0, 0)) return false;
+        if (Clock.getBytecodesLeft() < 500) return false;
+        int count = OVERWRITE_OLDER_WIPED_LOCATIONS && wipeWrapAround ? 10 : locationsToWipeCount;
+        while(count-->0){
+            SHAFlag flag = locationsToWipeFlags[count];
+            COMM_TYPE type = getCOMM_TYPEFromSHAFlag(flag);
+            assert type != null : "Invalid SHAFlag";
+            assert type != COMM_TYPE.HEADQUARTER : "Invalid SHAFlag";
+            // if (!findIfLocationAlreadyPresent(locationsToWrite[count], type, locationsToWriteFlags[count])) continue;
+            // if (BotCarrier.DEBUG_PRINT)
+            //     System.out.println("Writing saved location: " + locationsToWrite[count] + " with flag: " + locationsToWriteFlags[count]);
+            wipeThisLocationFromChannels(type, flag, locationsToWipe[count]);
+            if (Clock.getBytecodesLeft() < 500) {
+                locationsToWipeCount = count;
+                wipeWrapAround = false;
+                return false;
+            }
+        }
+        locationsToWipeCount = 0;
+        wipeWrapAround = false;
         return true;
     }
 }
