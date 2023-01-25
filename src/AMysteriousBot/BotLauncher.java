@@ -188,8 +188,11 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static boolean seekEnemyIslandInVision() throws GameActionException {
-        if (launcherState == Status.ISLAND_WORK && (rc.senseIsland(rc.getLocation()) != -1)) {
-            return true;
+        if (launcherState == Status.ISLAND_WORK) {
+            int islandId = rc.senseIsland(rc.getLocation());
+            if (islandId != -1 && rc.senseTeamOccupyingIsland(islandId) == ENEMY_TEAM){
+                return true;
+            }
         }
 
         int[] nearbyIslands = rc.senseNearbyIslands();
@@ -197,6 +200,7 @@ public class BotLauncher extends CombatUtils{
         int nearestDist = -1, curDist;
         for (int i = nearbyIslands.length; --i >= 0;){
             int islandId = nearbyIslands[i];
+            // Skip neutral/friendly islands
             if (rc.senseTeamOccupyingIsland(islandId) != ENEMY_TEAM){
                 continue;
             }
