@@ -95,19 +95,23 @@ public class BotLauncher extends CombatUtils{
     private static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
-            if (!mapSymmetry[i])
+            if (!mapSymmetry[i] || !checkIfSymmetry(SYMMETRY.values()[i])){
                 removeSymmetry(SYMMETRY.values()[i], "3");
-            if (!checkIfSymmetry(SYMMETRY.values()[i])){
                 mapSymmetry[i] = false;
                 rememberedEnemyHQLocations[i] = null;
             }
-            else if (enemyHQ == null && rememberedEnemyHQLocations[i] != null &&
-                rememberedEnemyHQLocations[i].distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared &&
-                rc.canSenseLocation(rememberedEnemyHQLocations[i])){
-                rememberedEnemyHQLocations[i] = null;
-                mapSymmetry[i] = false;
-                if (checkIfSymmetry(SYMMETRY.values()[i])){
-                    removeSymmetry(SYMMETRY.values()[i], "1");
+            if (enemyHQ == null){
+                for (int j = Comms.getHeadquartersCount(); --j >= 0;){
+                    MapLocation symmetricEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
+                    if (symmetricEnemyHQ == null) continue;
+                    if(symmetricEnemyHQ.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared &&
+                        rc.canSenseLocation(symmetricEnemyHQ)){
+                        rememberedEnemyHQLocations[i] = null;
+                        mapSymmetry[i] = false;
+                        if (checkIfSymmetry(SYMMETRY.values()[i])){
+                            removeSymmetry(SYMMETRY.values()[i], "1");
+                        } 
+                    }  
                 }
             }
         }
@@ -564,7 +568,8 @@ public class BotLauncher extends CombatUtils{
                 launcherState = Status.MARCHING;
                 return true;
             }
-            else if (currentDestination == null || currentDestination.distanceSquaredTo(rc.getLocation()) <= 5 && enemyHQ == null){
+            else if (currentDestination == null || (currentDestination.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared 
+                && enemyHQ == null && rc.canSenseLocation(currentDestination))){
                 setBaseDestination();
             }
         }

@@ -335,26 +335,21 @@ public class Globals {
         else {
             double factor = 1;
             int[] store = new int[] {1,0,2};
-            // if (MAP_SIZE > 2500 || areHQsCornered()){
-            //     store = new int[] {0,1,2};
-            // }
-            // else if (Math.max(MAP_HEIGHT, MAP_WIDTH) >= 1.5 * Math.min(MAP_HEIGHT, MAP_WIDTH)){
-            //     store = new int[] {1,2,0};
-            //     factor = 1;
-            // }
             for (int i : store) {
-                if (checkIfSymmetry(SYMMETRY.values()[i])){
-                    MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation);
+                if (checkIfSymmetry(SYMMETRY.values()[i]) && mapSymmetry[i]){
+                    MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation); // Default go to location
                     if (closestEnemyHQ == null) continue;
                     double minDistance = (double) parentHQLocation.distanceSquaredTo(closestEnemyHQ);
                     for (int j = alliedHQLocs.length; --j >= 0;) {
                         if (alliedHQLocs[j] == null) continue;
                         MapLocation alliedHQEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
                         if (alliedHQEnemyHQ == null) continue;
-                        double currDistance = (double) parentHQLocation.distanceSquaredTo(alliedHQEnemyHQ);
-                        if (currDistance <= 1.0) continue;
-                        if (currDistance * factor < minDistance){
-                            minDistance = currDistance;
+                        double parentDistance = (double) parentHQLocation.distanceSquaredTo(alliedHQEnemyHQ);
+                        // double currDistance = (double) rc.getLocation().distanceSquaredTo(alliedHQEnemyHQ); // As distance will be updated
+                        if (parentDistance > alliedHQLocs[j].distanceSquaredTo(alliedHQEnemyHQ)) continue; // Don't have all launchers go to the same place
+                        if (parentDistance <= 1.0) continue;
+                        if (parentDistance * factor < minDistance){
+                            minDistance = parentDistance;
                             closestEnemyHQ = alliedHQEnemyHQ;
                         }
                     }
