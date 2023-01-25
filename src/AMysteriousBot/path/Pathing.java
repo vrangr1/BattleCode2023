@@ -77,9 +77,9 @@ public class Pathing extends Utils {
         }
         Utils.bytecodeCheck("PreBugNavCheck");
         int nearbyRobotcount = rc.senseNearbyRobots().length;
-        if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15 || Clock.getBytecodesLeft() < BYTECODE_REMAINING) {
+        if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15 || Clock.getBytecodesLeft() < BYTECODE_REMAINING || Nav.bugState == Nav.BugState.BUG) {
             Nav.goTo(target);
-            Utils.bytecodeCheck("PostBugNav1 T:" + target+ " " + rc.getLocation());
+            Utils.bytecodeCheck("PBN1 T:" + target+ "|Side "+ Nav.bugWallSide + "|StartDir " + Nav.bugLookStartDir);
             return;
         }
         Utils.bytecodeCheck("PreBFS");
@@ -88,7 +88,7 @@ public class Pathing extends Utils {
         if (dir == null || !rc.canMove(dir) || isVisited(rc.getLocation().add(dir)) || !rc.sensePassability(rc.getLocation().add(dir)) || 
             rc.isLocationOccupied(rc.getLocation().add(dir))) {
             Nav.goTo(target);
-            Utils.bytecodeCheck("PostBugNav2 T:" + target + " " + rc.getLocation());
+            Utils.bytecodeCheck("PBN2 T:" + target + "|Side "+ Nav.bugWallSide + "|StartDir " + Nav.bugLookStartDir);
             addVisited(rc.getLocation());
         } else {
             moveTo(dir);

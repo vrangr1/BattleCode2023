@@ -7,7 +7,7 @@ public class Nav extends Utils {
 
     private static MapLocation dest;
 
-    private enum BugState {
+    public enum BugState {
         DIRECT, BUG
     }
 
@@ -15,11 +15,11 @@ public class Nav extends Utils {
         LEFT, RIGHT
     }
 
-    private static BugState bugState;
+    public static BugState bugState;
     public static WallSide bugWallSide = WallSide.LEFT;
     private static int bugStartDistSq;
     private static Direction bugLastMoveDir;
-    private static Direction bugLookStartDir;
+    public static Direction bugLookStartDir;
     private static int bugRotationCount;
     private static int bugMovesSinceSeenObstacle = 0;
 
@@ -28,9 +28,14 @@ public class Nav extends Utils {
         return true;
     }
 
+    private static boolean goodCurrent(Direction adjDir) throws GameActionException{
+        Direction currentDir = rc.senseMapInfo(rc.getLocation().add(adjDir)).getCurrentDirection();
+        return currentDir == Direction.CENTER || currentDir != adjDir.opposite();
+    }
+
     private static boolean tryMoveDirect() throws GameActionException {
         Direction dirAhead = rc.getLocation().directionTo(dest);
-        if(rc.canMove(dirAhead) && rc.senseMapInfo(rc.getLocation().add(dirAhead)).getCurrentDirection() != dirAhead.opposite()) {
+        if(rc.canMove(dirAhead) && goodCurrent(dirAhead)) {
             move(dirAhead);
             return true;
         }
@@ -49,7 +54,7 @@ public class Nav extends Utils {
         }
 
         for(Direction dir : dirs) {
-            if(rc.canMove(dir) && rc.senseMapInfo(rc.getLocation().add(dir)).getCurrentDirection() != dir.opposite()) {
+            if(rc.canMove(dir) && goodCurrent(dir)) {
                 move(dir);
                 return true;
             }
@@ -68,12 +73,12 @@ public class Nav extends Utils {
         // try to intelligently choose on which side we will keep the wall
         Direction leftTryDir = bugLastMoveDir.rotateLeft();
         for (int i = 0; i < 3; i++) {
-            if (!rc.canMove(leftTryDir) || rc.senseMapInfo(rc.getLocation().add(leftTryDir)).getCurrentDirection() == leftTryDir.opposite()) leftTryDir = leftTryDir.rotateLeft();
+            if (!rc.canMove(leftTryDir) || !goodCurrent(leftTryDir)) leftTryDir = leftTryDir.rotateLeft();
             else break;
         }
         Direction rightTryDir = bugLastMoveDir.rotateRight();
         for (int i = 0; i < 3; i++) {
-            if (!rc.canMove(rightTryDir) || rc.senseMapInfo(rc.getLocation().add(rightTryDir)).getCurrentDirection() == rightTryDir.opposite()) rightTryDir = rightTryDir.rotateRight();
+            if (!rc.canMove(rightTryDir) || !goodCurrent(rightTryDir)) rightTryDir = rightTryDir.rotateRight();
             else break;
         }
         if (dest.distanceSquaredTo(rc.getLocation().add(leftTryDir)) < dest.distanceSquaredTo(rc.getLocation().add(rightTryDir))) {
@@ -87,7 +92,9 @@ public class Nav extends Utils {
         bugMovesSinceSeenObstacle++;
         Direction dir = bugLookStartDir;
         for (int i = 8; i-- > 0;) {
-            if (rc.canMove(dir) && rc.senseMapInfo(rc.getLocation().add(dir)).getCurrentDirection() != dir.opposite() ) return dir;
+            if (rc.canMove(dir) && goodCurrent(dir)){
+                return dir;
+            } 
             dir = (bugWallSide == WallSide.LEFT ? dir.rotateRight() : dir.rotateLeft());
             bugMovesSinceSeenObstacle = 0;
         }
@@ -114,8 +121,10 @@ public class Nav extends Utils {
         if (move(dir)) {
             bugRotationCount += calculateBugRotation(dir);
             bugLastMoveDir = dir;
-            if (bugWallSide == WallSide.LEFT) bugLookStartDir = dir.rotateLeft().rotateLeft();
-            else bugLookStartDir = dir.rotateRight().rotateRight();
+            if (bugWallSide == WallSide.LEFT) 
+                bugLookStartDir = dir.rotateLeft().rotateLeft();
+            else 
+                bugLookStartDir = dir.rotateRight().rotateRight();
         }
     }
 
@@ -137,14 +146,14 @@ public class Nav extends Utils {
             reverseBugWallFollowDir();
         }
         Direction dir = findBugMoveDir();
-        if (dir != null && rc.canMove(dir) && rc.senseMapInfo(rc.getLocation().add(dir)).getCurrentDirection() != dir.opposite()) {
+        if (dir != null && rc.canMove(dir) && goodCurrent(dir)) {
             bugMove(dir);
         }
     }
 
     private static boolean canEndBug() {
         if (bugMovesSinceSeenObstacle >= 4) return true;
-        return (bugRotationCount <= 0 || bugRotationCount >= 8) && rc.getLocation().distanceSquaredTo(dest) <= bugStartDistSq;
+        return (bugRotationCount <= 0 || bugRotationCount >= 8); //Stricter condition -> && rc.getLocation().distanceSquaredTo(dest) <= bugStartDistSq;
     }
 
     private static void bugMove() throws GameActionException {

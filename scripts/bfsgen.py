@@ -97,10 +97,6 @@ def gen_bfs(radius):
                     out += f"""
         else if (rc.onTheMap(l{encode(x,y)})) {{ // check ({x}, {y})"""
                     indent = ""
-                    if r2 <= 2:
-                        out += f"""
-            if (!rc.isLocationOccupied(l{encode(x,y)})) {{ """
-                        indent = "    "
                     dxdy = [(dx, dy) for dx in range(-1, 2) for dy in range(-1, 2) if (dx, dy) != (0, 0) and dist(x+dx,y+dy) <= radius]
                     dxdy = sorted(dxdy, key=lambda dd: dist(x+dd[0], y+dd[1]))
                     for dx, dy in dxdy:
@@ -112,9 +108,6 @@ def gen_bfs(radius):
             {indent}}}"""
                     out += f"""
             {indent}d{encode(x,y)} += 12;"""
-                    if r2 <= 2:
-                        out += f"""
-            }}"""
                     visited.add(encode(x,y))
                     out += f"""
         }}
