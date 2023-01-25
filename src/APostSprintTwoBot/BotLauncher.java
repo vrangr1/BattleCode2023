@@ -610,8 +610,21 @@ public class BotLauncher extends CombatUtils{
     private static void setCircle(MapLocation cirCenter, int minDist, int maxDist) throws GameActionException{
         circleLocation = cirCenter;
         isClockwise = true;
+        // decideRotationDirection(rc.getLocation().directionTo(circleLocation));
         minCircleDistance = minDist;
         maxCircleDistance = maxDist;
+    }
+
+    private static void decideRotationDirection(Direction centerLocationDir){
+        MapLocation loc1, loc2;
+        Direction dir1 = centerLocationDir.rotateLeft().rotateLeft();
+        Direction dir2 = centerLocationDir.rotateRight().rotateRight();
+        loc1 = CircularExplore.extrapolateAndReturn(dir1);
+        loc2 = CircularExplore.extrapolateAndReturn(dir2);
+        if (loc1.distanceSquaredTo(CENTER_OF_THE_MAP) < loc2.distanceSquaredTo(CENTER_OF_THE_MAP))
+            isClockwise = true;
+        else
+            isClockwise = false;
     }
 
     private static void circleWorks() throws GameActionException{
@@ -670,33 +683,29 @@ public class BotLauncher extends CombatUtils{
 		if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
-		int bestDistSq = minHosDist;
-        double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
-
-		for (Direction dir : directions) {
+		double leastAttack = Double.MAX_VALUE;
+        // double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
+		for (Direction dir : carDirections) {
 			if (!rc.canMove(dir)) continue;
 			MapLocation dirLoc = lCR.add(dir);
-            MapInfo dirLocMapInfo = rc.senseMapInfo(dirLoc);
-            // double dirLocRubble = rc.senseMapInfo(dirLoc).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
-            // if (dirLocRubble > bestRubble) continue; // Don't move to even more rubble
-            if (rc.senseCloud(dirLoc) && !rc.isActionReady()){
-                bestRetreatDir = dir;
-                break;
+            // MapInfo dirLocMapInfo = rc.senseMapInfo(dirLoc);
+            double unitsAttacking = 0;
+            for (int i = visibleHostiles.length; --i >= 0;){
+                if (isMilitaryUnit(visibleHostiles[i].type)){
+                    int distToDirLoc = visibleHostiles[i].location.distanceSquaredTo(dirLoc);
+                    if (distToDirLoc <= visibleHostiles[i].type.actionRadiusSquared){
+                        unitsAttacking+=1;
+                    }
+                    else if (distToDirLoc <= visibleHostiles[i].type.visionRadiusSquared){
+                        unitsAttacking+=0.5;
+                    }
+                    unitsAttacking++;
+                }
             }
-            if (dirLocMapInfo.getCurrentDirection() != Direction.CENTER) continue; // Don't move into a moving tile
-			int smallestDistSq = Integer.MAX_VALUE;
-			for (int j  = visibleHostiles.length; --j >= 0;) {
-                RobotInfo hostile = visibleHostiles[j];
-				if (!CombatUtils.isMilitaryUnit(hostile.type)) continue;
-				int distSq = hostile.location.distanceSquaredTo(dirLoc);
-				if (distSq < smallestDistSq) {
-					smallestDistSq = distSq;
-				}
-			}
-			if (smallestDistSq > bestDistSq) {
-				bestDistSq = smallestDistSq;
-				bestRetreatDir = dir;
-			}
+            if (unitsAttacking < leastAttack){
+                leastAttack = unitsAttacking;
+                bestRetreatDir = dir;
+            }
 		}
 		if (bestRetreatDir != null) {
             rc.setIndicatorString("Backing: " + bestRetreatDir);

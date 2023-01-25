@@ -18,6 +18,18 @@ public class Globals {
         Direction.WEST,
         Direction.NORTHWEST,
     };
+
+    public static final Direction[] carDirections = {
+        Direction.NORTH,
+        Direction.EAST,
+        Direction.SOUTH,
+        Direction.WEST,
+        Direction.NORTHEAST,
+        Direction.SOUTHEAST,
+        Direction.SOUTHWEST,
+        Direction.NORTHWEST,
+    };
+
     public static final Direction NORTH = Direction.NORTH;
     public static final Direction NORTHEAST = Direction.NORTHEAST;
     public static final Direction EAST = Direction.EAST;

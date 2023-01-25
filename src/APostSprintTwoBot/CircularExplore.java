@@ -183,7 +183,7 @@ public class CircularExplore extends Utils{
         centerLocationDir = null;
     }
 
-    private static MapLocation extrapolateAndReturn(Direction dir){
+    public static MapLocation extrapolateAndReturn(Direction dir){
         return extrapolateLocation(currentLocation, dir, EXTRAPOLATION_DISTANCE_UNSQUARED);
     }
 
