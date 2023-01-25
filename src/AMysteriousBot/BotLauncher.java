@@ -124,7 +124,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static boolean doIdling() throws GameActionException {
-        if (vNonHQEnemies == 0 && rc.getRoundNum() <= BIRTH_ROUND + 2){
+        if (vNonHQEnemies == 0 && rc.getRoundNum() <= BIRTH_ROUND + 1){
             updateVisibleAlliesVision();
             if (vNonHQCombatAllies == 0){
                 return true;
