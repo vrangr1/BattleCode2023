@@ -83,10 +83,10 @@ public class BotCarrier extends Utils{
     }
 
     private static void setInitialMineOnlyManaStrat(){
-        // if (MAP_SIZE > 2500) INITIAL_MINE_ONLY_MANA_STRAT = false;
-        // if (MAP_SIZE < 900) INITIAL_MINE_ONLY_MANA_STRAT = true;
-        // else if (MAP_SIZE < 1600) INITIAL_MINE_ONLY_MANA_STRAT = false;
-        // else INITIAL_MINE_ONLY_MANA_STRAT = true;
+        if (MAP_SIZE < 1000) INITIAL_MINE_ONLY_MANA_STRAT = false;
+        else if (MAP_SIZE < 1400) INITIAL_MINE_ONLY_MANA_STRAT = false;
+        else if (MAP_SIZE < 1600) INITIAL_MINE_ONLY_MANA_STRAT = true;
+        else INITIAL_MINE_ONLY_MANA_STRAT = true;
     }
 
     private static void setGeffnersExploreTrigger(){

@@ -26,7 +26,7 @@ fi
 count=0
 # Sorted the maps by size
 for i in SmallElements Clown AllElements PairedProgramming Pizza Rewind DefaultMap KingdomRush BatSignal Tacocat Hah Eyelands\
-    Rectangle Frog Scatter Diagonal Cat Forest
+    Rectangle Scatter Frog Diagonal Cat Forest
     # CloudyOctDoors OctDoors #GrandRing
 do
   count=$[count+1]

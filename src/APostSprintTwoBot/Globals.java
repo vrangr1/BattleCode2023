@@ -123,6 +123,7 @@ public class Globals {
     public static MapLocation rememberedEnemyHQLocations[];
     public static final boolean END_EARLY = false;
     public static final int END_EARLY_ROUND_NUM = 1000;
+    public static final boolean RESIGN_IF_LOST = false;
     public static boolean[] mapSymmetry = {true, true, true}; // {Vertical, Horizontal, Rotational}
     public static MapLocation[] alliedHQLocs;
     public static RobotInfo shepherdUnit;

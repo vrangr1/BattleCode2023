@@ -2,7 +2,7 @@
 
 team1="$(basename src/A*)"
 count1=0
-for team2 in OTCBot OManaFocusedBot OCrowdBot OPostPatchBot ONewMapsBot OPostSprintBot
+for team2 in OPreSprintTwoBot OSavantMinerBot OnExploreBot OManaFocusedBot OCrowdBot OPostPatchBot ONewMapsBot
 do
     rm -rf logs/${team1}_vs_${team2}/
     mkdir -p logs/${team1}_vs_${team2}
@@ -24,8 +24,8 @@ do
     count1=$[count1+1]
     count2=0
     echo "Team number $count1: $team2, is processing:"
-    for i in SmallElements AllElements PairedProgramming Pizza Rewind DefaultMap BatSignal Tacocat Hah Eyelands\
-    Scatter Diagonal Cat Forest Grievance
+    for i in SmallElements Clown AllElements PairedProgramming Pizza Rewind DefaultMap KingdomRush BatSignal Tacocat Hah Eyelands\
+        Rectangle Scatter Frog Diagonal Cat Forest
     do
     count2=$[count2+1]
     echo "$team2: Running map $count2: $i"

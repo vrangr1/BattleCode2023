@@ -29,6 +29,12 @@ public class BuilderWrapper extends Utils {
         return wells.length > 0;
     }
 
+    private static void resetCarrierPrioritizationNumbers(int roundNum){
+        if (rc.getRoundNum() != roundNum) return;
+        carrierResourceCount = (int)RESOURCE_MANA_ADAMANTIUM_RATIO;
+        updatesResourceCount = carrierResourceCount;
+    }
+
     private static void updatePrioritizationRatio() throws GameActionException{
         // if (manaWellNearby == 0){
         //     manaWellNearby = canSeeManaWell() ? 2 : 1;
@@ -37,7 +43,28 @@ public class BuilderWrapper extends Utils {
         //     RESOURCE_MANA_ADAMANTIUM_RATIO = 4;
         //     return;
         // }
-        if (MAP_SIZE < 900) RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+        if (MAP_SIZE < 1000){
+            if (rc.getRoundNum() < 240){
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 4;
+            }
+            else{
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 3;
+                resetCarrierPrioritizationNumbers(240);
+            }
+        }
+        else if (MAP_SIZE < 1400){
+            if (rc.getRoundNum() < 2){
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
+            }
+            if (rc.getRoundNum() < 180){
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 4;
+                resetCarrierPrioritizationNumbers(2);
+            }
+            else{
+                RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
+                resetCarrierPrioritizationNumbers(240);
+            }
+        }
         else if (MAP_SIZE < 1600){
             if (rc.getRoundNum() < 50)
             RESOURCE_MANA_ADAMANTIUM_RATIO = 3;
@@ -45,7 +72,6 @@ public class BuilderWrapper extends Utils {
                 RESOURCE_MANA_ADAMANTIUM_RATIO = 1;
             else RESOURCE_MANA_ADAMANTIUM_RATIO = 2;
         }
-        // else if (MAP_SIZE <= 2500){
         else{
             if (rc.getRoundNum() < 50)
                 RESOURCE_MANA_ADAMANTIUM_RATIO = 3;
@@ -82,7 +108,6 @@ public class BuilderWrapper extends Utils {
         adamantium = rc.getResourceAmount(ResourceType.ADAMANTIUM);
         mana = rc.getResourceAmount(ResourceType.MANA);
         elixir = rc.getResourceAmount(ResourceType.ELIXIR);
-        updatePrioritizationRatio();
         if (carriersBuilt > 0){
             assert rc.getRoundNum() > 1 : "round num correctness";
             assert headquarterMessageIndex != -1 : "headquarter message index correctness";
@@ -94,6 +119,7 @@ public class BuilderWrapper extends Utils {
             // writePrioritizedResource = ResourceType.NO_RESOURCE;
         }
         rollBackPrioritizedResource(updatesResourceCount - carriersBuilt);
+        updatePrioritizationRatio();
         carriersBuilt = 0;
         updatesResourceCount = 0;
         assert carriersBuilt == 0 : "carriersBuilt == 0";

@@ -51,6 +51,7 @@ public strictfp class RobotPlayer {
 
             turnCount += 1;  // We have now been alive for one more turn!
             if (Globals.END_EARLY && rc.getRoundNum() >= Globals.END_EARLY_ROUND_NUM) continue;
+            if (Globals.RESIGN_IF_LOST && rc.getRoundNum() > 400 && rc.getRobotCount() <= 4) rc.resign();
             Globals.updateGlobals();
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode.
             try {
