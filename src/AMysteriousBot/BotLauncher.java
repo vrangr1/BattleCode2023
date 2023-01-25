@@ -124,7 +124,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static boolean doIdling() throws GameActionException {
-        if (vNonHQEnemies == 0 && rc.getRoundNum() > 150 && rc.getRoundNum() <= BIRTH_ROUND + 1){
+        if (vNonHQEnemies == 0 && rc.getRoundNum() <= BIRTH_ROUND + 2){
             updateVisibleAlliesVision();
             if (vNonHQCombatAllies == 0){
                 return true;
@@ -230,7 +230,7 @@ public class BotLauncher extends CombatUtils{
 
     private static void moveAfterNonMovingCombat() throws GameActionException {
         if (vNonHQEnemies != 0) return;
-        if (rc.getRoundNum() % 2 == 0 && rc.getRoundNum() > 10 && rc.getHealth() == UNIT_TYPE.getMaxHealth()) return;
+        if (rc.getRoundNum() % 2 == 0 && rc.getHealth() == UNIT_TYPE.getMaxHealth()) return;
         if (rc.isMovementReady()) {
             if (currentDestination != null) {
                 pathing.setNewDestination(currentDestination);

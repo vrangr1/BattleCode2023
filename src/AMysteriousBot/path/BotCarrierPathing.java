@@ -1059,19 +1059,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l110)) { // check (-2, 0)
-            if (d110 > d111) { // from (-1, 0)
-                d110 = d111;
-                dir110 = dir111;
+            if (!rc.isLocationOccupied(l110)) { 
+                if (d110 > d111) { // from (-1, 0)
+                    d110 = d111;
+                    dir110 = dir111;
+                }
+                if (d110 > d96) { // from (-1, -1)
+                    d110 = d96;
+                    dir110 = dir96;
+                }
+                if (d110 > d126) { // from (-1, 1)
+                    d110 = d126;
+                    dir110 = dir126;
+                }
+                d110 += locationScore(l110, m110, dir110);
             }
-            if (d110 > d96) { // from (-1, -1)
-                d110 = d96;
-                dir110 = dir96;
-            }
-            if (d110 > d126) { // from (-1, 1)
-                d110 = d126;
-                dir110 = dir126;
-            }
-            d110 += locationScore(l110, m110, dir110);
         }
         else if (rc.onTheMap(l110)) { // check (-2, 0)
             if (d110 > d111) { // from (-1, 0)
@@ -1090,19 +1092,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l82)) { // check (0, -2)
-            if (d82 > d97) { // from (0, -1)
-                d82 = d97;
-                dir82 = dir97;
+            if (!rc.isLocationOccupied(l82)) { 
+                if (d82 > d97) { // from (0, -1)
+                    d82 = d97;
+                    dir82 = dir97;
+                }
+                if (d82 > d96) { // from (-1, -1)
+                    d82 = d96;
+                    dir82 = dir96;
+                }
+                if (d82 > d98) { // from (1, -1)
+                    d82 = d98;
+                    dir82 = dir98;
+                }
+                d82 += locationScore(l82, m82, dir82);
             }
-            if (d82 > d96) { // from (-1, -1)
-                d82 = d96;
-                dir82 = dir96;
-            }
-            if (d82 > d98) { // from (1, -1)
-                d82 = d98;
-                dir82 = dir98;
-            }
-            d82 += locationScore(l82, m82, dir82);
         }
         else if (rc.onTheMap(l82)) { // check (0, -2)
             if (d82 > d97) { // from (0, -1)
@@ -1121,19 +1125,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l142)) { // check (0, 2)
-            if (d142 > d127) { // from (0, 1)
-                d142 = d127;
-                dir142 = dir127;
+            if (!rc.isLocationOccupied(l142)) { 
+                if (d142 > d127) { // from (0, 1)
+                    d142 = d127;
+                    dir142 = dir127;
+                }
+                if (d142 > d126) { // from (-1, 1)
+                    d142 = d126;
+                    dir142 = dir126;
+                }
+                if (d142 > d128) { // from (1, 1)
+                    d142 = d128;
+                    dir142 = dir128;
+                }
+                d142 += locationScore(l142, m142, dir142);
             }
-            if (d142 > d126) { // from (-1, 1)
-                d142 = d126;
-                dir142 = dir126;
-            }
-            if (d142 > d128) { // from (1, 1)
-                d142 = d128;
-                dir142 = dir128;
-            }
-            d142 += locationScore(l142, m142, dir142);
         }
         else if (rc.onTheMap(l142)) { // check (0, 2)
             if (d142 > d127) { // from (0, 1)
@@ -1152,19 +1158,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l114)) { // check (2, 0)
-            if (d114 > d113) { // from (1, 0)
-                d114 = d113;
-                dir114 = dir113;
+            if (!rc.isLocationOccupied(l114)) { 
+                if (d114 > d113) { // from (1, 0)
+                    d114 = d113;
+                    dir114 = dir113;
+                }
+                if (d114 > d98) { // from (1, -1)
+                    d114 = d98;
+                    dir114 = dir98;
+                }
+                if (d114 > d128) { // from (1, 1)
+                    d114 = d128;
+                    dir114 = dir128;
+                }
+                d114 += locationScore(l114, m114, dir114);
             }
-            if (d114 > d98) { // from (1, -1)
-                d114 = d98;
-                dir114 = dir98;
-            }
-            if (d114 > d128) { // from (1, 1)
-                d114 = d128;
-                dir114 = dir128;
-            }
-            d114 += locationScore(l114, m114, dir114);
         }
         else if (rc.onTheMap(l114)) { // check (2, 0)
             if (d114 > d113) { // from (1, 0)
@@ -1183,19 +1191,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l95)) { // check (-2, -1)
-            if (d95 > d111) { // from (-1, 0)
-                d95 = d111;
-                dir95 = dir111;
+            if (!rc.isLocationOccupied(l95)) { 
+                if (d95 > d111) { // from (-1, 0)
+                    d95 = d111;
+                    dir95 = dir111;
+                }
+                if (d95 > d96) { // from (-1, -1)
+                    d95 = d96;
+                    dir95 = dir96;
+                }
+                if (d95 > d110) { // from (-2, 0)
+                    d95 = d110;
+                    dir95 = dir110;
+                }
+                d95 += locationScore(l95, m95, dir95);
             }
-            if (d95 > d96) { // from (-1, -1)
-                d95 = d96;
-                dir95 = dir96;
-            }
-            if (d95 > d110) { // from (-2, 0)
-                d95 = d110;
-                dir95 = dir110;
-            }
-            d95 += locationScore(l95, m95, dir95);
         }
         else if (rc.onTheMap(l95)) { // check (-2, -1)
             if (d95 > d111) { // from (-1, 0)
@@ -1214,19 +1224,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l125)) { // check (-2, 1)
-            if (d125 > d111) { // from (-1, 0)
-                d125 = d111;
-                dir125 = dir111;
+            if (!rc.isLocationOccupied(l125)) { 
+                if (d125 > d111) { // from (-1, 0)
+                    d125 = d111;
+                    dir125 = dir111;
+                }
+                if (d125 > d126) { // from (-1, 1)
+                    d125 = d126;
+                    dir125 = dir126;
+                }
+                if (d125 > d110) { // from (-2, 0)
+                    d125 = d110;
+                    dir125 = dir110;
+                }
+                d125 += locationScore(l125, m125, dir125);
             }
-            if (d125 > d126) { // from (-1, 1)
-                d125 = d126;
-                dir125 = dir126;
-            }
-            if (d125 > d110) { // from (-2, 0)
-                d125 = d110;
-                dir125 = dir110;
-            }
-            d125 += locationScore(l125, m125, dir125);
         }
         else if (rc.onTheMap(l125)) { // check (-2, 1)
             if (d125 > d111) { // from (-1, 0)
@@ -1245,23 +1257,25 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l81)) { // check (-1, -2)
-            if (d81 > d97) { // from (0, -1)
-                d81 = d97;
-                dir81 = dir97;
+            if (!rc.isLocationOccupied(l81)) { 
+                if (d81 > d97) { // from (0, -1)
+                    d81 = d97;
+                    dir81 = dir97;
+                }
+                if (d81 > d96) { // from (-1, -1)
+                    d81 = d96;
+                    dir81 = dir96;
+                }
+                if (d81 > d82) { // from (0, -2)
+                    d81 = d82;
+                    dir81 = dir82;
+                }
+                if (d81 > d95) { // from (-2, -1)
+                    d81 = d95;
+                    dir81 = dir95;
+                }
+                d81 += locationScore(l81, m81, dir81);
             }
-            if (d81 > d96) { // from (-1, -1)
-                d81 = d96;
-                dir81 = dir96;
-            }
-            if (d81 > d82) { // from (0, -2)
-                d81 = d82;
-                dir81 = dir82;
-            }
-            if (d81 > d95) { // from (-2, -1)
-                d81 = d95;
-                dir81 = dir95;
-            }
-            d81 += locationScore(l81, m81, dir81);
         }
         else if (rc.onTheMap(l81)) { // check (-1, -2)
             if (d81 > d97) { // from (0, -1)
@@ -1284,23 +1298,25 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l141)) { // check (-1, 2)
-            if (d141 > d127) { // from (0, 1)
-                d141 = d127;
-                dir141 = dir127;
+            if (!rc.isLocationOccupied(l141)) { 
+                if (d141 > d127) { // from (0, 1)
+                    d141 = d127;
+                    dir141 = dir127;
+                }
+                if (d141 > d126) { // from (-1, 1)
+                    d141 = d126;
+                    dir141 = dir126;
+                }
+                if (d141 > d142) { // from (0, 2)
+                    d141 = d142;
+                    dir141 = dir142;
+                }
+                if (d141 > d125) { // from (-2, 1)
+                    d141 = d125;
+                    dir141 = dir125;
+                }
+                d141 += locationScore(l141, m141, dir141);
             }
-            if (d141 > d126) { // from (-1, 1)
-                d141 = d126;
-                dir141 = dir126;
-            }
-            if (d141 > d142) { // from (0, 2)
-                d141 = d142;
-                dir141 = dir142;
-            }
-            if (d141 > d125) { // from (-2, 1)
-                d141 = d125;
-                dir141 = dir125;
-            }
-            d141 += locationScore(l141, m141, dir141);
         }
         else if (rc.onTheMap(l141)) { // check (-1, 2)
             if (d141 > d127) { // from (0, 1)
@@ -1323,19 +1339,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l83)) { // check (1, -2)
-            if (d83 > d97) { // from (0, -1)
-                d83 = d97;
-                dir83 = dir97;
+            if (!rc.isLocationOccupied(l83)) { 
+                if (d83 > d97) { // from (0, -1)
+                    d83 = d97;
+                    dir83 = dir97;
+                }
+                if (d83 > d98) { // from (1, -1)
+                    d83 = d98;
+                    dir83 = dir98;
+                }
+                if (d83 > d82) { // from (0, -2)
+                    d83 = d82;
+                    dir83 = dir82;
+                }
+                d83 += locationScore(l83, m83, dir83);
             }
-            if (d83 > d98) { // from (1, -1)
-                d83 = d98;
-                dir83 = dir98;
-            }
-            if (d83 > d82) { // from (0, -2)
-                d83 = d82;
-                dir83 = dir82;
-            }
-            d83 += locationScore(l83, m83, dir83);
         }
         else if (rc.onTheMap(l83)) { // check (1, -2)
             if (d83 > d97) { // from (0, -1)
@@ -1354,19 +1372,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l143)) { // check (1, 2)
-            if (d143 > d127) { // from (0, 1)
-                d143 = d127;
-                dir143 = dir127;
+            if (!rc.isLocationOccupied(l143)) { 
+                if (d143 > d127) { // from (0, 1)
+                    d143 = d127;
+                    dir143 = dir127;
+                }
+                if (d143 > d128) { // from (1, 1)
+                    d143 = d128;
+                    dir143 = dir128;
+                }
+                if (d143 > d142) { // from (0, 2)
+                    d143 = d142;
+                    dir143 = dir142;
+                }
+                d143 += locationScore(l143, m143, dir143);
             }
-            if (d143 > d128) { // from (1, 1)
-                d143 = d128;
-                dir143 = dir128;
-            }
-            if (d143 > d142) { // from (0, 2)
-                d143 = d142;
-                dir143 = dir142;
-            }
-            d143 += locationScore(l143, m143, dir143);
         }
         else if (rc.onTheMap(l143)) { // check (1, 2)
             if (d143 > d127) { // from (0, 1)
@@ -1385,23 +1405,25 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l99)) { // check (2, -1)
-            if (d99 > d113) { // from (1, 0)
-                d99 = d113;
-                dir99 = dir113;
+            if (!rc.isLocationOccupied(l99)) { 
+                if (d99 > d113) { // from (1, 0)
+                    d99 = d113;
+                    dir99 = dir113;
+                }
+                if (d99 > d98) { // from (1, -1)
+                    d99 = d98;
+                    dir99 = dir98;
+                }
+                if (d99 > d114) { // from (2, 0)
+                    d99 = d114;
+                    dir99 = dir114;
+                }
+                if (d99 > d83) { // from (1, -2)
+                    d99 = d83;
+                    dir99 = dir83;
+                }
+                d99 += locationScore(l99, m99, dir99);
             }
-            if (d99 > d98) { // from (1, -1)
-                d99 = d98;
-                dir99 = dir98;
-            }
-            if (d99 > d114) { // from (2, 0)
-                d99 = d114;
-                dir99 = dir114;
-            }
-            if (d99 > d83) { // from (1, -2)
-                d99 = d83;
-                dir99 = dir83;
-            }
-            d99 += locationScore(l99, m99, dir99);
         }
         else if (rc.onTheMap(l99)) { // check (2, -1)
             if (d99 > d113) { // from (1, 0)
@@ -1424,23 +1446,25 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l129)) { // check (2, 1)
-            if (d129 > d113) { // from (1, 0)
-                d129 = d113;
-                dir129 = dir113;
+            if (!rc.isLocationOccupied(l129)) { 
+                if (d129 > d113) { // from (1, 0)
+                    d129 = d113;
+                    dir129 = dir113;
+                }
+                if (d129 > d128) { // from (1, 1)
+                    d129 = d128;
+                    dir129 = dir128;
+                }
+                if (d129 > d114) { // from (2, 0)
+                    d129 = d114;
+                    dir129 = dir114;
+                }
+                if (d129 > d143) { // from (1, 2)
+                    d129 = d143;
+                    dir129 = dir143;
+                }
+                d129 += locationScore(l129, m129, dir129);
             }
-            if (d129 > d128) { // from (1, 1)
-                d129 = d128;
-                dir129 = dir128;
-            }
-            if (d129 > d114) { // from (2, 0)
-                d129 = d114;
-                dir129 = dir114;
-            }
-            if (d129 > d143) { // from (1, 2)
-                d129 = d143;
-                dir129 = dir143;
-            }
-            d129 += locationScore(l129, m129, dir129);
         }
         else if (rc.onTheMap(l129)) { // check (2, 1)
             if (d129 > d113) { // from (1, 0)
@@ -1463,19 +1487,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l80)) { // check (-2, -2)
-            if (d80 > d96) { // from (-1, -1)
-                d80 = d96;
-                dir80 = dir96;
+            if (!rc.isLocationOccupied(l80)) { 
+                if (d80 > d96) { // from (-1, -1)
+                    d80 = d96;
+                    dir80 = dir96;
+                }
+                if (d80 > d95) { // from (-2, -1)
+                    d80 = d95;
+                    dir80 = dir95;
+                }
+                if (d80 > d81) { // from (-1, -2)
+                    d80 = d81;
+                    dir80 = dir81;
+                }
+                d80 += locationScore(l80, m80, dir80);
             }
-            if (d80 > d95) { // from (-2, -1)
-                d80 = d95;
-                dir80 = dir95;
-            }
-            if (d80 > d81) { // from (-1, -2)
-                d80 = d81;
-                dir80 = dir81;
-            }
-            d80 += locationScore(l80, m80, dir80);
         }
         else if (rc.onTheMap(l80)) { // check (-2, -2)
             if (d80 > d96) { // from (-1, -1)
@@ -1494,19 +1520,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l140)) { // check (-2, 2)
-            if (d140 > d126) { // from (-1, 1)
-                d140 = d126;
-                dir140 = dir126;
+            if (!rc.isLocationOccupied(l140)) { 
+                if (d140 > d126) { // from (-1, 1)
+                    d140 = d126;
+                    dir140 = dir126;
+                }
+                if (d140 > d125) { // from (-2, 1)
+                    d140 = d125;
+                    dir140 = dir125;
+                }
+                if (d140 > d141) { // from (-1, 2)
+                    d140 = d141;
+                    dir140 = dir141;
+                }
+                d140 += locationScore(l140, m140, dir140);
             }
-            if (d140 > d125) { // from (-2, 1)
-                d140 = d125;
-                dir140 = dir125;
-            }
-            if (d140 > d141) { // from (-1, 2)
-                d140 = d141;
-                dir140 = dir141;
-            }
-            d140 += locationScore(l140, m140, dir140);
         }
         else if (rc.onTheMap(l140)) { // check (-2, 2)
             if (d140 > d126) { // from (-1, 1)
@@ -1525,19 +1553,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l84)) { // check (2, -2)
-            if (d84 > d98) { // from (1, -1)
-                d84 = d98;
-                dir84 = dir98;
+            if (!rc.isLocationOccupied(l84)) { 
+                if (d84 > d98) { // from (1, -1)
+                    d84 = d98;
+                    dir84 = dir98;
+                }
+                if (d84 > d83) { // from (1, -2)
+                    d84 = d83;
+                    dir84 = dir83;
+                }
+                if (d84 > d99) { // from (2, -1)
+                    d84 = d99;
+                    dir84 = dir99;
+                }
+                d84 += locationScore(l84, m84, dir84);
             }
-            if (d84 > d83) { // from (1, -2)
-                d84 = d83;
-                dir84 = dir83;
-            }
-            if (d84 > d99) { // from (2, -1)
-                d84 = d99;
-                dir84 = dir99;
-            }
-            d84 += locationScore(l84, m84, dir84);
         }
         else if (rc.onTheMap(l84)) { // check (2, -2)
             if (d84 > d98) { // from (1, -1)
@@ -1556,19 +1586,21 @@ public class BotCarrierPathing implements UnitPathing {
         }
 
         if (rc.canSenseLocation(l144)) { // check (2, 2)
-            if (d144 > d128) { // from (1, 1)
-                d144 = d128;
-                dir144 = dir128;
+            if (!rc.isLocationOccupied(l144)) { 
+                if (d144 > d128) { // from (1, 1)
+                    d144 = d128;
+                    dir144 = dir128;
+                }
+                if (d144 > d143) { // from (1, 2)
+                    d144 = d143;
+                    dir144 = dir143;
+                }
+                if (d144 > d129) { // from (2, 1)
+                    d144 = d129;
+                    dir144 = dir129;
+                }
+                d144 += locationScore(l144, m144, dir144);
             }
-            if (d144 > d143) { // from (1, 2)
-                d144 = d143;
-                dir144 = dir143;
-            }
-            if (d144 > d129) { // from (2, 1)
-                d144 = d129;
-                dir144 = dir129;
-            }
-            d144 += locationScore(l144, m144, dir144);
         }
         else if (rc.onTheMap(l144)) { // check (2, 2)
             if (d144 > d128) { // from (1, 1)

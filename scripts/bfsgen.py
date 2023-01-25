@@ -61,8 +61,12 @@ def gen_init(radius):
 """
     return out
 
-def gen_bfs(radius):
+def gen_bfs(radius, unit):
     visited = set([encode(0,0)])
+    if unit == 'Carrier':
+        occupied_val = 8
+    else:
+        occupied_val = 2
     out = f"""
 """
     for r2 in range(1, radius+1):
@@ -72,7 +76,7 @@ def gen_bfs(radius):
                     out += f"""
         if (rc.canSenseLocation(l{encode(x,y)})) {{ // check ({x}, {y})"""
                     indent = ""
-                    if r2 <= 2:
+                    if r2 <= occupied_val:
                         out += f"""
             if (!rc.isLocationOccupied(l{encode(x,y)})) {{ """
                         indent = "    "
@@ -87,7 +91,7 @@ def gen_bfs(radius):
             {indent}}}"""
                     out += f"""
             {indent}d{encode(x,y)} += locationScore(l{encode(x,y)}, m{encode(x,y)}, dir{encode(x,y)});"""
-                    if r2 <= 2:
+                    if r2 <= occupied_val:
                         out += f"""
             }}"""
                     visited.add(encode(x,y))
@@ -389,7 +393,7 @@ public class Bot{unit}Pathing implements UnitPathing {{
 
     public Direction bestDir(MapLocation target) throws GameActionException {{
 {gen_init(radius)}
-{gen_bfs(radius)}
+{gen_bfs(radius, unit)}
 {gen_print(radius)}
 {gen_selection(radius, smaller_radius)}
         if (cost > 150){{
