@@ -333,15 +333,15 @@ public class Globals {
             }
         }
         else {
-            double factor = 2;
-            int[] store = new int[] {2,1,0};
-            if (MAP_SIZE > 2500 || areHQsCornered()){
-                store = new int[] {0,1,2};
-            }
-            else if (Math.max(MAP_HEIGHT, MAP_WIDTH) >= 1.5 * Math.min(MAP_HEIGHT, MAP_WIDTH)){
-                store = new int[] {1,2,0};
-                factor = 1;
-            }
+            double factor = 1;
+            int[] store = new int[] {1,0,2};
+            // if (MAP_SIZE > 2500 || areHQsCornered()){
+            //     store = new int[] {0,1,2};
+            // }
+            // else if (Math.max(MAP_HEIGHT, MAP_WIDTH) >= 1.5 * Math.min(MAP_HEIGHT, MAP_WIDTH)){
+            //     store = new int[] {1,2,0};
+            //     factor = 1;
+            // }
             for (int i : store) {
                 if (checkIfSymmetry(SYMMETRY.values()[i])){
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation);
