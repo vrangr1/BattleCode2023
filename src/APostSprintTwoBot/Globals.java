@@ -334,7 +334,7 @@ public class Globals {
         }
         else {
             double factor = 1;
-            int[] store = new int[] {1,0,2};
+            int[] store = new int[] {1,2,0};
             for (int i : store) {
                 if (checkIfSymmetry(SYMMETRY.values()[i]) && mapSymmetry[i]){
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation); // Default go to location
