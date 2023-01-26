@@ -35,7 +35,7 @@
 - [x] When near hq and about to deposit resources, don't flee.
 ~~- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?~~
 - [ ] Do early deposition.
-- [ ] Replace currentLocation with rc.getLocation everywhere properly.
+- [x] Replace currentLocation with rc.getLocation everywhere properly.
 - [ ] Move movementWrapper to the end.
 - [ ] Opportunistic mining : perhaps opportunistic adamantium mining after some number of turns?? Check.
 ~~- [ ] Increase adamantium collection on larger maps~~

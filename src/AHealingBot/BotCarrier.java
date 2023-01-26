@@ -365,7 +365,7 @@ public class BotCarrier extends Utils{
     private static void transferResourcesToHQ() throws GameActionException{
         if (!returnToHQ) return;
         assert movementDestination != null;
-        if (currentLocation.distanceSquaredTo(movementDestination) > 2) return;
+        if (rc.getLocation().distanceSquaredTo(movementDestination) > 2) return;
         if (collectedElixir > 0 && rc.canTransferResource(movementDestination, ResourceType.ELIXIR, collectedElixir)){
             rc.transferResource(movementDestination, ResourceType.ELIXIR, collectedElixir);
             carrierStatus = Status.DEPOSITING_RESOURCES;
@@ -496,7 +496,7 @@ public class BotCarrier extends Utils{
             MapLocation[] locations = rc.senseNearbyIslandLocations(islandId);
             for (int j = locations.length; j-- > 0; ){
                 loc = locations[j];
-                curDist = currentLocation.distanceSquaredTo(loc);
+                curDist = rc.getLocation().distanceSquaredTo(loc);
                 if (nearestLoc == null || curDist < nearestDist){
                     nearestLoc = loc;
                     nearestDist = curDist;
@@ -514,7 +514,7 @@ public class BotCarrier extends Utils{
             if (Comms.readSHAFlagFromMessage(message) != Comms.SHAFlag.UNOCCUPIED_ISLAND) continue;
             MapLocation loc = Comms.readLocationFromMessage(message);
             if (ignoreLocations[hashLocation(loc)]) continue;
-            curDist = currentLocation.distanceSquaredTo(loc);
+            curDist = rc.getLocation().distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
                 nearestLoc = loc;
                 nearestDist = curDist;
@@ -538,7 +538,7 @@ public class BotCarrier extends Utils{
         )
             Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.NEUTRAL_ISLANDS, senseLoc, Comms.SHAFlag.UNOCCUPIED_ISLAND);
         if (senseLoc != null && commsLoc != null){
-            if (currentLocation.distanceSquaredTo(commsLoc) <= currentLocation.distanceSquaredTo(senseLoc))
+            if (rc.getLocation().distanceSquaredTo(commsLoc) <= rc.getLocation().distanceSquaredTo(senseLoc))
                 return commsLoc;
             return senseLoc;
         }
@@ -581,7 +581,7 @@ public class BotCarrier extends Utils{
         assert movementDestination != null : "movementDestination != null";
         // assert targetedIslandId != -1 : "targetedIslandId != -1";
         assertNotHeadquarterLocation(movementDestination);
-        int isCurLocIsland = rc.senseIsland(currentLocation);
+        int isCurLocIsland = rc.senseIsland(rc.getLocation());
         if (isCurLocIsland != -1 && rc.senseTeamOccupyingIsland(isCurLocIsland) == Team.NEUTRAL){
             if (rc.canPlaceAnchor()){
                 // rc.setIndicatorString("A small dump for carrier, a huge jump for AnchorIslands! Placed Anchor!");
@@ -730,7 +730,7 @@ public class BotCarrier extends Utils{
         // if (returnEarly) return;
         if (rc.getWeight() < 5) // Can't even attack...
             return;
-        else if (returnToHQ && movementDestination != null && currentLocation.distanceSquaredTo(movementDestination) <= 2)
+        else if (returnToHQ && movementDestination != null && rc.getLocation().distanceSquaredTo(movementDestination) <= 2)
             return;
         else if (visibleEnemies.length == 0 || !rc.isActionReady())
             return;
@@ -800,7 +800,7 @@ public class BotCarrier extends Utils{
         for (int i = nearbyWells.length; --i >= 0;){
             well = nearbyWells[i];
             MapLocation loc = well.getMapLocation();
-            curDist = currentLocation.distanceSquaredTo(loc);
+            curDist = rc.getLocation().distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
                 nearestLoc = loc;
                 nearestDist = curDist;
@@ -828,14 +828,14 @@ public class BotCarrier extends Utils{
             well = nearbyWells[i];
             MapLocation loc = well.getMapLocation();
             if (well.getResourceType() != resourceType){
-                curDist = currentLocation.distanceSquaredTo(loc);
+                curDist = rc.getLocation().distanceSquaredTo(loc);
                 if (otherTypeWell == null || curDist < otherTypeDist){
                     otherTypeWell = loc;
                     otherTypeDist = curDist;
                 }
                 continue;
             }
-            curDist = currentLocation.distanceSquaredTo(loc);
+            curDist = rc.getLocation().distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
                 nearestLoc = loc;
                 nearestDist = curDist;
@@ -887,13 +887,12 @@ public class BotCarrier extends Utils{
     }
 
     private static boolean toExploreOrNotToExplore(MapLocation obtainedLoc){
-        currentLocation = rc.getLocation();
         if (otherTypeWell == null) return  true;
         if (STORING_EXPLORED_LOCATIONS && isLocationExplored(obtainedLoc) && !Comms.checkIfLocationSaved(obtainedLoc)) return false;
-        double wellDist = Math.sqrt(currentLocation.distanceSquaredTo(otherTypeWell));
+        double wellDist = Math.sqrt(rc.getLocation().distanceSquaredTo(otherTypeWell));
         double potentialDist = Math.min(Math.sqrt(GameConstants.MAX_DISTANCE_BETWEEN_WELLS), Math.min(MAP_HEIGHT, MAP_WIDTH)/4);
         double expectedDist = wellDist + potentialDist;
-        return currentLocation.distanceSquaredTo(obtainedLoc) < expectedDist * expectedDist;
+        return rc.getLocation().distanceSquaredTo(obtainedLoc) < expectedDist * expectedDist;
     }
 
     /**
@@ -944,10 +943,10 @@ public class BotCarrier extends Utils{
             exploreForWells(true);
             return;
         }
-        int curDist = currentLocation.distanceSquaredTo(movementDestination);
+        int curDist = rc.getLocation().distanceSquaredTo(movementDestination);
         if (curDist <= 2) { // Reached location
             if (!rc.isLocationOccupied(movementDestination)){
-                Direction dir = currentLocation.directionTo(movementDestination);
+                Direction dir = rc.getLocation().directionTo(movementDestination);
                 if (rc.canMove(dir))
                     rc.move(dir);
             }
@@ -1175,4 +1174,3 @@ public class BotCarrier extends Utils{
         endOfTurnUpdate();
     }
 }
-
