@@ -441,11 +441,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     case EAST:
                         return 15;
                     case SOUTHEAST:
-                        return 99999;
+                        return 9999;
                     case SOUTH:
                         return 99999;
                     case SOUTHWEST:
-                        return 99999;
+                        return 9999;
                     case WEST:
                         return 15;
                     case NORTHWEST:
@@ -464,11 +464,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     case SOUTHEAST:
                         return 15;
                     case SOUTH:
-                        return 99999;
+                        return 9999;
                     case SOUTHWEST:
                         return 99999;
                     case WEST:
-                        return 99999;
+                        return 9999;
                     case NORTHWEST:
                         return 15;
                     default:
@@ -487,18 +487,18 @@ public class BotAmplifierPathing implements UnitPathing {
                     case SOUTH:
                         return 15;
                     case SOUTHWEST:
-                        return 99999;
+                        return 9999;
                     case WEST:
                         return 99999;
                     case NORTHWEST:
-                        return 99999;
+                        return 9999;
                     default:
                         return 99999;
                 }
             case SOUTHEAST:
                 switch(inputDir){
                     case NORTH:
-                        return 99999;
+                        return 9999;
                     case NORTHEAST:
                         return 15;
                     case EAST:
@@ -510,7 +510,7 @@ public class BotAmplifierPathing implements UnitPathing {
                     case SOUTHWEST:
                         return 15;
                     case WEST:
-                        return 99999;
+                        return 9999;
                     case NORTHWEST:
                         return 99999;
                     default:
@@ -521,7 +521,7 @@ public class BotAmplifierPathing implements UnitPathing {
                     case NORTH:
                         return 99999;
                     case NORTHEAST:
-                        return 99999;
+                        return 9999;
                     case EAST:
                         return 15;
                     case SOUTHEAST:
@@ -533,18 +533,18 @@ public class BotAmplifierPathing implements UnitPathing {
                     case WEST:
                         return 15;
                     case NORTHWEST:
-                        return 99999;
+                        return 9999;
                     default:
                         return 99999;
                 }
             case SOUTHWEST:
                 switch(inputDir){
                     case NORTH:
-                        return 99999;
+                        return 9999;
                     case NORTHEAST:
                         return 99999;
                     case EAST:
-                        return 99999;
+                        return 9999;
                     case SOUTHEAST:
                         return 15;
                     case SOUTH:
@@ -563,11 +563,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     case NORTH:
                         return 15;
                     case NORTHEAST:
-                        return 99999;
+                        return 9999;
                     case EAST:
                         return 99999;
                     case SOUTHEAST:
-                        return 99999;
+                        return 9999;
                     case SOUTH:
                         return 15;
                     case SOUTHWEST:
@@ -586,11 +586,11 @@ public class BotAmplifierPathing implements UnitPathing {
                     case NORTHEAST:
                         return 15;
                     case EAST:
-                        return 99999;
+                        return 9999;
                     case SOUTHEAST:
                         return 99999;
                     case SOUTH:
-                        return 99999;
+                        return 9999;
                     case SOUTHWEST:
                         return 15;
                     case WEST:
@@ -4012,7 +4012,7 @@ public class BotAmplifierPathing implements UnitPathing {
             cost = d117;
         }
 
-        if (cost > 150){
+        if (cost > 9999){
             Nav.goTo(target);
             return null;
         }

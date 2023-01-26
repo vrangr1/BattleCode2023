@@ -381,11 +381,11 @@ public class BotCarrierPathing implements UnitPathing {
                     case EAST:
                         return 15;
                     case SOUTHEAST:
-                        return 99999;
+                        return 40;
                     case SOUTH:
-                        return 99999;
+                        return 100;
                     case SOUTHWEST:
-                        return 99999;
+                        return 40;
                     case WEST:
                         return 15;
                     case NORTHWEST:
@@ -404,11 +404,11 @@ public class BotCarrierPathing implements UnitPathing {
                     case SOUTHEAST:
                         return 15;
                     case SOUTH:
-                        return 99999;
+                        return 40;
                     case SOUTHWEST:
-                        return 99999;
+                        return 100;
                     case WEST:
-                        return 99999;
+                        return 40;
                     case NORTHWEST:
                         return 15;
                     default:
@@ -427,18 +427,18 @@ public class BotCarrierPathing implements UnitPathing {
                     case SOUTH:
                         return 15;
                     case SOUTHWEST:
-                        return 99999;
+                        return 40;
                     case WEST:
-                        return 99999;
+                        return 100;
                     case NORTHWEST:
-                        return 99999;
+                        return 40;
                     default:
                         return 99999;
                 }
             case SOUTHEAST:
                 switch(inputDir){
                     case NORTH:
-                        return 99999;
+                        return 40;
                     case NORTHEAST:
                         return 15;
                     case EAST:
@@ -450,18 +450,18 @@ public class BotCarrierPathing implements UnitPathing {
                     case SOUTHWEST:
                         return 15;
                     case WEST:
-                        return 99999;
+                        return 40;
                     case NORTHWEST:
-                        return 99999;
+                        return 100;
                     default:
                         return 99999;
                 }
             case SOUTH:
                 switch(inputDir){
                     case NORTH:
-                        return 99999;
+                        return 100;
                     case NORTHEAST:
-                        return 99999;
+                        return 40;
                     case EAST:
                         return 15;
                     case SOUTHEAST:
@@ -473,18 +473,18 @@ public class BotCarrierPathing implements UnitPathing {
                     case WEST:
                         return 15;
                     case NORTHWEST:
-                        return 99999;
+                        return 40;
                     default:
                         return 99999;
                 }
             case SOUTHWEST:
                 switch(inputDir){
                     case NORTH:
-                        return 99999;
+                        return 40;
                     case NORTHEAST:
-                        return 99999;
+                        return 100;
                     case EAST:
-                        return 99999;
+                        return 40;
                     case SOUTHEAST:
                         return 15;
                     case SOUTH:
@@ -503,11 +503,11 @@ public class BotCarrierPathing implements UnitPathing {
                     case NORTH:
                         return 15;
                     case NORTHEAST:
-                        return 99999;
+                        return 40;
                     case EAST:
-                        return 99999;
+                        return 100;
                     case SOUTHEAST:
-                        return 99999;
+                        return 40;
                     case SOUTH:
                         return 15;
                     case SOUTHWEST:
@@ -526,11 +526,11 @@ public class BotCarrierPathing implements UnitPathing {
                     case NORTHEAST:
                         return 15;
                     case EAST:
-                        return 99999;
+                        return 40;
                     case SOUTHEAST:
-                        return 99999;
+                        return 100;
                     case SOUTH:
-                        return 99999;
+                        return 40;
                     case SOUTHWEST:
                         return 15;
                     case WEST:
@@ -3636,7 +3636,7 @@ public class BotCarrierPathing implements UnitPathing {
             cost = d146;
         }
 
-        if (cost > 150){
+        if (cost > 9999){
             Nav.goTo(target);
             return null;
         }

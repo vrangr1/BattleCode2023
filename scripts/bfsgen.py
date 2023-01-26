@@ -8,7 +8,7 @@ def encode(x, y):
 # Amplifies is 34 but set to 25 for bytecode reasons
 RADII = {'Carrier': 20, 'Launcher': 20, 'Destabilizer': 20, 'Booster': 20, 'Headquarter': 34, 'Amplifier': 25}
 SMALLER_RADII = {'Carrier': 10, 'Launcher': 10, 'Destabilizer': 10, 'Booster': 10, 'Headquarter': 20, 'Amplifier': 20}
-CURRENT_VALUES = {'Carrier': [5,8,15,99999,99999], 'Launcher': [5,8,30,99999,99999], 'Destabilizer': [5,8,15,99999,99999], 'Booster': [5,8,15,99999,99999], 'Headquarter': [5,8,15,99999,99999], 'Amplifier': [5,8,15,99999,99999]}
+CURRENT_VALUES = {'Carrier': [5,8,15,40,100], 'Launcher': [5,8,15,9999,9999], 'Destabilizer': [5,8,15,9999,9999], 'Booster': [5,8,15,9999,9999], 'Headquarter': [5,8,15,9999,9999], 'Amplifier': [5,8,15,9999,99999]}
 
 DIRECTIONS = {
     (1, 0): 'Direction.EAST',
@@ -398,7 +398,7 @@ public class Bot{unit}Pathing implements UnitPathing {{
 {gen_bfs(radius, unit)}
 {gen_print(radius)}
 {gen_selection(radius, smaller_radius)}
-        if (cost > 150){{
+        if (cost > 9999){{
             Nav.goTo(target);
             return null;
         }}
