@@ -388,8 +388,10 @@ public class BotCarrier extends Utils{
             movementDestination = null;
             getAndSetWellLocation();
             // goToWell();
-            carrierStatus = Status.TRANSIT_TO_WELL;
-            movementWrapper(movementDestination);
+            if (movementDestination != null){
+                carrierStatus = Status.TRANSIT_TO_WELL;
+                movementWrapper(movementDestination);
+            }
         }
     }
 
@@ -427,7 +429,7 @@ public class BotCarrier extends Utils{
         }
         else if (DOING_EARLY_MANA_DEPOSITION && !returnToHQ && isFleeing){
             MapLocation hqLoc = Comms.findNearestHeadquarter();
-            if (rc.getResourceAmount(ResourceType.MANA) > EARLY_MANA_DEPOSTION_THRESHOLD){
+            if (currentInventoryWeight >= EARLY_MANA_DEPOSTION_THRESHOLD){
                 returnToHQ = true;
                 movementDestination = hqLoc;
                 isFleeing = false;
@@ -1173,3 +1175,4 @@ public class BotCarrier extends Utils{
         endOfTurnUpdate();
     }
 }
+
