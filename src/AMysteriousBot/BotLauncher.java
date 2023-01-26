@@ -675,6 +675,15 @@ public class BotLauncher extends CombatUtils{
 
     private static void circleEnemyHQ() throws GameActionException{
         if (enemyHQInVision == visibleEnemies.length && enemyHQInVision > 0 && launcherState != Status.ISLAND_WORK){
+            if (circlingCount >= CIRCLE_CHECK && Comms.getHeadquartersCount() > 1 && rc.getID() % Comms.getHeadquartersCount() != 0){
+                visitedHQList[++visitedHQIndex % Comms.getHeadquartersCount()] = enemyHQ.location;
+                circlingCount = 0;
+                circleLocation = null;
+                setBaseDestination();
+            }
+            if (enemyHQ.location.equals(visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()])){
+                return;
+            }
             visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
             if (launcherState != Status.CIRCLING && circleLocation != enemyHQ.location){
                 setCircle(enemyHQ.location, 9, 20);
@@ -800,7 +809,7 @@ public class BotLauncher extends CombatUtils{
         if (!rc.isActionReady()) return;
         cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
         MapLocation cloudAttackLocation = null;
-        if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1){
+        if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1.2){
             int bestDistance = 4;
             int count = 0;
             for (int i = cloudLocations.length; --i >= 0;){

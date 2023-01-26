@@ -128,6 +128,8 @@ public class Globals {
     public static MapLocation[] alliedHQLocs;
     public static RobotInfo shepherdUnit;
     public static String destinationFlag = "";
+    public static MapLocation[] visitedHQList;
+    public static int visitedHQIndex = 0;
 
     public static enum SYMMETRY{
         VERTICAL(0b100),
@@ -179,6 +181,7 @@ public class Globals {
         if (UNIT_TYPE != RobotType.HEADQUARTERS){
             alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
             guessEnemyHQLocation();
+            visitedHQList = new MapLocation[Comms.getHeadquartersCount()];
         }
         shepherdUnit = null;
     }
@@ -349,6 +352,8 @@ public class Globals {
                         // double currDistance = (double) rc.getLocation().distanceSquaredTo(alliedHQEnemyHQ); // As distance will be updated
                         if (parentDistance > alliedHQLocs[j].distanceSquaredTo(alliedHQEnemyHQ)) continue; // Don't have all launchers go to the same place
                         if (parentDistance <= 1.0) continue;
+                        MapLocation alreadyVisitedHQ = visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()];
+                        if (alreadyVisitedHQ != null && alreadyVisitedHQ.equals(alliedHQEnemyHQ)) continue;
                         if (parentDistance * factor < minDistance){
                             minDistance = parentDistance;
                             closestEnemyHQ = alliedHQEnemyHQ;
