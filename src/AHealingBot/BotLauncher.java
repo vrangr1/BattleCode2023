@@ -412,14 +412,13 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health) || rc.getHealth() <= 30) {
-			if (Movement.tryFlagMoveInDirection(closestHostile.location, true)){
-                launcherState = Status.FLANKING;
-                return true;
-            }
-            else {
+			Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), true);
+            if (rc.isMovementReady()){
                 standOff = true;
                 return false;
             }
+            launcherState = Status.FLANKING;
+            return true;
 		}
 		return false;
 	}
