@@ -8,6 +8,7 @@ def encode(x, y):
 # Amplifies is 34 but set to 25 for bytecode reasons
 RADII = {'Carrier': 20, 'Launcher': 20, 'Destabilizer': 20, 'Booster': 20, 'Headquarter': 34, 'Amplifier': 25}
 SMALLER_RADII = {'Carrier': 10, 'Launcher': 10, 'Destabilizer': 10, 'Booster': 10, 'Headquarter': 20, 'Amplifier': 20}
+CURRENT_VALUES = {'Carrier': [5,8,15,99999,99999], 'Launcher': [5,8,30,99999,99999], 'Destabilizer': [5,8,15,99999,99999], 'Booster': [5,8,15,99999,99999], 'Headquarter': [5,8,15,99999,99999], 'Amplifier': [5,8,15,99999,99999]}
 
 DIRECTIONS = {
     (1, 0): 'Direction.EAST',
@@ -187,6 +188,7 @@ def gen_print(radius):
 def gen_full(bot, unit):
     radius = RADII[unit]
     smaller_radius = SMALLER_RADII[unit]
+    curr_values = CURRENT_VALUES[unit]
     out_file = Path('../src/') / bot / f'path' / f'Bot{unit}Pathing.java'
     with open(out_file, 'w') as f:
         f.write(f"""// Inspired by https://github.com/IvanGeffner/battlecode2021/blob/master/thirtyone/BFSMuckraker.java
@@ -221,168 +223,168 @@ public class Bot{unit}Pathing implements UnitPathing {{
             case NORTH:
                 switch(inputDir){{
                     case NORTH:
-                        return 5;
+                        return {curr_values[0]};
                     case NORTHEAST:
-                        return 8;
+                        return {curr_values[1]};
                     case EAST:
-                        return 15;
+                        return {curr_values[2]};
                     case SOUTHEAST:
-                        return 99999;
+                        return {curr_values[3]};
                     case SOUTH:
-                        return 99999;
+                        return {curr_values[4]};
                     case SOUTHWEST:
-                        return 99999;
+                        return {curr_values[3]};
                     case WEST:
-                        return 15;
+                        return {curr_values[2]};
                     case NORTHWEST:
-                        return 8;
+                        return {curr_values[1]};
                     default:
                         return 99999;
                 }}
             case NORTHEAST:
                 switch(inputDir){{
                     case NORTH:
-                        return 8;
+                        return {curr_values[1]};
                     case NORTHEAST:
-                        return 5;
+                        return {curr_values[0]};
                     case EAST:
-                        return 8;
+                        return {curr_values[1]};
                     case SOUTHEAST:
-                        return 15;
+                        return {curr_values[2]};
                     case SOUTH:
-                        return 99999;
+                        return {curr_values[3]};
                     case SOUTHWEST:
-                        return 99999;
+                        return {curr_values[4]};
                     case WEST:
-                        return 99999;
+                        return {curr_values[3]};
                     case NORTHWEST:
-                        return 15;
+                        return {curr_values[2]};
                     default:
                         return 99999;
                 }}
             case EAST:
                 switch(inputDir){{
                     case NORTH:
-                        return 15;
+                        return {curr_values[2]};
                     case NORTHEAST:
-                        return 8;
+                        return {curr_values[1]};
                     case EAST:
-                        return 5;
+                        return {curr_values[0]};
                     case SOUTHEAST:
-                        return 8;
+                        return {curr_values[1]};
                     case SOUTH:
-                        return 15;
+                        return {curr_values[2]};
                     case SOUTHWEST:
-                        return 99999;
+                        return {curr_values[3]};
                     case WEST:
-                        return 99999;
+                        return {curr_values[4]};
                     case NORTHWEST:
-                        return 99999;
+                        return {curr_values[3]};
                     default:
                         return 99999;
                 }}
             case SOUTHEAST:
                 switch(inputDir){{
                     case NORTH:
-                        return 99999;
+                        return {curr_values[3]};
                     case NORTHEAST:
-                        return 15;
+                        return {curr_values[2]};
                     case EAST:
-                        return 8;
+                        return {curr_values[1]};
                     case SOUTHEAST:
-                        return 5;
+                        return {curr_values[0]};
                     case SOUTH:
-                        return 8;
+                        return {curr_values[1]};
                     case SOUTHWEST:
-                        return 15;
+                        return {curr_values[2]};
                     case WEST:
-                        return 99999;
+                        return {curr_values[3]};
                     case NORTHWEST:
-                        return 99999;
+                        return {curr_values[4]};
                     default:
                         return 99999;
                 }}
             case SOUTH:
                 switch(inputDir){{
                     case NORTH:
-                        return 99999;
+                        return {curr_values[4]};
                     case NORTHEAST:
-                        return 99999;
+                        return {curr_values[3]};
                     case EAST:
-                        return 15;
+                        return {curr_values[2]};
                     case SOUTHEAST:
-                        return 8;
+                        return {curr_values[1]};
                     case SOUTH:
-                        return 5;
+                        return {curr_values[0]};
                     case SOUTHWEST:
-                        return 8;
+                        return {curr_values[1]};
                     case WEST:
-                        return 15;
+                        return {curr_values[2]};
                     case NORTHWEST:
-                        return 99999;
+                        return {curr_values[3]};
                     default:
                         return 99999;
                 }}
             case SOUTHWEST:
                 switch(inputDir){{
                     case NORTH:
-                        return 99999;
+                        return {curr_values[3]};
                     case NORTHEAST:
-                        return 99999;
+                        return {curr_values[4]};
                     case EAST:
-                        return 99999;
+                        return {curr_values[3]};
                     case SOUTHEAST:
-                        return 15;
+                        return {curr_values[2]};
                     case SOUTH:
-                        return 8;
+                        return {curr_values[1]};
                     case SOUTHWEST:
-                        return 5;
+                        return {curr_values[0]};
                     case WEST:
-                        return 8;
+                        return {curr_values[1]};
                     case NORTHWEST:
-                        return 15;
+                        return {curr_values[2]};
                     default:
                         return 99999;
                 }}
             case WEST:
                 switch(inputDir){{
                     case NORTH:
-                        return 15;
+                        return {curr_values[2]};
                     case NORTHEAST:
-                        return 99999;
+                        return {curr_values[3]};
                     case EAST:
-                        return 99999;
+                        return {curr_values[4]};
                     case SOUTHEAST:
-                        return 99999;
+                        return {curr_values[3]};
                     case SOUTH:
-                        return 15;
+                        return {curr_values[2]};
                     case SOUTHWEST:
-                        return 8;
+                        return {curr_values[1]};
                     case WEST:
-                        return 5;
+                        return {curr_values[0]};
                     case NORTHWEST:
-                        return 8;
+                        return {curr_values[1]};
                     default:
                         return 99999;
                 }}
             case NORTHWEST:
                 switch(inputDir){{
                     case NORTH:
-                        return 8;
+                        return {curr_values[1]};
                     case NORTHEAST:
-                        return 15;
+                        return {curr_values[2]};
                     case EAST:
-                        return 99999;
+                        return {curr_values[3]};
                     case SOUTHEAST:
-                        return 99999;
+                        return {curr_values[4]};
                     case SOUTH:
-                        return 99999;
+                        return {curr_values[3]};
                     case SOUTHWEST:
-                        return 15;
+                        return {curr_values[2]};
                     case WEST:
-                        return 8;
+                        return {curr_values[1]};
                     case NORTHWEST:
-                        return 5;
+                        return {curr_values[0]};
                     default:
                         return 99999;
                 }}

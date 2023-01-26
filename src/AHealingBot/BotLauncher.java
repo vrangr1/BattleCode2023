@@ -370,7 +370,7 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		if (allyIsFighting) {
-            Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostileLocation));
+            Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostileLocation), false);
             if (bestDir != null) {
                 rc.move(bestDir);
                 launcherState = Status.FLANKING;
@@ -386,7 +386,7 @@ public class BotLauncher extends CombatUtils{
             return false;
 	    pathing.setAndMoveToDestination(closestHostile.location);
         if (!rc.isMovementReady() || Movement.tryFlagMoveInDirection(closestHostile.location, true)) {
-            destinationFlag += " tM2APU";
+            destinationFlag += "|tM2APU";
             launcherState = Status.PURSUING;
             return true;
         }
@@ -412,7 +412,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health) || rc.getHealth() <= 30) {
-			if (Movement.tryFlagMoveInDirection(closestHostile.location, false)){
+			if (Movement.tryFlagMoveInDirection(closestHostile.location, true)){
                 launcherState = Status.FLANKING;
                 return true;
             }
@@ -485,7 +485,7 @@ public class BotLauncher extends CombatUtils{
             if (rc.isActionReady() && inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
-			Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(retreatTarget));
+			Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(retreatTarget), false);
             if (bestDir != null) {
                 destinationFlag += " " + bestDir;
                 rc.move(bestDir);

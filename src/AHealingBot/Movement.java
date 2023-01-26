@@ -53,9 +53,16 @@ public class Movement extends Utils{
     }
 
 
-    public static Direction combatMovement(RobotInfo[] visibleEnemies, Direction targetDir) throws GameActionException{
+    public static Direction combatMovement(RobotInfo[] visibleEnemies, Direction targetDir, boolean allDirections) throws GameActionException{
         Direction movDirection = targetDir;
-        Direction[] possibleDirs = {movDirection, movDirection.rotateLeft(), movDirection.rotateRight()};
+        Direction[] possibleDirs;
+        if (allDirections){
+            possibleDirs = carDirections;
+        }
+        else{
+            possibleDirs = new Direction[] {movDirection, movDirection.rotateLeft(), movDirection.rotateRight()};
+        }
+
         int maxDamageTaken = Integer.MAX_VALUE;
         Direction bestDir = null;
         for (int i = possibleDirs.length; --i >= 0;) {
@@ -66,7 +73,9 @@ public class Movement extends Utils{
                     if (CombatUtils.isMilitaryUnit(visibleEnemies[j]) && 
                         visibleEnemies[j].location.distanceSquaredTo(potDest) <= visibleEnemies[j].getType().actionRadiusSquared) {
                         maxDamage += visibleEnemies[j].getType().damage;
-                        break;
+                    }
+                    else {
+                        maxDamage += visibleEnemies[j].getType().damage / 4;
                     }
                 }
                 if (maxDamage < maxDamageTaken) {

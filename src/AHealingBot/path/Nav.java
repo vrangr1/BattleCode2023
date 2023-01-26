@@ -30,7 +30,8 @@ public class Nav extends Utils {
 
     private static boolean goodCurrent(Direction adjDir) throws GameActionException{
         Direction currentDir = rc.senseMapInfo(rc.getLocation().add(adjDir)).getCurrentDirection();
-        return currentDir == Direction.CENTER || currentDir != adjDir.opposite();
+        return currentDir == Direction.CENTER || (currentDir != adjDir.opposite() 
+            && currentDir != adjDir.opposite().rotateLeft() && currentDir != adjDir.opposite().rotateRight());
     }
 
     private static boolean tryMoveDirect() throws GameActionException {
