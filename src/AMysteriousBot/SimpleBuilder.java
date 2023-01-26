@@ -146,7 +146,7 @@ public class SimpleBuilder extends Utils{
     }
 
     private static int updateStandardAnchorScore(int oldScore) {
-        return oldScore + 30;
+        return oldScore + 20;
     }
     
     private static int updateScore(RobotType type, int oldScore){
@@ -174,7 +174,8 @@ public class SimpleBuilder extends Utils{
 
     private static boolean tryBuildLauncher() throws GameActionException{
         int soldierReq = 1;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 120 + MAP_SIZE/80 || rc.getRoundNum() >= 1700) soldierReq = 2;
+        if (rc.getRobotCount() > 50) soldierReq = 2;
+        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 120 + MAP_SIZE/80 || rc.getRoundNum() >= 1700) soldierReq = 3;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, soldierReq)) {
             return false;
         }
@@ -201,7 +202,8 @@ public class SimpleBuilder extends Utils{
             return false;
 
         int carrierReq = 1;
-        if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) carrierReq = 3;
+        if (rc.getRobotCount() > 50) carrierReq = 2;
+        else if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) carrierReq = 3;
 
         if (BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, carrierReq)){
             ResourceType prioritizedResource = BuilderWrapper.getPrioritizedResource();
@@ -229,7 +231,7 @@ public class SimpleBuilder extends Utils{
         if (!rc.canBuildAnchor(Anchor.STANDARD)) return false;
         System.out.println("Built standard anchor");
         rc.buildAnchor(Anchor.STANDARD);
-        anchorCountDown = (20 - rc.getRoundNum()/200) * Comms.getHeadquartersCount();
+        anchorCountDown = (40 - rc.getRoundNum()/200) * Comms.getHeadquartersCount();
         Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));
         BuilderWrapper.sendAnchorCollectionCommand();
         return true;
@@ -250,7 +252,7 @@ public class SimpleBuilder extends Utils{
     public static boolean tryBuildAmplifier() throws GameActionException{
         if (!shouldBuildAmplifier()) return false;
         // if (amplifierScore > carrierScore) return false;
-        if (amplifierScore > launcherScore) return false;
+        if (launcherScore < amplifierScore) return false;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.AMPLIFIER, 1)) return false;
         if (tryConstructEnvelope(RobotType.AMPLIFIER, Comms.findNearestEnemyHeadquarterLocation())){
             Comms.writeScore(RobotType.AMPLIFIER, updateScore(RobotType.AMPLIFIER, amplifierScore));
@@ -289,7 +291,7 @@ public class SimpleBuilder extends Utils{
                 builtUnit = true;
                 continue;
             }
-            if (!endangered && tryBuildAmplifier() && MAP_SIZE >= 2500) {
+            if (!endangered && tryBuildAmplifier()) {
                 builtUnit = true;
                 continue;
             }
