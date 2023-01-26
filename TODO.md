@@ -34,14 +34,16 @@
 ~~- [ ] Attack carriers by carriers~~
 - [x] When near hq and about to deposit resources, don't flee.
 ~~- [ ] Need to slightly increase adamantium collection. Perhaps go back to 1:1 priortization split?~~
-- [ ] Do early deposition.
 - [x] Replace currentLocation with rc.getLocation everywhere properly.
+~~- [ ] Increase adamantium collection on larger maps~~
+- [x] Do early deposition.
 - [ ] Move movementWrapper to the end.
 - [ ] Opportunistic mining : perhaps opportunistic adamantium mining after some number of turns?? Check.
-~~- [ ] Increase adamantium collection on larger maps~~
+- [x] Possible overcrowding fix: Trigger explore when not mining and greater than a threshold number of carriers in vision.
 - [ ] Rework entire resource collection strategy.
 - [ ] Perhaps use GG's strat of mining one resource in waves.
-- [ ] Possible overcrowding fix: Trigger explore when not mining and greater than a threshold number of carriers in vision.
+- [ ] overcrowding limit set to 9 and test
+- [ ] Fix back and forth behavior when against a wall when doing circular explore.
 - [ ] Find out how to improve production in BowAndArrow (noBFSplz match)
 - [ ] Shift all movementWrappers to the end of the code PROPERLY.
 - [ ] Fix flee from enemy hq. Perhaps use circular explore to circumvent?
