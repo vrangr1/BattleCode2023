@@ -262,6 +262,40 @@ public class BotCarrier extends Utils{
         return count;
     }
 
+    private static void fleeUpdate() throws GameActionException{
+        if (!TRY_TO_FLEE) return;
+        if (!isFleeing && canSeeMilitaryUnit()){
+            RobotInfo[] alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+            int allyCount = vicinityMilitaryCount(alliedInfos);
+            int enemyCount = vicinityMilitaryCount(visibleEnemies);
+            if (allyCount < enemyCount){ 
+                isFleeing = true;
+                fleeCount = FLEE_ROUNDS;
+                if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
+                return;
+            }
+        }
+        else if (isFleeing && vicinityMilitaryCount(visibleEnemies) == 0)
+            fleeCount = Math.max(0, fleeCount - 1);
+        
+        if (isFleeing && fleeCount == 0){
+            isFleeing = false;
+            lastRetreatDirection = null;
+            if (returnToHQ) movementDestination = Comms.findNearestHeadquarter();
+            else if (movingToIsland){
+                MapLocation islandLoc = getMeAnIslandLocation();
+                if (islandLoc == null){
+                    carrierStatus = Status.EXPLORE_FOR_ISLANDS;
+                    movementWrapper();
+                    return;
+                }
+                setIslandDestination(islandLoc);
+                // moveToIslandAndPlaceAnchor();
+            }
+            else movementDestination = null;
+        }
+    }
+
     private static void updateOverall() throws GameActionException{
         carrierStatus = Status.NORMAL;
         if (returnEarly){
@@ -276,27 +310,8 @@ public class BotCarrier extends Utils{
         exploreDest2 = null;
         movesLeftBeforeDeath = (rc.getHealth() / RobotType.LAUNCHER.damage);
         if (rc.getWeight() <= 2) movesLeftBeforeDeath *= 2;
-        Comms.writeSavedLocations();
-        if (TRY_TO_FLEE){
-            if (!isFleeing && canSeeMilitaryUnit()){
-                RobotInfo[] alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
-                int allyCount = vicinityMilitaryCount(alliedInfos);
-                int enemyCount = vicinityMilitaryCount(visibleEnemies);
-                if (allyCount < enemyCount){ 
-                    isFleeing = true;
-                    fleeCount = FLEE_ROUNDS;
-                    if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
-                    return;
-                }
-            }
-            else if (isFleeing && vicinityMilitaryCount(visibleEnemies) == 0)
-                fleeCount = Math.max(0, fleeCount - 1);
-            
-            if (fleeCount == 0){
-                isFleeing = false;
-                lastRetreatDirection = null;
-            }
-        }
+        // Comms.writeSavedLocations();
+        fleeUpdate();
         if (rc.getRoundNum() % 200 == 0){
             unFlagAllIslands();
             if (Clock.getBytecodesLeft() < 6000){
