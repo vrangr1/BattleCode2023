@@ -10,12 +10,18 @@ public class BotHeadquarters extends Utils{
     public static int enemyHQInVision = 0;
     private static RobotInfo enemyHQ = null;
     private static boolean isEndangered = false;
+    public static boolean canSeeEnemyHQ = false;
 
     public static void initHeadquarters() throws GameActionException{
         BuilderWrapper.initBuilder();
         if (TRACKING_LAUNCHER_COUNT) Comms.resetRobotCount(RobotType.LAUNCHER);
         if (TRACKING_AMPLIFIER_COUNT) Comms.resetRobotCount(RobotType.AMPLIFIER);
         rc.writeSharedArray(Comms.SYMMETRY_CHANNEL, 0b111);
+        setCanSeeEnemyHQ();
+    }
+
+    private static void setCanSeeEnemyHQ() throws GameActionException{
+        canSeeEnemyHQ = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM).length > 0;
     }
 
     public static void updateEveryTurn() throws GameActionException{

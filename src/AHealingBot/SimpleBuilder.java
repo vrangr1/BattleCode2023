@@ -261,6 +261,11 @@ public class SimpleBuilder extends Utils{
         return false;
     }
 
+    private static boolean prioritizeLauncherProductionFirstTurn(){
+        // return BotHeadquarters.canSeeEnemyHQ;
+        return true;
+    }
+
     public static void buildUnits(boolean endangered) throws GameActionException{
         boolean builtUnit = true;
         if (endangered){
@@ -277,7 +282,7 @@ public class SimpleBuilder extends Utils{
         }
         while(rc.isActionReady() && builtUnit){
             builtUnit = false;
-            if (rc.getRoundNum() == 1){
+            if (rc.getRoundNum() == 1 && prioritizeLauncherProductionFirstTurn()){
                 if (tryBuildLauncher()) {
                     builtUnit = true;
                     continue;

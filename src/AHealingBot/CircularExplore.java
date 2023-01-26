@@ -392,7 +392,7 @@ public class CircularExplore extends Utils{
         else return dir.rotateLeft();
     }
 
-    private static MapLocation locationComputationIteration(){
+    private static MapLocation locationComputationIterationOld(){
         Direction dir;
         MapLocation temp;
         lastOnTheMapLocation = null;
@@ -416,7 +416,7 @@ public class CircularExplore extends Utils{
         return null;
     }
 
-    private static MapLocation locationComputationIterationNew(){
+    private static MapLocation locationComputationIteration(){
         Direction tangentialDir = updateDirection(updateDirection(centerLocationDir));
         
         if (!rc.onTheMap(extrapolateAndReturn(tangentialDir))) return null;
