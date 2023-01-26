@@ -37,7 +37,7 @@ public class BotAmplifier extends Explore{
         Comms.surveyForIslandsAmplifiers();
         combatCommsCleaner(vNonHQEnemies);
         CombatUtils.sendGenericCombatLocation(visibleEnemies);
-        if (rc.isMovementReady() && vNonHQCombatEnemies > vNonHQCombatAllies){
+        if (rc.isMovementReady()){
             tryToBackUpToMaintainMaxRangeAmplifier();
         }
         // circleEnemyHQ();
@@ -125,6 +125,7 @@ public class BotAmplifier extends Explore{
     }
 
     private static boolean tryToBackUpToMaintainMaxRangeAmplifier() throws GameActionException {
+        if (vNonHQCombatEnemies == 0) return false;
 		int closestHostileDistSq = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (int i= visibleEnemies.length; --i >= 0;) {
@@ -139,31 +140,35 @@ public class BotAmplifier extends Explore{
 
         if (closestHostileDistSq == Integer.MAX_VALUE) return false;
 		
-		Direction bestRetreatDir = null;
-		int bestDistSq = closestHostileDistSq;
-
-		for (Direction dir : directions) {
+        Direction bestRetreatDir = null;
+		double leastAttack = Double.MAX_VALUE;
+        // double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
+		for (Direction dir : carDirections) {
 			if (!rc.canMove(dir)) continue;
 			MapLocation dirLoc = lCR.add(dir);
-
-			int smallestDistSq = Integer.MAX_VALUE;
-			for (int i = visibleEnemies.length; --i >= 0;) {
-                RobotInfo hostile = visibleEnemies[i];
-				if (!CombatUtils.isMilitaryUnit(hostile)) continue;
-                if (rc.getLocation().distanceSquaredTo(hostile.location) > hostile.type.visionRadiusSquared) continue;
-				int distSq = hostile.location.distanceSquaredTo(dirLoc);
-				if (distSq < smallestDistSq) {
-					smallestDistSq = distSq;
-				}
-			}
-			if (smallestDistSq >= bestDistSq) {
-				bestDistSq = smallestDistSq;
-				bestRetreatDir = dir;
-			}
+            // MapInfo dirLocMapInfo = rc.senseMapInfo(dirLoc);
+            double unitsAttacking = 0;
+            for (int i = visibleEnemies.length; --i >= 0;){
+                if (CombatUtils.isMilitaryUnit(visibleEnemies[i].type)){
+                    int distToDirLoc = visibleEnemies[i].location.distanceSquaredTo(dirLoc);
+                    if (distToDirLoc <= visibleEnemies[i].type.actionRadiusSquared){
+                        unitsAttacking+=1;
+                    }
+                    else if (distToDirLoc <= visibleEnemies[i].type.visionRadiusSquared){
+                        unitsAttacking+=0.5;
+                    }
+                    unitsAttacking++;
+                }
+            }
+            if (unitsAttacking < leastAttack){
+                leastAttack = unitsAttacking;
+                bestRetreatDir = dir;
+            }
 		}
 		if (bestRetreatDir != null) {
-            Nav.goTo(rc.getLocation().add(bestRetreatDir));
-            amplifierState = Status.FLEEING;
+            rc.setIndicatorString("Backing: " + bestRetreatDir);
+			rc.move(bestRetreatDir);
+            currentLocation = rc.getLocation();
 			return true;
 		}
 		return false;

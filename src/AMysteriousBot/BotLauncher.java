@@ -15,6 +15,7 @@ public class BotLauncher extends CombatUtils{
         GUARDING,
         ISLAND_WORK,
         RETREATING,
+        HEALING,
         CLOUD_WORK, // In the clouds
         STANDOFF,
         CIRCLING,
@@ -42,9 +43,12 @@ public class BotLauncher extends CombatUtils{
     private static int circlingCount;
     private static int CIRCLE_CHECK = 30;
     private static MapLocation excludeHQ = null;
+    private static boolean inHealingState;
+    private static MapLocation closestHealingIsland = null;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
+        inHealingState = false;
         setBaseDestination();
     }
 
@@ -57,14 +61,20 @@ public class BotLauncher extends CombatUtils{
         findAndWriteWellLocationsToComms();
         bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
-            boolean seekingIsland = false;
-            seekingIsland = seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
-            // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
-            // lowHealthCircle(); // [CUR_STATE] -> [CUR_STATE|MARCHING|CIRCLING]
-            if (!seekingIsland && MAP_SIZE >= 1200){
-                if (doIdling()){
-                    rc.setIndicatorString("Idling");
-                    return;
+            manageHealingState();
+            if (inHealingState){
+                tryToHealAtIsland();
+            }
+            else{
+                boolean seekingIsland = false;
+                seekingIsland = seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
+                // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
+                // lowHealthCircle(); // [CUR_STATE] -> [CUR_STATE|MARCHING|CIRCLING]
+                if (!seekingIsland && MAP_SIZE >= 1200){
+                    if (doIdling()){
+                        rc.setIndicatorString("Idling");
+                        return;
+                    }
                 }
             }
         }
@@ -222,7 +232,7 @@ public class BotLauncher extends CombatUtils{
             launcherState = Status.ISLAND_WORK;
             return true;
         }
-        else{
+        else {
             launcherState = Status.MARCHING;
             return false;
         }
@@ -479,7 +489,7 @@ public class BotLauncher extends CombatUtils{
             if (bestDir != null) {
                 destinationFlag += " " + bestDir;
                 rc.move(bestDir);
-                launcherState = Status.RETREATING;
+                launcherState = Status.FLANKING;
                 return true;
             }
 		}
@@ -520,15 +530,15 @@ public class BotLauncher extends CombatUtils{
                 launcherState = Status.FLANKING;
                 return true;
             }
-            if (tryMoveToEngageOutnumberedEnemy(closestHostile)) {
+            if (!inHealingState && tryMoveToEngageOutnumberedEnemy(closestHostile)) {
                 destinationFlag += " 4";
                 return true;
             }
-            if (tryMoveToHelpAlly(closestHostile)) {
+            if (!inHealingState && tryMoveToHelpAlly(closestHostile)) {
                 destinationFlag += " 3";
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
-            if (tryMoveToAttackProductionUnit(closestHostile)) {
+            if (!inHealingState && tryMoveToAttackProductionUnit(closestHostile)) {
                 destinationFlag += " 5";
                 return true;
             }
@@ -536,8 +546,74 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
+    private static void manageHealingState() {
+        if (rc.getHealth() <= rc.getType().getMaxHealth() * 3.0/10.0) {
+            inHealingState = true;
+            return;
+        }
+        else if (rc.getHealth() > 3.0/4.0 * rc.getType().getMaxHealth()) {
+            if (launcherState == Status.HEALING){
+                currentDestination = null;  
+                launcherState = Status.MARCHING;
+            }
+            inHealingState = false;
+            return;
+        }
+    }
+
+    private static boolean tryToHealAtIsland() throws GameActionException {		
+		closestHealingIsland = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.OUR_ISLANDS, Comms.SHAFlag.OUR_ISLAND);
+        int islandId = rc.senseIsland(rc.getLocation());
+        if (islandId != -1 && rc.senseTeamOccupyingIsland(islandId) == MY_TEAM){
+            launcherState = Status.HEALING;
+            return true;
+        }
+        int[] nearbyIslands = rc.senseNearbyIslands();
+        MapLocation nearestLoc = null;
+        int nearestDist = -1, curDist;
+        for (int i = nearbyIslands.length; --i >= 0;){
+            islandId = nearbyIslands[i];
+            // Skip neutral/enemy islands
+            if (rc.senseTeamOccupyingIsland(islandId) != MY_TEAM){
+                continue;
+            }
+            MapLocation[] locations = rc.senseNearbyIslandLocations(islandId);
+            for (int j = locations.length; --j >= 0;){
+                MapLocation loc = locations[j];
+                if (rc.isLocationOccupied(loc)) continue;
+                curDist = currentLocation.distanceSquaredTo(loc);
+                if (nearestLoc == null || curDist < nearestDist){
+                    nearestLoc = loc;
+                    nearestDist = curDist;
+                }
+            }
+        }
+        if (nearestDist != -1 && (closestHealingIsland == null || nearestDist <= rc.getLocation().distanceSquaredTo(closestHealingIsland))){
+            closestHealingIsland = nearestLoc;
+        }
+
+		destinationFlag += "|trHAl "+closestHealingIsland+"|";
+		if (closestHealingIsland == null){
+            if (launcherState != Status.MARCHING){
+                currentDestination = null;
+                launcherState = Status.MARCHING;
+            }
+            inHealingState = false;
+            return false;
+        }
+        else if(!rc.getLocation().equals(closestHealingIsland)){
+            currentDestination = closestHealingIsland;
+            launcherState = Status.HEALING; //TODO: Change this to healing
+            pathing.setAndMoveToDestination(currentDestination);
+        }
+        else{
+            launcherState = Status.HEALING;
+        }    
+		return true;
+	}
+
     public static boolean sendCombatLocation() throws GameActionException{
-        if (vNonHQEnemies > 0){
+        if (vNonHQEnemies > 0 && rc.getLocation().distanceSquaredTo(parentHQLocation) > RobotType.HEADQUARTERS.actionRadiusSquared){
 			RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             if (closestHostile == null) return false;
 			if (!standOff){ // The idea is to prevent standoffs from flooding comms with local info
@@ -561,7 +637,7 @@ public class BotLauncher extends CombatUtils{
     // If our current destination has no enemies left, move to the nearest new location with combat
     private static boolean findNewCombatLocation() throws GameActionException{
         circleEnemyHQ();
-        if (vNonHQEnemies == 0 && (currentDestination == null || (launcherState != Status.ISLAND_WORK && 
+        if (vNonHQEnemies == 0 && (currentDestination == null || (launcherState != Status.ISLAND_WORK && launcherState != Status.HEALING && 
             rc.getLocation().distanceSquaredTo(currentDestination) <= UNIT_TYPE.actionRadiusSquared))){
             Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
