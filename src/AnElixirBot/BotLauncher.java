@@ -105,28 +105,28 @@ public class BotLauncher extends CombatUtils{
     private static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
-            if (!mapSymmetry[i] || !checkIfSymmetry(SYMMETRY.values()[i])){
-                removeSymmetry(SYMMETRY.values()[i], "3");
+            if (!mapSymmetry[i] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[i])){
+                Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
                 mapSymmetry[i] = false;
                 rememberedEnemyHQLocations[i] = null;
             }
             if (enemyHQ == null){
                 for (int j = Comms.getHeadquartersCount(); --j >= 0;){
-                    MapLocation symmetricEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i], alliedHQLocs[j]);
+                    MapLocation symmetricEnemyHQ = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[i], alliedHQLocs[j]);
                     if (symmetricEnemyHQ == null) continue;
                     if(symmetricEnemyHQ.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared &&
                         rc.canSenseLocation(symmetricEnemyHQ)){
                         rememberedEnemyHQLocations[i] = null;
                         mapSymmetry[i] = false;
-                        if (checkIfSymmetry(SYMMETRY.values()[i])){
-                            removeSymmetry(SYMMETRY.values()[i], "1");
+                        if (Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[i])){
+                            Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "1");
                         } 
                     }  
                 }
             }
         }
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
-            currentDestination = defaultEnemyLocation();
+            currentDestination = Symmetry.defaultEnemyLocation();
         }
         pathing.setNewDestination(currentDestination);
         destinationFlag = "sBD " + currentDestination;

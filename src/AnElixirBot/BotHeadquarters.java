@@ -34,7 +34,7 @@ public class BotHeadquarters extends Utils{
         if (rc.getRoundNum() == 2){
             Comms.initCommunicationsArray();
             alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
-            guessEnemyHQLocation();
+            Symmetry.guessEnemyHQLocation();
         }
         updateVisibleEnemiesInVision();
         BuilderWrapper.buildUnits(isEndangered);

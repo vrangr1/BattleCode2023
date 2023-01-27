@@ -1,7 +1,5 @@
 package AnElixirBot;
 
-import AnElixirBot.Comms.COMM_TYPE;
-import AnElixirBot.Comms.SHAFlag;
 import battlecode.common.*;
 
 public class Utils extends Globals{
