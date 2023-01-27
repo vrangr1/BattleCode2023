@@ -276,10 +276,8 @@ public class SimpleBuilder extends Utils{
                     continue;
                 }
             }
-            // The below case is specifically for when enemy HQ spawn in vision range to HQ
-            if (endangered && rc.getRoundNum() < 30) 
-                return;
         }
+        builtUnit = true;
         while(rc.isActionReady() && builtUnit){
             builtUnit = false;
             if (rc.getRoundNum() == 1 && prioritizeLauncherProductionFirstTurn()){
