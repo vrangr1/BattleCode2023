@@ -223,7 +223,7 @@ public class Globals {
             case VERTICAL:
                 return new MapLocation(MAP_WIDTH - allyHQ.x - 1, allyHQ.y);
             case HORIZONTAL:
-                return new MapLocation(allyHQ.x - 1, MAP_HEIGHT - allyHQ.y - 1); // Intentional bug
+                return new MapLocation(allyHQ.x, MAP_HEIGHT - allyHQ.y - 1); // Intentional bug
             case ROTATIONAL:
                 return new MapLocation(MAP_WIDTH - allyHQ.x - 1, MAP_HEIGHT - allyHQ.y - 1);
             default:
