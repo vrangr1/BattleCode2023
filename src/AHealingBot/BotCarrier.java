@@ -268,7 +268,8 @@ public class BotCarrier extends Utils{
             RobotInfo[] alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
             int allyCount = vicinityMilitaryCount(alliedInfos);
             int enemyCount = vicinityMilitaryCount(visibleEnemies);
-            if (allyCount < enemyCount){ 
+            // if (allyCount <= 3 || allyCount < enemyCount + Math.max(2,(allyCount/3))){ 
+            if (rc.getAnchor() != null || allyCount < enemyCount){ 
                 isFleeing = true;
                 fleeCount = FLEE_ROUNDS;
                 if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
@@ -955,6 +956,7 @@ public class BotCarrier extends Utils{
         if (!rc.isMovementReady()) return;
         if (movementDestination == null){
             assert carrierStatus == Status.EXPLORE_FOR_WELLS : "Movement destination is null but status is not explore for wells";
+            exploringForWells = true;
             exploreForWells(true);
             return;
         }

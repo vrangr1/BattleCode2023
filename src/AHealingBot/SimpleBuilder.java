@@ -175,6 +175,7 @@ public class SimpleBuilder extends Utils{
 
     private static boolean tryBuildLauncher() throws GameActionException{
         int soldierReq = 1;
+        if (isTimeForEarlyAnchors() && BuilderWrapper.adamantium < RobotType.LAUNCHER.buildCostMana + Anchor.STANDARD.manaCost) return false;
         if (rc.getRobotCount() > 50) soldierReq = 2;
         if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 120 + MAP_SIZE/80 || rc.getRoundNum() >= 1700) soldierReq = 3;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, soldierReq)) {
@@ -202,6 +203,7 @@ public class SimpleBuilder extends Utils{
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.CARRIER, 1))
             return false;
 
+        if (isTimeForEarlyAnchors() && BuilderWrapper.adamantium < RobotType.CARRIER.buildCostAdamantium + Anchor.STANDARD.adamantiumCost) return false;
         int carrierReq = 1;
         if (rc.getRobotCount() > 50) carrierReq = 2;
         else if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 100 || rc.getRoundNum() >= 1700) carrierReq = 3;
@@ -217,6 +219,14 @@ public class SimpleBuilder extends Utils{
         }
 
         return false;
+    }
+
+    private static int getAnchorCount() throws GameActionException{
+        return (Comms.getRobotScore(Anchor.STANDARD) - INIT_ANCHOR_SCORE) / 20;
+    }
+
+    private static boolean isTimeForEarlyAnchors() throws GameActionException{
+        return MAP_SIZE < 2000 && rc.getRoundNum() >= 300 && getAnchorCount() < 1;
     }
 
     private static boolean buildOurAnchor() throws GameActionException{
@@ -235,7 +245,8 @@ public class SimpleBuilder extends Utils{
         if (anchorCountDown > 0) return false;
         if (rc.getNumAnchors(Anchor.STANDARD) >= 2) return false;
         if (!BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 1)) return false;
-        if (rc.getRobotCount() > MAP_SIZE / 4) return buildOurAnchor();
+        if (isTimeForEarlyAnchors()) return buildOurAnchor();
+        if (rc.getRobotCount() > MAP_SIZE / 8) return buildOurAnchor();
         if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
         if (rc.getRobotCount() > 70 + Math.round(rc.getRobotCount()/500) * 20) return buildOurAnchor();
         if (launcherScore < standardAnchorScore) return false;
