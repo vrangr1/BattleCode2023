@@ -37,12 +37,14 @@
 - [x] Replace currentLocation with rc.getLocation everywhere properly.
 ~~- [ ] Increase adamantium collection on larger maps~~
 - [x] Do early deposition.
-- [ ] Move movementWrapper to the end.
-- [ ] Opportunistic mining : perhaps opportunistic adamantium mining after some number of turns?? Check.
 - [x] Possible overcrowding fix: Trigger explore when not mining and greater than a threshold number of carriers in vision.
+- [x] overcrowding limit set to 9 and test : did not go well
+- [ ] Move movementWrapper to the end.
+- [ ] Send excess carriers to the woodchipper
+- [ ] Fix circular explore issue of not continuing revolution after the first one.
+- [ ] Opportunistic mining : perhaps opportunistic adamantium mining after some number of turns?? Check.
 - [ ] Rework entire resource collection strategy.
 - [ ] Perhaps use GG's strat of mining one resource in waves.
-- [ ] overcrowding limit set to 9 and test
 - [ ] Fix back and forth behavior when against a wall when doing circular explore.
 - [ ] Find out how to improve production in BowAndArrow (noBFSplz match)
 - [ ] Shift all movementWrappers to the end of the code PROPERLY.

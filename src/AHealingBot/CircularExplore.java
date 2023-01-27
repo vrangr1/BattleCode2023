@@ -19,9 +19,12 @@ public class CircularExplore extends Utils{
     private static MapLocation lastOnTheMapLocation = null;
     private static final int WELL_INITIAL_EXPLORE_RADIUS = 18;
     public static final boolean DEBUG_PRINT = false;
-    public static final int DEBUG_ID = 13749;
-    private static final int MAX_EXPLORE_ROUNDS_ALLOWED = 40;
+    public static final int DEBUG_ID = 13757;
+    private static final int MAX_EXPLORE_ROUNDS_ALLOWED = 90;
     private static int exploreRoundCount = 0;
+    private static MapLocation previousLocation;
+    private static final int PREVIOUS_LOCATION_ROUND_DIFF = 5;
+    private static int previousLocationRoundNum = BIRTH_ROUND;
     
     ///////////////////////// Public Methods /////////////////////////
 
@@ -62,6 +65,7 @@ public class CircularExplore extends Utils{
         revolutionStartLocation = null;
         revolutionStartRound = -1;
         lastDir = null;
+        exploreRoundCount = 0;
         currentLocation = rc.getLocation();
         centerLocationDir = currentLocation.directionTo(centerLocation);
         decideRotationDirection();
@@ -88,19 +92,32 @@ public class CircularExplore extends Utils{
         if (!startedExplore)
             startExploration();
         updateDetails();
+        MapLocation temp = null;
         if (UNIT_TYPE == RobotType.CARRIER && exploreRoundCount > MAX_EXPLORE_ROUNDS_ALLOWED){
             // System.out.println("Max explore rounds reached");
-            MapLocation temp = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(BotCarrier.getLocalPrioritizedResource()));
+            if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+                System.out.println("Max explore rounds reached");
+            temp = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(BotCarrier.getLocalPrioritizedResource()));
             if (temp != null) return temp;
+            else return Explore.explore(true);
         }
+        temp = doGeffnersExplore();
+        if (temp != null) return temp;
         // if (rc.getID() == 13837)
         //     System.out.println("explore");
         if (!reachedPerimeter) return reachPerimeter();
-        if (checkRevolutionComplete() && isCenterHQ){
+        if (isCenterHQ && checkRevolutionComplete()){
+            if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+                System.out.println("Revolution complete");
             updateRevolution();
             return explore();
         }
-        return computeNextTangentialLocation();
+        temp = computeNextTangentialLocation();
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID){
+            System.out.println("Next tangential location: " + temp);
+            rc.setIndicatorDot(temp, 255, 0, 0);
+        }
+        return temp;
     }
 
     public static void printStatus(){
@@ -135,6 +152,34 @@ public class CircularExplore extends Utils{
         else MIN_DISTANCE_FROM_HQ_TO_EXPLORE = Math.min(rc.getLocation().distanceSquaredTo(centerLocation), 20);
         MIN_DISTANCE_FROM_HQ_TO_EXPLORE = Math.max(MIN_DISTANCE_FROM_HQ_TO_EXPLORE, 15);
         PERIMETER_BUFFER = MIN_DISTANCE_FROM_HQ_TO_EXPLORE;
+    }
+
+    private static void updateCarrierStuff(){
+        if (UNIT_TYPE != RobotType.CARRIER) return;
+        int curRoundNum = rc.getRoundNum();
+        if (curRoundNum - previousLocationRoundNum > 5){
+            previousLocation = rc.getLocation();
+            previousLocationRoundNum = curRoundNum;
+            return;
+        }
+        if (curRoundNum - previousLocationRoundNum == PREVIOUS_LOCATION_ROUND_DIFF){
+            previousLocation = rc.getLocation();
+            previousLocationRoundNum = curRoundNum;
+        }
+    }
+
+    private static boolean checkIfBlocked(){
+        if (previousLocation == null || rc.getRoundNum() - previousLocationRoundNum != PREVIOUS_LOCATION_ROUND_DIFF - 1) return false;
+        return rc.getLocation().distanceSquaredTo(previousLocation) < 4;
+    }
+
+    private static MapLocation doGeffnersExplore() throws GameActionException{
+        if (UNIT_TYPE != RobotType.CARRIER || !checkIfBlocked()) return null;
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+            System.out.println("Blocked. Doing geffners explore");
+        MapLocation temp = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.resourceFlag(BotCarrier.getLocalPrioritizedResource()));
+        if (temp != null) return temp;
+        else return Explore.explore(true);
     }
 
     private static void setCircleRadiusForWells(){
@@ -192,6 +237,7 @@ public class CircularExplore extends Utils{
         centerLocationDir = currentLocation.directionTo(centerLocation);
         // lastOnTheMapLocation = null;
         exploreRoundCount++;
+        updateCarrierStuff();
         // rotateAntiClockwise = true;
     }
 
@@ -221,8 +267,8 @@ public class CircularExplore extends Utils{
         dir = centerLocationDir.opposite();
         MapLocation temp = currentLocation.add(dir);
         if (rc.onTheMap(temp)){
-            if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
-                System.out.println("Going to perimeter; curLoc: " + currentLocation + "; center: " + centerLocation + "; dir: " + dir);
+            // if (DEBUG_PRINT && rc.getID() == DEBUG_ID)
+            //     System.out.println("Going to perimeter; curLoc: " + currentLocation + "; center: " + centerLocation + "; dir: " + dir);
             return extrapolateAndReturn(dir);
         }
         if (lastDir != null){
@@ -441,16 +487,27 @@ public class CircularExplore extends Utils{
         rotateAntiClockwise = !rotateAntiClockwise;
         nextLoc = locationComputationIteration();
         if (nextLoc != null) return nextLoc;
-        return Explore.explore();
+        return Explore.explore(true);
         // assert false : "rc.getID(): " + rc.getID() + "rn: " + rc.getRoundNum() + " currentLocation: " + currentLocation + " centerLocation: " + centerLocation + " centerLocationDir: " + centerLocationDir + " currentDistanceFromHQ: " + currentDistanceFromHQ;
         // return null;
     }
 
     private static MapLocation reachPerimeter() throws GameActionException{
         MapLocation dest = goToPerimeter();
-        if (dest != null) return dest;
+        if (dest != null){
+            if (DEBUG_PRINT && rc.getID() == DEBUG_ID){
+                System.out.println("Going to perimeter: " + dest);
+                rc.setIndicatorDot(dest, 255, 0, 0);
+            }
+            return dest;
+        }
         setupRevolution();
-        return computeNextTangentialLocation();
+        dest = computeNextTangentialLocation();
+        if (DEBUG_PRINT && rc.getID() == DEBUG_ID){
+            System.out.println("Next tangential location: " + dest);
+            rc.setIndicatorDot(dest, 255, 0, 0);
+        }
+        return dest;
     }
 
     private static boolean checkRevolutionComplete() throws GameActionException{
