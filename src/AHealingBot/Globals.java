@@ -96,7 +96,7 @@ public class Globals {
 
     // Bot Production Related
     public static final boolean TRACKING_LAUNCHER_COUNT = true;
-    public static final boolean TRACKING_AMPLIFIER_COUNT = false;
+    public static final boolean TRACKING_AMPLIFIER_COUNT = true;
     public static int MAX_AMPLIFIER_COUNT;
 
     // public static final Direction droidVisionDirs[] = new Direction[]{
@@ -338,7 +338,11 @@ public class Globals {
         }
         else {
             double factor = 1;
-            int[] store = new int[] {1,2,0};
+            int[] store; 
+            if (MAP_SIZE < 1000)
+                store = new int[] {1,0,2};
+            else
+                store = new int[] {1,2,0};
             for (int i : store) {
                 if (checkIfSymmetry(SYMMETRY.values()[i]) && mapSymmetry[i]){
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(SYMMETRY.values()[i],parentHQLocation); // Default go to location
