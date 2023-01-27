@@ -283,6 +283,21 @@ public class BuilderWrapper extends Utils {
         return null;
     }
 
+    private static boolean isMilitaryUnit(RobotInfo robotInfo) throws GameActionException{
+        switch(robotInfo.type){
+            case LAUNCHER: 
+            case DESTABILIZER: return true;
+            default: return false;
+        }
+    }
+
+    public static int vicinityMilitaryCount(RobotInfo[] rInfos) throws GameActionException{
+        int count = 0;
+        for (int i = rInfos.length; --i >= 0;)
+            if (isMilitaryUnit(rInfos[i])) count++;
+        return count;
+    }
+
     public static void buildUnits(boolean endangered) throws GameActionException{
         updateBuilder();
         switch(CURRENT_BUILDER){

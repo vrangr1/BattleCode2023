@@ -203,3 +203,5 @@ fabric.properties
 p_scripts/*
 
 src/OTCBot
+
+saved_matches/

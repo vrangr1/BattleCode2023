@@ -173,9 +173,19 @@ public class SimpleBuilder extends Utils{
         return -1;
     }
 
+    private static boolean saveManaForLauncherComeback() throws GameActionException{
+        int addOn = 1;
+        // if (rc.senseNearbyCloudLocations().length > 7) addOn = 2;
+        if (rc.senseNearbyCloudLocations().length > 7) return false;
+        int allyCount = BuilderWrapper.vicinityMilitaryCount(rc.senseNearbyRobots(-1, MY_TEAM));
+        if (allyCount > 0 && BotHeadquarters.vNonHQEnemies <= allyCount + 3) return false;
+        return !BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, Math.min(BotHeadquarters.vNonHQEnemies + addOn, 5));
+    }
+
     private static boolean tryBuildLauncher() throws GameActionException{
         int soldierReq = 1;
         if (isTimeForEarlyAnchors() && BuilderWrapper.adamantium < RobotType.LAUNCHER.buildCostMana + Anchor.STANDARD.manaCost) return false;
+        if (saveManaForLauncherComeback()) return false;
         if (rc.getRobotCount() > 50) soldierReq = 2;
         if (rc.getRobotCount() > MAP_SIZE / 4 || rc.getRobotCount() > 120 + MAP_SIZE/80 || rc.getRoundNum() >= 1700) soldierReq = 3;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.LAUNCHER, soldierReq)) {
