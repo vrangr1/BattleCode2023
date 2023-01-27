@@ -50,11 +50,11 @@ public class BotAmplifier extends Explore{
             else if (vNonHQCombatEnemies == 0){
                 amplifierMove();
             }
-        } 
+        }
         if (amplifierState == Status.BATTLE_FOLLOWER){
             rc.setIndicatorString(amplifierState.toString() + " " + shepherdUnit.location);
         }
-        rc.setIndicatorString(amplifierState.toString() + " " + currentDestination);
+        rc.setIndicatorString(amplifierState.toString() + "|Dest" + currentDestination + "|ACount" + Comms.getRobotCount(RobotType.AMPLIFIER));
     }
 
     private static void followCombatUnit() throws GameActionException{
@@ -127,16 +127,15 @@ public class BotAmplifier extends Explore{
     private static boolean tryToBackUpToMaintainMaxRangeAmplifier() throws GameActionException {
         if (vNonHQCombatEnemies == 0) return false;
 		int closestHostileDistSq = Integer.MAX_VALUE;
-        MapLocation lCR = rc.getLocation();
         for (int i= visibleEnemies.length; --i >= 0;) {
             RobotInfo hostile = visibleEnemies[i];
 			if (!CombatUtils.isMilitaryUnit(hostile)) continue;
-            if (rc.getLocation().distanceSquaredTo(hostile.location) > hostile.type.visionRadiusSquared) continue;
-			int distSq = lCR.distanceSquaredTo(hostile.location);
+			int distSq = rc.getLocation().distanceSquaredTo(hostile.location);
 			if (distSq < closestHostileDistSq) {
 				closestHostileDistSq = distSq;
 			}
 		}
+        rc.setIndicatorString("P Ret|" + closestHostileDistSq);
 
         if (closestHostileDistSq == Integer.MAX_VALUE) return false;
 		
@@ -145,9 +144,12 @@ public class BotAmplifier extends Explore{
         // double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(ENEMY_TEAM) * 10.0;
 		for (Direction dir : carDirections) {
 			if (!rc.canMove(dir)) continue;
-			MapLocation dirLoc = lCR.add(dir);
+			MapLocation dirLoc = rc.getLocation().add(dir);
             // MapInfo dirLocMapInfo = rc.senseMapInfo(dirLoc);
             double unitsAttacking = 0;
+            if (rc.senseCloud(dirLoc)){
+                unitsAttacking+=2;
+            }
             for (int i = visibleEnemies.length; --i >= 0;){
                 if (CombatUtils.isMilitaryUnit(visibleEnemies[i].type)){
                     int distToDirLoc = visibleEnemies[i].location.distanceSquaredTo(dirLoc);
@@ -166,9 +168,8 @@ public class BotAmplifier extends Explore{
             }
 		}
 		if (bestRetreatDir != null) {
-            rc.setIndicatorString("Backing: " + bestRetreatDir);
 			rc.move(bestRetreatDir);
-            currentLocation = rc.getLocation();
+            rc.setIndicatorString("Ret" + bestRetreatDir + "lA " + leastAttack + "Move " + rc.isMovementReady());
 			return true;
 		}
 		return false;

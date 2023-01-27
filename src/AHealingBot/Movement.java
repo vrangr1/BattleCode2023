@@ -52,60 +52,47 @@ public class Movement extends Utils{
         }
     }
 
-    public static boolean tryForwardFlagMoveInDirection(RobotInfo hostile, boolean quickFlag) throws GameActionException {
-        try{
-            if (hostile == null) return false;
-            MapLocation dest = hostile.location;
-            if (dest == null) return false;
-            if(!rc.isMovementReady()) return false;
-            MapLocation lCR = rc.getLocation();
-            if (lCR.equals(dest)) return false;
-            Direction forward = lCR.directionTo(dest);
-            MapLocation dirLoc = null;
-            Direction[] dirs;
-            if (preferLeft(dest)) {
-                dirs = new Direction[] { forward.rotateLeft(), forward.rotateRight(),forward.rotateLeft().rotateLeft(), 
-                    forward.rotateRight().rotateRight(), forward};         
-            } else {
-                dirs = new Direction[] { forward.rotateRight(), forward.rotateLeft(), forward.rotateRight().rotateRight(), 
-                    forward.rotateLeft().rotateLeft(), forward};
-            }
-            Direction bestDir = null;
-            double bestRubble = rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) * 10.0 + 0.01;
-            int currentDistSq = lCR.distanceSquaredTo(dest);
-            int desiredDist = hostile.getType().actionRadiusSquared;
-            for (Direction direction : dirs) {
-                dirLoc = lCR.add(direction);
-                if (!rc.canMove(direction)) continue;
-                int potentialDistSq = dirLoc.distanceSquaredTo(dest);
-                if (bestDir != null && potentialDistSq > currentDistSq) continue;
-                MapInfo mapInfo = rc.senseMapInfo(dirLoc);
-                Direction currentDir = mapInfo.getCurrentDirection();
-                if (!quickFlag && currentDir != Direction.CENTER) continue;
-                if (currentDir != Direction.CENTER && currentDir != direction &&
-                    currentDir != direction.rotateLeft() && currentDir != direction.rotateRight())
+    public static Direction forwardCombatMovement(RobotInfo[] visibleEnemies, Direction targetDir, boolean allDirections) throws GameActionException{
+        Direction movDirection = targetDir;
+        Direction[] possibleDirs;
+        if (allDirections){
+            possibleDirs = carDirections;
+        }
+        else{
+            possibleDirs = new Direction[] {movDirection, movDirection.rotateLeft(), movDirection.rotateRight(), 
+                movDirection.rotateLeft().rotateLeft(), movDirection.rotateRight().rotateRight()};
+        }
+
+        int maxDamageTaken = Integer.MAX_VALUE;
+        Direction bestDir = null;
+        for (int i = possibleDirs.length; --i >= 0;) {
+            MapLocation potDest = rc.getLocation().add(possibleDirs[i]);
+            int maxDamage = 0;
+            boolean canAttack = false;
+            if (rc.canMove(possibleDirs[i])) {
+                for (int j = visibleEnemies.length; --j >= 0;) {
+                    if (CombatUtils.isMilitaryUnit(visibleEnemies[j]) && 
+                        visibleEnemies[j].location.distanceSquaredTo(potDest) <= visibleEnemies[j].getType().actionRadiusSquared) {
+                        maxDamage += visibleEnemies[j].getType().damage;
+                        canAttack = true;
+                    }
+                    else {
+                        maxDamage += visibleEnemies[j].getType().damage / 4;
+                    }
+                }
+                if (rc.isActionReady() && canAttack){
+                    maxDamage -= (UNIT_TYPE.damage + 1);
+                }
+                if (!canAttack){
                     continue;
-                double rubble = mapInfo.getCooldownMultiplier(MY_TEAM) * 10.0;
-                
-                if (rubble <= bestRubble && Math.abs(potentialDistSq - hostile.getType().actionRadiusSquared) < desiredDist) {
-                    bestRubble = rubble;
-                    bestDir = direction;
-                    desiredDist = Math.abs(potentialDistSq - hostile.getType().actionRadiusSquared);
+                }
+                if (maxDamage < maxDamageTaken) {
+                    maxDamageTaken = maxDamage;
+                    bestDir = possibleDirs[i];
                 }
             }
-            destinationFlag += "| fMID " + dest;
-            if (bestDir != null) {
-                rc.move(bestDir);
-                currentLocation = rc.getLocation();
-                return true;
-            }
-            return false;
         }
-        catch (Exception e) {
-            System.out.println("Exception in tryMoveInDirection: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        return bestDir;
     }
 
     public static Direction combatMovement(RobotInfo[] visibleEnemies, Direction targetDir, boolean allDirections) throws GameActionException{

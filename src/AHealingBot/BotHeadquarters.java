@@ -25,7 +25,8 @@ public class BotHeadquarters extends Utils{
     }
 
     public static void updateEveryTurn() throws GameActionException{
-        Comms.wipeCountChannels();
+        if (rc.getRoundNum() > 1 && Comms.getHeadquarterIndex(rc.getLocation()) == Comms.getHeadquartersCount() - 1)
+            Comms.wipeCountChannels();
         combatCommsCleaner(vNonHQEnemies);
     }
 

@@ -98,7 +98,7 @@ public class BotLauncher extends CombatUtils{
                 attackCloud();
             }
         }
-        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + " |Des flag " + destinationFlag + 
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + "| " + destinationFlag + 
             " |Can move " + rc.isMovementReady() + "| cicL " + circleLocation);
     }
 
@@ -363,14 +363,16 @@ public class BotLauncher extends CombatUtils{
 		if (alliesAroundHostile.length == 0) return false;
         for (int i = alliesAroundHostile.length; --i >= 0;) {
 			if (alliesAroundHostile[i].type.canAttack()) {
-				if (alliesAroundHostile[i].location.distanceSquaredTo(closestHostileLocation) <= alliesAroundHostile[i].type.actionRadiusSquared) {
+				if (alliesAroundHostile[i].location.distanceSquaredTo(closestHostileLocation) <= alliesAroundHostile[i].type.visionRadiusSquared) {
 					allyIsFighting = true;
 					break;
 				}
 			}
 		}
+        destinationFlag += "mha1-";
 		if (allyIsFighting) {
-            Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostileLocation), false);
+            Direction bestDir = Movement.forwardCombatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostileLocation), false);
+            destinationFlag += bestDir;
             if (bestDir != null) {
                 rc.move(bestDir);
                 launcherState = Status.FLANKING;
@@ -403,7 +405,7 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
         if (numNearbyHostiles == 0) return false;
-		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.actionRadiusSquared, MY_TEAM);
+		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		int numNearbyAllies = 1; // Counts ourself
 		for (int i = visibleAllies.length; --i >= 0;) {
 			if (isMilitaryUnit(visibleAllies[i])) {
@@ -411,8 +413,8 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		
-		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health) || rc.getHealth() <= 30) {
-			Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), true);
+		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health - UNIT_TYPE.damage) || rc.getHealth() <= 30) {
+			Movement.forwardCombatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), true);
             if (rc.isMovementReady()){
                 standOff = true;
                 return false;
@@ -456,6 +458,13 @@ public class BotLauncher extends CombatUtils{
 			if (isMilitaryUnit(ally.type)) {
 				numAlliesAttackingClosestHostile += 1;
 			}
+            else if (ally.type == RobotType.CARRIER) {
+                WellInfo[] nearbyWells = rc.senseNearbyWells();
+                if (nearbyWells.length > 0) {
+                    destinationFlag+="Ter_ret";
+                    return false;
+                }
+            }
 		}
 		
 		if (numAlliesAttackingClosestHostile > numHostilesThatAttackUs) {
@@ -485,8 +494,8 @@ public class BotLauncher extends CombatUtils{
                 chooseTargetAndAttack(inRangeEnemies);
             }
 			Direction bestDir = Movement.combatMovement(visibleEnemies, rc.getLocation().directionTo(retreatTarget), false);
+            destinationFlag += "rio" + bestDir;
             if (bestDir != null) {
-                destinationFlag += " " + bestDir;
                 rc.move(bestDir);
                 launcherState = Status.FLANKING;
                 return true;
@@ -501,7 +510,7 @@ public class BotLauncher extends CombatUtils{
         }
 
         if (rc.isMovementReady() && retreatIfOutnumbered()){
-            destinationFlag += " -1";
+            destinationFlag += " -ret";
             return true;
         }
 
@@ -512,11 +521,11 @@ public class BotLauncher extends CombatUtils{
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
                 if(tryMoveToHelpAlly(closestHostile)) {
-                    destinationFlag += " 1 " + closestHostile.location.toString();
+                    destinationFlag += " ally1" + closestHostile.location.toString();
                     return true;
                 }
                 if(tryMoveToAttackProductionUnit(closestHostile)) {
-                    destinationFlag += " 2";
+                    destinationFlag += " prod1";
                     return true;
                 }
             }
@@ -525,20 +534,20 @@ public class BotLauncher extends CombatUtils{
             RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
             // Most important function
             if (inRNonHQEnemies > 0 && tryToBackUpToMaintainMaxRangeLauncher(visibleEnemies)) {
-                destinationFlag += " 2.5";
+                destinationFlag += " max1";
                 launcherState = Status.FLANKING;
                 return true;
             }
             if (!inHealingState && tryMoveToEngageOutnumberedEnemy(closestHostile)) {
-                destinationFlag += " 4";
+                destinationFlag += " out1";
                 return true;
             }
             if (!inHealingState && tryMoveToHelpAlly(closestHostile)) {
-                destinationFlag += " 3";
+                destinationFlag += " ally2";
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
             }
             if (!inHealingState && tryMoveToAttackProductionUnit(closestHostile)) {
-                destinationFlag += " 5";
+                destinationFlag += " prod2";
                 return true;
             }
         }

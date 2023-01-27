@@ -25,6 +25,7 @@ public class SimpleBuilder extends Utils{
     private static final double MISCOUNT_FACTOR = 5;
     public static final int INIT_ANCHOR_SCORE = 50;
     public static int anchorCountDown = 20;
+    public static final int AMPLIFIER_MULTIPLIER = 30;
 
     static class BuildRobotLoc {
         MapLocation loc;
@@ -218,14 +219,6 @@ public class SimpleBuilder extends Utils{
         return false;
     }
 
-    private static boolean shouldBuildAmplifier() throws GameActionException{
-        return launcherScore >= 10 + amplifierScore && rc.getRoundNum() >= 100;
-    }
-
-    private static boolean shouldBuildAnchor() throws GameActionException{
-        return (int)((double)Comms.getRobotCount(RobotType.LAUNCHER) * MISCOUNT_FACTOR) >= getMinLaunchers();
-    }
-
     private static boolean buildOurAnchor() throws GameActionException{
         System.out.println("Trying to build standard anchor");
         if (!rc.canBuildAnchor(Anchor.STANDARD)) return false;
@@ -250,9 +243,9 @@ public class SimpleBuilder extends Utils{
     }
 
     public static boolean tryBuildAmplifier() throws GameActionException{
-        if (!shouldBuildAmplifier()) return false;
-        // if (amplifierScore > carrierScore) return false;
-        if (launcherScore < amplifierScore) return false;
+        if (rc.getRoundNum() < 100) return false;
+        if (rc.getRobotCount() - Comms.getHeadquartersCount() < 15 + AMPLIFIER_MULTIPLIER*Comms.getRobotCount(RobotType.AMPLIFIER)) 
+            return false;
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.AMPLIFIER, 1)) return false;
         if (tryConstructEnvelope(RobotType.AMPLIFIER, Comms.findNearestEnemyHeadquarterLocation())){
             Comms.writeScore(RobotType.AMPLIFIER, updateScore(RobotType.AMPLIFIER, amplifierScore));
