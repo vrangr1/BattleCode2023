@@ -18,17 +18,42 @@ public class Symmetry extends Utils{
         }
     }
 
-    public static enum SYM_MATCH{
-        INVALID,
-        VALID,
-        CANNOT_BE_DETERMINED;
+    private static boolean isCurrentSymmetricallyMatched(Direction dir1, Direction dir2, int dx, int dy) throws GameActionException{
+        SYMMETRY sym = (dx == 0) ? SYMMETRY.HORIZONTAL : ((dy == 0) ? SYMMETRY.VERTICAL : SYMMETRY.ROTATIONAL);
+        switch(sym){
+            case VERTICAL:
+                switch(dir1){
+                    case CENTER:
+                    case NORTH:
+                    case SOUTH: return dir1 == dir2;
+                    case NORTHEAST: return dir2 == Direction.NORTHWEST;
+                    case SOUTHEAST: return dir2 == Direction.SOUTHWEST;
+                    case NORTHWEST: return dir2 == Direction.NORTHEAST;
+                    case SOUTHWEST: return dir2 == Direction.SOUTHEAST;
+                    case EAST: return dir2 == Direction.WEST;
+                    case WEST: return dir2 == Direction.EAST;
+                }
+            case HORIZONTAL:
+                switch(dir1){
+                    case CENTER:
+                    case EAST:
+                    case WEST: return dir1 == dir2;
+                    case NORTHEAST: return dir2 == Direction.SOUTHEAST;
+                    case SOUTHEAST: return dir2 == Direction.NORTHEAST;
+                    case NORTHWEST: return dir2 == Direction.SOUTHWEST; 
+                    case SOUTHWEST: return dir2 == Direction.NORTHWEST;
+                    case NORTH: return dir2 == Direction.SOUTH;
+                    case SOUTH: return dir2 == Direction.NORTH;
+                }
+            default : assert false; return true;
+        }
     }
 
     private static boolean areEqualInPropertiesNoClouds(MapLocation first, MapLocation second) throws GameActionException{
         // walls, currents, wells, islands
         MapInfo firstInfo = rc.senseMapInfo(first), secondInfo = rc.senseMapInfo(second);
         if (firstInfo.isPassable() != secondInfo.isPassable()) return false;
-        if (firstInfo.getCurrentDirection() != secondInfo.getCurrentDirection()) return false;
+        if (!isCurrentSymmetricallyMatched(firstInfo.getCurrentDirection(), secondInfo.getCurrentDirection(), first.x - second.x, first.y - second.y)) return false;
         WellInfo firstWell = rc.senseWell(first), secondWell = rc.senseWell(second);
         if (firstWell == null && secondWell != null) return false;
         if (firstWell != null && secondWell == null) return false;
@@ -41,7 +66,7 @@ public class Symmetry extends Utils{
         boolean isCloud = rc.senseCloud(first);
         if (isCloud != rc.senseCloud(second))
             return false;
-        boolean firstSense = first.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED), secondSense = rc.canSenseLocation(second);
+        boolean firstSense = first.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED), secondSense = second.isWithinDistanceSquared(second, GameConstants.CLOUD_VISION_RADIUS_SQUARED);
         if (isCloud && firstSense && secondSense) return areEqualInPropertiesNoClouds(first, second);
         else if (isCloud && firstSense != secondSense) return false;
         else if (isCloud) return true;
@@ -54,7 +79,7 @@ public class Symmetry extends Utils{
         MapLocation first = new MapLocation(curX, curY), second = new MapLocation(curX + sdx, curY + sdy);
         int visionRadiusSquared = (rc.senseCloud(currentLocation) ? GameConstants.CLOUD_VISION_RADIUS_SQUARED : UNIT_TYPE.visionRadiusSquared);
         while(first.isWithinDistanceSquared(currentLocation, visionRadiusSquared) && second.isWithinDistanceSquared(currentLocation, visionRadiusSquared)){
-            if (!rc.onTheMap(first) || !rc.onTheMap(second)) continue;
+            if (!rc.onTheMap(first) || !rc.onTheMap(second)) break;
             if (!areEqualInProperties(first, second))
                 return false;
             curX += dx;
