@@ -78,12 +78,12 @@ public class Symmetry extends Utils{
     private static boolean areEqualInProperties(MapLocation first, MapLocation second) throws GameActionException{
         // walls, currents, clouds, wells, islands
         boolean isCloud = rc.senseCloud(first);
-        if (isCloud != rc.senseCloud(second))
-            return false;
-        boolean firstSense = first.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED), secondSense = second.isWithinDistanceSquared(second, GameConstants.CLOUD_VISION_RADIUS_SQUARED);
-        if (isCloud && firstSense && secondSense) return areEqualInPropertiesNoClouds(first, second);
-        else if (isCloud && firstSense != secondSense) return false;
-        else if (isCloud) return true;
+        if (isCloud != rc.senseCloud(second)) return false;
+        if (isCloud){
+            boolean firstSense = first.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED), secondSense = second.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED);
+            if (isCloud && firstSense && secondSense) return areEqualInPropertiesNoClouds(first, second);
+            return true;
+        }
         return areEqualInPropertiesNoClouds(first, second);
     }
 
@@ -187,7 +187,12 @@ public class Symmetry extends Utils{
         rememberedEnemyHQLocations[1] = returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[1], parentHQLocation);
         rememberedEnemyHQLocations[2] = returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[2], parentHQLocation);
         for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
-            if (!checkIfSymmetry(Symmetry.SYMMETRY.values()[i])){
+            if (checkIfSymmetry(Symmetry.SYMMETRY.values()[i]) && !Symmetry.checkThisSymmetry(SYMMETRY.values()[i])){
+                removeSymmetry(SYMMETRY.values()[i], "3");
+                mapSymmetry[i] = false;
+                rememberedEnemyHQLocations[i] = null;
+            }
+            else if (!checkIfSymmetry(Symmetry.SYMMETRY.values()[i])){
                 mapSymmetry[i] = false;
                 rememberedEnemyHQLocations[i] = null;
             } 

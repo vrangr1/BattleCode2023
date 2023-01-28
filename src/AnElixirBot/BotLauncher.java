@@ -45,6 +45,8 @@ public class BotLauncher extends CombatUtils{
     private static MapLocation excludeHQ = null;
     private static boolean inHealingState;
     private static MapLocation closestHealingIsland = null;
+    private static MapLocation storedEnemyHQLoc = null;
+    private static boolean symDestinationCall = false;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -86,6 +88,10 @@ public class BotLauncher extends CombatUtils{
         else {
             findNewCombatLocation();
         }
+        if (!rc.isMovementReady()){
+            midLineSymmetryCheck();
+        }
+
         bytecodeCheck(); //3
         moveAfterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE] (Only works with [MARCHING|ISLAND_WORK|EXPLORE])
         if (rc.isActionReady()) {
@@ -98,12 +104,16 @@ public class BotLauncher extends CombatUtils{
                 attackCloud();
             }
         }
-        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + "| " + destinationFlag + 
-            " |Can move " + rc.isMovementReady() + "| cicL " + circleLocation);
+
+        rc.setIndicatorString(launcherState.toString() + " " + currentDestination + "|" + destinationFlag + 
+            " |Can move " + rc.isMovementReady() + "|" + "|cicL " + circleLocation);
     }
 
     private static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
+        if (currentDestination.equals(visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()])){
+            currentDestination = CENTER_OF_THE_MAP;
+        }
         for (int i = rememberedEnemyHQLocations.length; --i >= 0;){
             if (!mapSymmetry[i] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[i])){
                 Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
@@ -128,6 +138,7 @@ public class BotLauncher extends CombatUtils{
         if (currentDestination.equals(CENTER_OF_THE_MAP)){
             currentDestination = Symmetry.defaultEnemyLocation();
         }
+        storedEnemyHQLoc = currentDestination;
         pathing.setNewDestination(currentDestination);
         destinationFlag = "sBD " + currentDestination;
         launcherState = Status.MARCHING;
@@ -147,6 +158,10 @@ public class BotLauncher extends CombatUtils{
         standOff = false;
         destinationFlag = "";
         cloudLocations = null;
+        if (symDestinationCall){
+            setBaseDestination();
+        }
+        symDestinationCall = false;
         cloudCentral();
         simplePursuit();
         if (launcherState != Status.PURSUING){
@@ -162,6 +177,21 @@ public class BotLauncher extends CombatUtils{
             destinationFlag += " cW";
             launcherState = Status.CLOUD_WORK;
             return;
+        }
+    }
+
+    private static void midLineSymmetryCheck() throws GameActionException{
+        for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
+            
+            if (Clock.getBytecodesLeft() > 2100 && mapSymmetry[i] && !symDestinationCall && !Symmetry.checkThisSymmetry(Symmetry.SYMMETRY.values()[i])){
+                Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
+                mapSymmetry[i] = false;
+                rememberedEnemyHQLocations[i] = null;
+                if (currentDestination == null || currentDestination.equals(storedEnemyHQLoc)){
+                    symDestinationCall = true;
+                    break;
+                }
+            }
         }
     }
 
