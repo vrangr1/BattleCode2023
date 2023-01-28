@@ -25,6 +25,7 @@ public class BotCarrier extends Utils{
         OCCUPIED__FINDING_ANOTHER_ISLAND,
         FLEEING,
         SEARCHING_FOR_WELL,
+        TRANSIT_TO_MANA_WELL_FOR_ELIXIR,
         NORMAL,
         TOO_MUCH_BYTECODES_RET_EARLY,
     }
@@ -437,17 +438,35 @@ public class BotCarrier extends Utils{
         }
     }
 
+    private static boolean adamantiumDepositionForElixirStuff() throws GameActionException{
+        if (!ElixirProducer.shouldProduceElixir() || ElixirProducer.checkIfElixirWellMade()) return false;
+        if (rc.getResourceAmount(ResourceType.ADAMANTIUM) != amountToCollect()) return false;
+        movementDestination = ElixirProducer.getManaWellToConvert();
+        if (movementDestination == null) return false;
+        carrierStatus = Status.TRANSIT_TO_MANA_WELL_FOR_ELIXIR;
+        ElixirProducer.goingToElixirWell = true;
+        return true;
+    }
+
+    private static void setReturnToHQTrue() throws GameActionException{
+        if (adamantiumDepositionForElixirStuff()) return;
+        returnToHQ = true;
+        movementDestination = Comms.findNearestHeadquarter();
+    }
+
+    private static void setReturnToHQTrue(MapLocation hqLoc){
+        returnToHQ = true;
+        movementDestination = hqLoc;
+    }
+
     private static void doIReturnToHQ() throws GameActionException{
         currentInventoryWeight = rc.getWeight();
-        if (!returnToHQ && currentInventoryWeight >= amountToCollect()){
-            returnToHQ = true;
-            movementDestination = Comms.findNearestHeadquarter();
-        }
+        if (!returnToHQ && currentInventoryWeight >= amountToCollect())
+            setReturnToHQTrue();
         else if (DOING_EARLY_MANA_DEPOSITION && !returnToHQ && isFleeing){
             MapLocation hqLoc = Comms.findNearestHeadquarter();
             if (currentInventoryWeight >= EARLY_MANA_DEPOSTION_THRESHOLD){
-                returnToHQ = true;
-                movementDestination = hqLoc;
+                setReturnToHQTrue(hqLoc);
                 isFleeing = false;
                 fleeCount = 0;
             }
@@ -716,8 +735,7 @@ public class BotCarrier extends Utils{
     private static void collectionWrapper(WellInfo curWell) throws GameActionException{
         int amount = Math.min(curWell.getRate(), amountToCollect() - rc.getWeight());  
         if (amount <= 0){
-            returnToHQ = true;
-            movementDestination = Comms.findNearestHeadquarter();
+            setReturnToHQTrue();
             carrierStatus = Status.TRANSIT_RES_DEP;
             movementWrapper(movementDestination);
             return;
@@ -735,8 +753,7 @@ public class BotCarrier extends Utils{
             collectedResourcesThisTurn = true;
             desperationIndex = 0;
             if (currentInventoryWeight >= amountToCollect()){
-                returnToHQ = true;
-                movementDestination = Comms.findNearestHeadquarter();
+                setReturnToHQTrue();
                 return;
             }
         }
@@ -843,6 +860,7 @@ public class BotCarrier extends Utils{
         for (int i = nearbyWells.length; --i >= 0;){
             well = nearbyWells[i];
             MapLocation loc = well.getMapLocation();
+            if (well.getResourceType() == ResourceType.ELIXIR) return loc;
             if (well.getResourceType() != resourceType){
                 curDist = rc.getLocation().distanceSquaredTo(loc);
                 if (otherTypeWell == null || curDist < otherTypeDist){
@@ -851,6 +869,24 @@ public class BotCarrier extends Utils{
                 }
                 continue;
             }
+            curDist = rc.getLocation().distanceSquaredTo(loc);
+            if (nearestLoc == null || curDist < nearestDist){
+                nearestLoc = loc;
+                nearestDist = curDist;
+            }
+        }
+        return nearestLoc;
+    }
+
+    private static MapLocation findNearestWellInVisionOfOnlyThisType(ResourceType rType) throws GameActionException{
+        WellInfo[] nearbyWells = rc.senseNearbyWells(rType);
+        if (nearbyWells.length == 0) return null;
+        MapLocation nearestLoc = null;
+        int nearestDist = -1, curDist;
+        WellInfo well;
+        for (int i = nearbyWells.length; --i >= 0;){
+            well = nearbyWells[i];
+            MapLocation loc = well.getMapLocation();
             curDist = rc.getLocation().distanceSquaredTo(loc);
             if (nearestLoc == null || curDist < nearestDist){
                 nearestLoc = loc;
@@ -911,6 +947,19 @@ public class BotCarrier extends Utils{
         return rc.getLocation().distanceSquaredTo(obtainedLoc) < expectedDist * expectedDist;
     }
 
+    private static boolean possibilityOfElixirWell() throws GameActionException{
+        MapLocation senseLoc = findNearestWellInVisionOfOnlyThisType(ResourceType.ELIXIR);
+        if (senseLoc == null && !ElixirProducer.checkIfElixirWellMade()) return false;
+        else if (senseLoc == null && ElixirProducer.rollTheDice()){
+            senseLoc = Comms.getElixirWellTarget();
+            assert senseLoc != null;
+        }
+        else if (senseLoc == null) return false;
+        setWellDestination(senseLoc);
+        Comms.writeOrSaveLocation(senseLoc, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
+        return true;
+    }
+
     /**
      * Find a Well location from which resources are to be collected. First try to find in comms. If that location is null or not in vision, try to find out if there's a location in vision that is better
      * @throws GameActionException
@@ -918,6 +967,7 @@ public class BotCarrier extends Utils{
      */
     private static void getAndSetWellLocation() throws GameActionException{
         otherTypeWell = null;
+        if (possibilityOfElixirWell()) return;
         ResourceType rType = getLocalPrioritizedResource();
         Comms.SHAFlag flag = Comms.resourceFlag(rType);
         MapLocation senseLoc = findNearestWellInVision(rType);
@@ -1025,6 +1075,30 @@ public class BotCarrier extends Utils{
         carrierStatus = Status.DESPERATE;
     }
 
+    private static void goToManaWellForElixir() throws GameActionException{
+        assert movementDestination != null;
+        currentLocation = rc.getLocation();
+        if (currentLocation.distanceSquaredTo(movementDestination) > 2){
+            carrierStatus = Status.TRANSIT_TO_MANA_WELL_FOR_ELIXIR;
+            movementWrapper(movementDestination);
+            return;
+        }
+        WellInfo well = rc.senseWell(movementDestination);
+        assert well != null : "where did the well go?";
+        assert well.getResourceType() == ResourceType.MANA : "I was targeting mana wells right?";
+        int depositedAmount = well.getResource(ResourceType.ADAMANTIUM);
+        int amountToTransfer = Math.min(depositedAmount, ElixirProducer.ADAMANTIUM_DEPOSITION_FOR_ELIXIR_WELL_CREATION);
+        if (rc.canTransferResource(movementDestination, ResourceType.ADAMANTIUM, amountToTransfer)){
+            rc.transferResource(movementDestination, ResourceType.ADAMANTIUM, amountToTransfer);
+            depositedAmount += amountToTransfer;
+            if (depositedAmount == GameConstants.UPGRADE_TO_ELIXIR)
+                ElixirProducer.setElixirWellMade();
+            collectResources();
+            Comms.writeOrSaveLocation(movementDestination, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
+            ElixirProducer.goingToElixirWell = false;
+        }
+    }
+
     private static void gatherResources() throws GameActionException{
         // TODO: Add conditions and actions for behavior under attack here too.
         if (returnEarly) {
@@ -1039,6 +1113,10 @@ public class BotCarrier extends Utils{
             return;
         }
         if (exploringForWells) return;
+        if (ElixirProducer.goingToElixirWell){
+            goToManaWellForElixir();
+            return;
+        }
         if (returnToHQ){
             assert movementDestination != null : "movementDestination != null in gather resources";
             if (goingToCollectAnchor)
@@ -1054,8 +1132,7 @@ public class BotCarrier extends Utils{
         collectResources();
         if (collectedResourcesThisTurn) {
             if (rc.getWeight() < amountToCollect()) return;
-            returnToHQ = true;
-            movementDestination = Comms.findNearestHeadquarter();
+            setReturnToHQTrue();
             carrierStatus = Status.TRANSIT_RES_DEP;
             movementWrapper(movementDestination);
             return;

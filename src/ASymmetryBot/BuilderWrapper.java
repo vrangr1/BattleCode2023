@@ -221,12 +221,10 @@ public class BuilderWrapper extends Utils {
     private static MapLocation findNearestWellForCarrier(ResourceType pResourceType) throws GameActionException{
         currentLocation = rc.getLocation();
         BotCarrier.otherTypeWell = null;
-        MapLocation senseLoc = BotCarrier.findNearestWellInVision(prioritizedResource);
+        MapLocation senseLoc = BotCarrier.findNearestWellInVision(pResourceType);
         if (senseLoc != null) return senseLoc;
         if (BotCarrier.otherTypeWell != null) return BotCarrier.otherTypeWell;
-        MapLocation commsLoc = Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(pResourceType));
-        if (commsLoc != null) return commsLoc;
-        return null;
+        return Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(pResourceType));
     }
 
     private static MapLocation findBestSpawnLocationForCarrier(ResourceType pResourceType) throws GameActionException{

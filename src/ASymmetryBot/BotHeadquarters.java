@@ -24,10 +24,15 @@ public class BotHeadquarters extends Utils{
         canSeeEnemyHQ = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM).length > 0;
     }
 
-    public static void updateEveryTurn() throws GameActionException{
+    private static void updateEndOfEveryTurn() throws GameActionException{
         if (rc.getRoundNum() > 1 && Comms.getHeadquarterIndex(rc.getLocation()) == Comms.getHeadquartersCount() - 1)
             Comms.wipeCountChannels();
         combatCommsCleaner(vNonHQEnemies);
+    }
+
+    private static void updateHeadquarter() throws GameActionException{
+        updateVisibleEnemiesInVision();
+        ElixirProducer.updateElixirStuff();
     }
 
     public static void runHeadquarters() throws GameActionException{
@@ -36,9 +41,9 @@ public class BotHeadquarters extends Utils{
             alliedHQLocs = Comms.getAlliedHeadquartersLocationsList();
             Symmetry.guessEnemyHQLocation();
         }
-        updateVisibleEnemiesInVision();
+        updateHeadquarter();
         BuilderWrapper.buildUnits(isEndangered);
-        updateEveryTurn();
+        updateEndOfEveryTurn();
     }
 
     private static void updateVisibleEnemiesInVision() throws GameActionException{

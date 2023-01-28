@@ -39,27 +39,28 @@
 - [x] Do early deposition.
 - [x] Possible overcrowding fix: Trigger explore when not mining and greater than a threshold number of carriers in vision.
 - [x] overcrowding limit set to 9 and test : did not go well
-- [ ] Move movementWrapper to the end.
+~~- [ ] Move movementWrapper to the end.~~
+~~- [ ] Perhaps use GG's strat of mining one resource in waves.~~
+- [x] Fix circular explore issue of not continuing revolution after the first one.
+- [x] Test mining of resources enroute to another location
+- [x] Test flee rounds counts.
+- [x] Experiment with mining immediately after first move. Remove bugs.
+- [x] Fix fleeing code
+- [x] Avoid overcrowding
+- [ ] If found other elixir well. Mine from there too.
 - [ ] Send excess carriers to the woodchipper
-- [ ] Fix circular explore issue of not continuing revolution after the first one.
-- [ ] Opportunistic mining : perhaps opportunistic adamantium mining after some number of turns?? Check.
 - [ ] Rework entire resource collection strategy.
-- [ ] Perhaps use GG's strat of mining one resource in waves.
 - [ ] Fix back and forth behavior when against a wall when doing circular explore.
+- [ ] If carrying anchor and encountered enemy occupied island with no enemy to defend, squat and free.
 - [ ] Find out how to improve production in BowAndArrow (noBFSplz match)
 - [ ] Shift all movementWrappers to the end of the code PROPERLY.
 - [ ] Fix flee from enemy hq. Perhaps use circular explore to circumvent?
-- [ ] If carrying anchor and encountered enemy occupied island with no enemy to defend, squat and free.
+- [ ] Opportunistic mining : perhaps opportunistic adamantium mining after some number of turns?? Check.
 - [ ] Refine toExploreOrNotToExplore heuristic
-- [ ] Test mining of resources enroute to another location
 - [ ] Check save location's performance.
-- [ ] Test flee rounds counts.
 - [ ] Perhaps deposit to other hqs if nearest hq is overcrowded
-- [ ] Experiment with mining immediately after first move. Remove bugs.
 - [ ] Carrier mining loss due to movement wrapper (run auto script)
 - [ ] Try removing the need for Explore.explore() in the worst case scenario in Circular Explore.
-- [ ] Fix fleeing code
-- [ ] Avoid overcrowding
 - [ ] Work on generation of elixir
 
 ## Explore:

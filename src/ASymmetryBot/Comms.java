@@ -1,5 +1,6 @@
 package ASymmetryBot;
 
+import OPostSprintTwoBot.Comms.SHAFlag;
 import battlecode.common.*;
 
 /* 
@@ -20,7 +21,8 @@ public class Comms extends Utils{
     private static final int LAUNCHER_SCORE_CHANNEL = 1;
     private static final int AMPLIFIER_SCORE_CHANNEL = 2;
     private static final int BOOSTER_SCORE_CHANNEL = 3;
-    private static final int DESTABILIZER_SCORE_CHANNEL = 4;
+    // private static final int DESTABILIZER_SCORE_CHANNEL = 4;
+    private static final int ELIXIR_WELL_LOCATION_CHANNEL = 4;
     private static final int STANDARD_ANCHOR_SCORE_CHANNEL = 5;
     private static final int LAUNCHER_COUNT_CHANNEL = 6;
     private static final int AMPLIFIER_COUNT_CHANNEL = 7;
@@ -64,6 +66,7 @@ public class Comms extends Utils{
     private static final int MAX_LOCATIONS_TO_WIPE = 10;
     private static final boolean OVERWRITE_OLDER_WIPED_LOCATIONS = true;
     private static boolean wipeWrapAround = false;
+    private static boolean saveElixirWellMade = false;
 
     
 
@@ -83,27 +86,27 @@ public class Comms extends Utils{
 
         // WELLS CHANNELS MESSAGES' TYPES
         // WELL_LOCATION,                      // 0x4
-        ADAMANTIUM_WELL_LOCATION,           // 0x5
-        MANA_WELL_LOCATION,                 // 0x6
-        ELIXIR_WELL_LOCATION,               // 0x7
+        ADAMANTIUM_WELL_LOCATION,           // 0x4
+        MANA_WELL_LOCATION,                 // 0x5
+        ELIXIR_WELL_LOCATION,               // 0x6
 
         // OUR_ISLANDS CHANNELS MESSAGES' TYPES
-        OUR_ISLAND,                         // 0x8
+        OUR_ISLAND,                         // 0x7
 
         // ISLAND CHANNELS MESSAGES' TYPES
         // OCCUPIED_ISLAND,                    // 0x8
-        UNOCCUPIED_ISLAND,                  // 0x9
+        UNOCCUPIED_ISLAND,                  // 0x8
 
         // COMBAT CHANNELS MESSAGES' TYPES
-        COMBAT_LOCATION,                    // 0xA
-        CLOUD_COMBAT_LOCATION,              // 0xB
+        COMBAT_LOCATION,                    // 0x9
+        CLOUD_COMBAT_LOCATION,              // 0xA
 
         // AMPLIFIER CHANNELS MESSAGES' TYPES
-        AMPLIFIER_LOCATION,                 // 0xC
-        ANCHOR_DEFENSE_NEEDED,              // 0xD
+        AMPLIFIER_LOCATION,                 // 0xB
+        ANCHOR_DEFENSE_NEEDED,              // 0xC
 
         // COMMS UTILITY TYPE
-        ARRAY_HEAD;                         // 0xE
+        ARRAY_HEAD;                         // 0xD
         // Can go upto 0xF. If more needed, let me know. I can make do without a few types.
 
         public boolean higherPriority(SHAFlag flag){
@@ -310,6 +313,7 @@ public class Comms extends Utils{
             wipeCountChannels();
             // wipeScoreChannels();
             scoreChannelsInit();
+            rc.writeSharedArray(ELIXIR_WELL_LOCATION_CHANNEL, 0);
             writeHeadquarterLocation(rc.getLocation());
             return;
         }
@@ -571,6 +575,12 @@ public class Comms extends Utils{
         return channel;
     }
 
+    public static void writeElixirWellLocation(MapLocation loc) throws GameActionException{
+        int message = rc.readSharedArray(ELIXIR_WELL_LOCATION_CHANNEL);
+        assert ((message & 0x8) >> 3) == 0;
+        writeSHAFlagMessage(loc, SHAFlag.ELIXIR_WELL_LOCATION, ELIXIR_WELL_LOCATION_CHANNEL);
+    }
+
 
 
     ////////////////////////////////////////
@@ -623,7 +633,7 @@ public class Comms extends Utils{
             case AMPLIFIER: return AMPLIFIER_SCORE_CHANNEL;
             case LAUNCHER: return LAUNCHER_SCORE_CHANNEL;
             case BOOSTER: return BOOSTER_SCORE_CHANNEL;
-            case DESTABILIZER: return DESTABILIZER_SCORE_CHANNEL;
+            // case DESTABILIZER: return DESTABILIZER_SCORE_CHANNEL;
             default: assert false;
         }
         assert false;
@@ -838,6 +848,18 @@ public class Comms extends Utils{
     ////////////////////////////////////////
     // FIND AND GET METHODS ////////////////
     ////////////////////////////////////////
+
+    public static MapLocation getElixirWellTarget() throws GameActionException{
+        int message = rc.readSharedArray(ELIXIR_WELL_LOCATION_CHANNEL);
+        if (SHAFlags[message & 0x7] == SHAFlag.ELIXIR_WELL_LOCATION) return readLocationFromMessage(message);
+        return null;
+    }
+
+    public static boolean findIfElixirWellMade() throws GameActionException{
+        int message = rc.readSharedArray(ELIXIR_WELL_LOCATION_CHANNEL);
+        if (SHAFlags[message & 0x7] == SHAFlag.ELIXIR_WELL_LOCATION && (message & 0x8) >> 3 == 1) return true;
+        return false; 
+    }
 
     /**
      * Gets the count of headquarters from the shared array
@@ -1314,6 +1336,10 @@ public class Comms extends Utils{
         if (locationsToWrite == null || savedLocationsCount == 0) return true;
         if (!rc.canWriteSharedArray(0, 0)) return false;
         if (Clock.getBytecodesLeft() < 500) return false;
+        if (saveElixirWellMade){
+            writeElixirWellMade();
+            saveElixirWellMade = false;
+        }
         int count = OVERWRITE_OLDER_SAVED_LOCATIONS && wrapAround ? 20 : savedLocationsCount;
         while(count-->0){
             COMM_TYPE type = getCOMM_TYPEFromSHAFlag(locationsToWriteFlags[count]);
@@ -1332,6 +1358,17 @@ public class Comms extends Utils{
         savedLocationsCount = 0;
         wrapAround = false;
         return true;
+    }
+
+    private static void writeElixirWellMade() throws GameActionException{
+        int message = rc.readSharedArray(ELIXIR_WELL_LOCATION_CHANNEL);
+        message |= 0x8;
+        rc.writeSharedArray(ELIXIR_WELL_LOCATION_CHANNEL, message);
+    }
+
+    public static void saveOrWriteThatElixirWellMade() throws GameActionException{
+        if (rc.canWriteSharedArray(0, 0)) writeElixirWellMade();
+        saveElixirWellMade = true;
     }
 
     

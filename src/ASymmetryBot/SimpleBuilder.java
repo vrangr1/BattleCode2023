@@ -95,7 +95,7 @@ public class SimpleBuilder extends Utils{
             case LAUNCHER: return true;
             case AMPLIFIER: return false;
             case BOOSTER: return false;
-            case DESTABILIZER: return false;
+            case DESTABILIZER: return true;
             default: return false;
         }
     }
@@ -280,6 +280,13 @@ public class SimpleBuilder extends Utils{
         return true;
     }
 
+    private static boolean tryBuildDestabilizer() throws GameActionException{
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.DESTABILIZER, 1)) return false;
+        if (tryConstructEnvelope(RobotType.DESTABILIZER, BuilderWrapper.findBestSpawnLocation(RobotType.LAUNCHER)))
+            return true;
+        return false;
+    }
+
     public static void buildUnits(boolean endangered) throws GameActionException{
         boolean builtUnit = true;
         if (endangered){
@@ -299,6 +306,10 @@ public class SimpleBuilder extends Utils{
                     builtUnit = true;
                     continue;
                 }
+            }
+            if (tryBuildDestabilizer()){
+                builtUnit = true;
+                continue;
             }
             if (tryBuildStandardAnchor()) {
                 builtUnit = true;
