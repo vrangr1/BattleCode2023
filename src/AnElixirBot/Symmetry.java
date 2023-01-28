@@ -51,6 +51,20 @@ public class Symmetry extends Utils{
 
     private static boolean areEqualInPropertiesNoClouds(MapLocation first, MapLocation second) throws GameActionException{
         // walls, currents, wells, islands
+        int firstIsland = rc.senseIsland(first), secondIsland = rc.senseIsland(second);
+        switch(firstIsland){
+            case -1:
+                switch(secondIsland){
+                    case -1: break;
+                    default: return false;
+                }
+                break;
+            default:
+                switch(secondIsland){
+                    case -1: return false;
+                    default: return true;
+                }
+        }
         MapInfo firstInfo = rc.senseMapInfo(first), secondInfo = rc.senseMapInfo(second);
         if (firstInfo.isPassable() != secondInfo.isPassable()) return false;
         if (!isCurrentSymmetricallyMatched(firstInfo.getCurrentDirection(), secondInfo.getCurrentDirection(), first.x - second.x, first.y - second.y)) return false;
@@ -58,7 +72,7 @@ public class Symmetry extends Utils{
         if (firstWell == null && secondWell != null) return false;
         if (firstWell != null && secondWell == null) return false;
         if (firstWell != null && !firstWell.getResourceType().equals(secondWell.getResourceType())) return false;
-        return rc.senseIsland(first) == rc.senseIsland(second);
+        return true;
     }
 
     private static boolean areEqualInProperties(MapLocation first, MapLocation second) throws GameActionException{
