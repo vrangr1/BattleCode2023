@@ -57,7 +57,7 @@ public class SimpleBuilder extends Utils{
 
     public static int getMinCarriers(){
         if (minCarriers != null) return minCarriers;
-        minCarriers = (MAP_HEIGHT * MAP_WIDTH)/125;
+        minCarriers = (MAP_HEIGHT * MAP_WIDTH)/200;
         if (minCarriers > INITIAL_CARRIERS) minCarriers = INITIAL_CARRIERS;
         return minCarriers;
     }
@@ -133,7 +133,7 @@ public class SimpleBuilder extends Utils{
     }
 
     private static int updateCarrierScore(int oldScore){
-        if (oldScore < CWBuilder.getMinCarriers()) 
+        if (oldScore < getMinCarriers()) 
             return oldScore + 1;
         return oldScore + 3;
     }

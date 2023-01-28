@@ -19,9 +19,7 @@ public class BuilderWrapper extends Utils {
     private static int manaWellNearby = 0;
 
     private enum BUILDERS{
-        CWBUILDER,
         SIMPLEBUILDER,
-        SAVVYBUILDER
     };
 
     private static boolean canSeeManaWell() throws GameActionException{
@@ -97,8 +95,6 @@ public class BuilderWrapper extends Utils {
         carrierResourceCount = 0;
         updatesResourceCount = 0;
         switch(CURRENT_BUILDER){
-            case CWBUILDER: CWBuilder.initBuilder(); break;
-            case SAVVYBUILDER: SavvyBuilder.initBuilder(); break;
             case SIMPLEBUILDER: SimpleBuilder.initBuilder(); break;
             default: break;
         }
@@ -125,8 +121,6 @@ public class BuilderWrapper extends Utils {
         assert carriersBuilt == 0 : "carriersBuilt == 0";
         assert updatesResourceCount == 0 : "updatesResourceCount == 0";
         switch(CURRENT_BUILDER){
-            case CWBUILDER: CWBuilder.updateBuilder(); break;
-            case SAVVYBUILDER: SavvyBuilder.updateBuilder(); break;
             case SIMPLEBUILDER: SimpleBuilder.updateBuilder(); break;
             default: break;
         }
@@ -301,8 +295,6 @@ public class BuilderWrapper extends Utils {
     public static void buildUnits(boolean endangered) throws GameActionException{
         updateBuilder();
         switch(CURRENT_BUILDER){
-            case CWBUILDER: CWBuilder.buildUnits(); break;
-            case SAVVYBUILDER: SavvyBuilder.buildUnits(); break;
             case SIMPLEBUILDER: SimpleBuilder.buildUnits(endangered); break;
             default: break;
         }
