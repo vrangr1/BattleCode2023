@@ -825,12 +825,11 @@ public class BotLauncher extends CombatUtils{
                 if (isMilitaryUnit(visibleHostiles[i].type)){
                     int distToDirLoc = visibleHostiles[i].location.distanceSquaredTo(dirLoc);
                     if (distToDirLoc <= visibleHostiles[i].type.actionRadiusSquared){
-                        unitsAttacking+=1;
+                        unitsAttacking+=visibleHostiles[i].type.damage;
                     }
                     else if (distToDirLoc <= visibleHostiles[i].type.visionRadiusSquared){
-                        unitsAttacking+=0.5;
+                        unitsAttacking+= visibleHostiles[i].type.damage/2;
                     }
-                    unitsAttacking++;
                 }
             }
             if (unitsAttacking < leastAttack){

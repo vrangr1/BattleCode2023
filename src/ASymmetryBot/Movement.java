@@ -77,7 +77,7 @@ public class Movement extends Utils{
                         canAttack = true;
                     }
                     else {
-                        maxDamage += visibleEnemies[j].getType().damage / 4;
+                        maxDamage += visibleEnemies[j].getType().damage / 2;
                     }
                 }
                 if (rc.isActionReady() && canAttack){
@@ -120,7 +120,7 @@ public class Movement extends Utils{
                         canAttack = true;
                     }
                     else {
-                        maxDamage += visibleEnemies[j].getType().damage / 4;
+                        maxDamage += visibleEnemies[j].getType().damage / 2;
                     }
                 }
                 if (rc.isActionReady() && canAttack){
