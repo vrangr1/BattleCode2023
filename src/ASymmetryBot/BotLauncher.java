@@ -88,7 +88,7 @@ public class BotLauncher extends CombatUtils{
         else {
             findNewCombatLocation();
         }
-        if (!rc.isMovementReady()){
+        if (!rc.isMovementReady() && rc.getRoundNum() < 120 + BIRTH_ROUND){
             midLineSymmetryCheck();
         }
 
@@ -158,9 +158,6 @@ public class BotLauncher extends CombatUtils{
         standOff = false;
         destinationFlag = "";
         cloudLocations = null;
-        if (symDestinationCall){
-            setBaseDestination();
-        }
         symDestinationCall = false;
         cloudCentral();
         simplePursuit();
@@ -183,12 +180,12 @@ public class BotLauncher extends CombatUtils{
     private static void midLineSymmetryCheck() throws GameActionException{
         for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
             
-            if (Clock.getBytecodesLeft() > 2100 && mapSymmetry[i] && !symDestinationCall && !Symmetry.checkThisSymmetry(Symmetry.SYMMETRY.values()[i])){
+            if (Clock.getBytecodesLeft() > 2100 && mapSymmetry[i] && !Symmetry.checkThisSymmetry(Symmetry.SYMMETRY.values()[i])){
                 Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
                 mapSymmetry[i] = false;
                 rememberedEnemyHQLocations[i] = null;
                 if (currentDestination == null || currentDestination.equals(storedEnemyHQLoc)){
-                    symDestinationCall = true;
+                    setBaseDestination();
                     break;
                 }
             }
