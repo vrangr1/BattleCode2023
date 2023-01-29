@@ -272,7 +272,7 @@ public class BotLauncher extends CombatUtils{
 
     private static void moveAfterNonMovingCombat() throws GameActionException {
         if (vNonHQEnemies != 0) return;
-        if (rc.getRoundNum() % 2 == 0 && rc.getHealth() == UNIT_TYPE.getMaxHealth()) return;
+        if ((rc.getRoundNum() + 1)% 2 == 0 && rc.getHealth() == UNIT_TYPE.getMaxHealth()) return;
         if (rc.isMovementReady()) {
             if (currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
