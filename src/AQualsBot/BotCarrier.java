@@ -73,7 +73,7 @@ public class BotCarrier extends Utils{
     private static int movesLeftBeforeDeath = -1;
     public static final boolean DEBUG_PRINT = false;
     private static final boolean DOING_EARLY_MANA_DEPOSITION = true;
-    private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 20;
+    private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 10;
     private static int GEFFNERS_EXPLORE_TRIGGER = 12;
     private static int persistance = 0;
     private static final int MAX_PERSISTANCE = 15;
@@ -321,7 +321,7 @@ public class BotCarrier extends Utils{
             if (rc.getAnchor() != null || allyCount < enemyCount){ 
                 isFleeing = true;
                 fleeCount = FLEE_ROUNDS;
-                if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
+                // if (tryToFlee(visibleEnemies)) tryToFlee(visibleEnemies);
                 return;
             }
         }
@@ -1200,12 +1200,12 @@ public class BotCarrier extends Utils{
             carrierStatus = Status.TOO_MUCH_BYTECODES_RET_EARLY;
             return;
         }
+        if (movingToIsland) resetIslandVariables();
+        updateCarrier();
         if (isFleeing && shouldIFlee()){
             collectResources();
             return;
         }
-        if (movingToIsland) resetIslandVariables();
-        updateCarrier();
         if (rc.getAnchor() != null){
             carrierAnchorMode();
             return;
