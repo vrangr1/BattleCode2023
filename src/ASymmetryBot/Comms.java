@@ -1,6 +1,5 @@
 package ASymmetryBot;
 
-import OPostSprintTwoBot.Comms.SHAFlag;
 import battlecode.common.*;
 
 /* 
