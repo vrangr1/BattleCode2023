@@ -47,6 +47,7 @@
 - [x] Experiment with mining immediately after first move. Remove bugs.
 - [x] Fix fleeing code
 - [x] Avoid overcrowding
+- [ ] If have fleed to a location quite near hq, deposit resources.
 - [ ] If found other elixir well. Mine from there too.
 - [ ] Send excess carriers to the woodchipper
 - [ ] Rework entire resource collection strategy.
