@@ -47,12 +47,12 @@ public class BotLauncher extends CombatUtils{
     private static MapLocation closestHealingIsland = null;
     private static MapLocation storedEnemyHQLoc = null;
     private static boolean symDestinationCall = false;
-    private static MapLocation[] seenEnemyHQ;
+    private static RobotInfo[] seenEnemyHQs;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
         inHealingState = false;
-        seenEnemyHQ = new MapLocation[Comms.getHeadquartersCount()];
+        seenEnemyHQs = new RobotInfo[Comms.getHeadquartersCount()];
         setBaseDestination();
     }
 
@@ -86,6 +86,7 @@ public class BotLauncher extends CombatUtils{
         tryToMicro();
         updateVision();
         bytecodeCheck(); //2
+        circleEnemyHQ();
         if (sendCombatLocation());
         else {
             findNewCombatLocation();
@@ -108,7 +109,7 @@ public class BotLauncher extends CombatUtils{
         }
 
         rc.setIndicatorString(launcherState.toString() + " " + currentDestination + "|" + destinationFlag + 
-            " |Can move " + rc.isMovementReady() + "|" + "|cicL " + circleLocation);
+            " |Move" + rc.isMovementReady());
     }
 
     private static void setBaseDestination() throws GameActionException {
@@ -142,7 +143,7 @@ public class BotLauncher extends CombatUtils{
         }
         storedEnemyHQLoc = currentDestination;
         pathing.setNewDestination(currentDestination);
-        destinationFlag = "sBD " + currentDestination;
+        destinationFlag += "sBD" + currentDestination;
         launcherState = Status.MARCHING;
     }
 
@@ -188,6 +189,7 @@ public class BotLauncher extends CombatUtils{
                 mapSymmetry[i] = false;
                 rememberedEnemyHQLocations[i] = null;
                 if (currentDestination == null || currentDestination.equals(storedEnemyHQLoc)){
+                    destinationFlag += "mLSC";
                     setBaseDestination();
                     break;
                 }
@@ -324,12 +326,41 @@ public class BotLauncher extends CombatUtils{
             else{
                 enemyHQInVision++;
                 enemyHQ = visibleEnemies[i];
+                // destinationFlag+="|eHQ" + enemyHQ.location;
+                updateSeenEnemyHQs(enemyHQ);
                 if (rc.canWriteSharedArray(0, 0)){
                     Comms.writeEnemyHeadquarterLocation(enemyHQ.location);
                 }
             }
         }
+        seenEnemyHQInNonCloudVision();
     }
+
+    public static void updateSeenEnemyHQs(RobotInfo giveEnemyHQ) throws GameActionException{
+        for (int i = 0; i < seenEnemyHQs.length; i++){
+            if (seenEnemyHQs[i] != null && (seenEnemyHQs[i].location).equals(giveEnemyHQ.location)) 
+                return;
+            if (seenEnemyHQs[i] == null){
+                seenEnemyHQs[i] = giveEnemyHQ;
+                return;
+            }
+        }
+    }
+
+    public static void seenEnemyHQInNonCloudVision() throws GameActionException{
+        currentLocation = rc.getLocation();
+        if (enemyHQ != null) return;
+        for (int i = seenEnemyHQs.length; --i >= 0;){
+            if (seenEnemyHQs[i] != null && currentLocation.distanceSquaredTo(seenEnemyHQs[i].location) <= UNIT_TYPE.visionRadiusSquared
+            && !rc.canSenseLocation(seenEnemyHQs[i].location)){
+                enemyHQInVision++;
+                enemyHQ = seenEnemyHQs[i];
+                return;
+            }
+        }
+    }
+
+    // public static nearbyHQInClouds() throws Game
 
     public static void updateInRangeEnemiesVision() throws GameActionException{
         inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
@@ -633,7 +664,7 @@ public class BotLauncher extends CombatUtils{
 
 		destinationFlag += "|trHAl "+closestHealingIsland+"|";
 		if (closestHealingIsland == null){
-            if (launcherState != Status.MARCHING){
+            if (launcherState != Status.MARCHING && launcherState != Status.CIRCLING){
                 currentDestination = null;
                 launcherState = Status.MARCHING;
             }
@@ -675,7 +706,6 @@ public class BotLauncher extends CombatUtils{
     
     // If our current destination has no enemies left, move to the nearest new location with combat
     private static boolean findNewCombatLocation() throws GameActionException{
-        circleEnemyHQ();
         if (vNonHQEnemies == 0){
             if (currentDestination != null){
                 if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING) return false;
@@ -688,13 +718,14 @@ public class BotLauncher extends CombatUtils{
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null){
                 currentDestination = combatLocation;
-                destinationFlag += " fNCL";
+                destinationFlag += "|fNCL1";
                 pathing.setNewDestination(currentDestination);
                 launcherState = Status.MARCHING;
                 return true;
             }
             else if (currentDestination == null || (currentDestination.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared 
                 && enemyHQ == null && rc.canSenseLocation(currentDestination))){
+                destinationFlag += "|fNCL2";
                 setBaseDestination();
                 return true;
             }
@@ -718,12 +749,16 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void circleEnemyHQ() throws GameActionException{
-        if (enemyHQInVision == visibleEnemies.length && enemyHQInVision > 0 && launcherState != Status.ISLAND_WORK){
+        if (launcherState == Status.ISLAND_WORK) return;
+        if (enemyHQ == null) return;
+        if (enemyHQInVision >= visibleEnemies.length && enemyHQInVision > 0  && (currentDestination == null || currentDestination.equals(enemyHQ.location))){
             if (circlingCount >= CIRCLE_CHECK && Comms.getHeadquartersCount() > 1 && rc.getID() % Comms.getHeadquartersCount() != 0){
-                visitedHQList[++visitedHQIndex % Comms.getHeadquartersCount()] = enemyHQ.location;
+                visitedHQList[++visitedHQIndex % Comms.getHeadquartersCount()] = circleLocation;
                 circlingCount = 0;
                 circleLocation = null;
+                destinationFlag += "cE0";
                 setBaseDestination();
+                launcherState = Status.MARCHING;
             }
             if (enemyHQ.location.equals(visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()])){
                 return;
@@ -733,9 +768,10 @@ public class BotLauncher extends CombatUtils{
                 setCircle(enemyHQ.location, 9, 20);
                 circlingCount = 0;
                 launcherState = Status.CIRCLING;
+                destinationFlag += "cE2";
             }
             circlingCount++;
-            destinationFlag += "| cEHQ" + circlingCount;
+            destinationFlag += "|cE1" + isClockwise + circlingCount;
             circleWorks();
         }
     }
@@ -750,7 +786,10 @@ public class BotLauncher extends CombatUtils{
 
     private static void circleWorks() throws GameActionException{
         Direction dirToCenter = rc.getLocation().directionTo(circleLocation);
-        if (!rc.isMovementReady()) return;
+        if (!rc.isMovementReady()) {
+            launcherState = Status.CIRCLING;
+            return;
+        }
         Direction[] dirs;
         if (isClockwise){
             dirs = new Direction[] {dirToCenter.rotateRight(), dirToCenter, dirToCenter.rotateRight().rotateRight(), 
@@ -760,6 +799,7 @@ public class BotLauncher extends CombatUtils{
             dirs = new Direction[] {dirToCenter.rotateLeft(), dirToCenter, dirToCenter.rotateLeft().rotateLeft(), 
                 dirToCenter.rotateLeft().rotateLeft().rotateLeft(), dirToCenter.rotateLeft().rotateLeft().rotateLeft().rotateLeft()};
         }
+
         for (Direction dir: dirs){
             MapLocation newLocation = rc.getLocation().add(dir);
             if (!rc.canSenseLocation(newLocation)) continue;
@@ -811,14 +851,17 @@ public class BotLauncher extends CombatUtils{
 			MapLocation dirLoc = lCR.add(dir);
             Direction dirLocCurrentDir = rc.senseMapInfo(dirLoc).getCurrentDirection();
             double unitsAttacking = 0;
+            if (enemyHQ != null && enemyHQ.location.distanceSquaredTo(dirLoc) <= RobotType.HEADQUARTERS.actionRadiusSquared){
+                unitsAttacking += 4;
+            }
             for (int i = visibleHostiles.length; --i >= 0;){
                 if (isMilitaryUnit(visibleHostiles[i].type)){
                     int distToDirLoc = visibleHostiles[i].location.distanceSquaredTo(dirLoc);
                     if (distToDirLoc <= visibleHostiles[i].type.actionRadiusSquared){
-                        unitsAttacking+=visibleHostiles[i].type.damage;
+                        unitsAttacking +=visibleHostiles[i].type.damage;
                     }
                     else if (distToDirLoc <= visibleHostiles[i].type.visionRadiusSquared){
-                        unitsAttacking+= visibleHostiles[i].type.damage/2;
+                        unitsAttacking += visibleHostiles[i].type.damage/2;
                     }
                 }
             }
@@ -862,7 +905,7 @@ public class BotLauncher extends CombatUtils{
             }
         }
         if (cloudAttackLocation != null && rc.canAttack(cloudAttackLocation)){
-            destinationFlag += " aC " + cloudAttackLocation + " clen " + cloudLocations.length;
+            destinationFlag += "|aC";
             rc.attack(cloudAttackLocation);
         }
     }

@@ -304,6 +304,11 @@ public class Symmetry extends Utils{
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[i],parentHQLocation); // Default go to location
                     if (closestEnemyHQ == null) continue;
                     double minDistance = (double) parentHQLocation.distanceSquaredTo(closestEnemyHQ);
+                    MapLocation alreadyVisitedHQ = visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()];
+                    if (alreadyVisitedHQ != null && alreadyVisitedHQ.equals(closestEnemyHQ)){
+                        closestEnemyHQ = null;
+                        minDistance = Double.MAX_VALUE;
+                    }
                     for (int j = alliedHQLocs.length; --j >= 0;) {
                         if (alliedHQLocs[j] == null) continue;
                         MapLocation alliedHQEnemyHQ = returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[i], alliedHQLocs[j]);
@@ -312,7 +317,6 @@ public class Symmetry extends Utils{
                         // double currDistance = (double) rc.getLocation().distanceSquaredTo(alliedHQEnemyHQ); // As distance will be updated
                         if (parentDistance > alliedHQLocs[j].distanceSquaredTo(alliedHQEnemyHQ)) continue; // Don't have all launchers go to the same place
                         if (parentDistance <= 1.0) continue;
-                        MapLocation alreadyVisitedHQ = visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()];
                         if (alreadyVisitedHQ != null && alreadyVisitedHQ.equals(alliedHQEnemyHQ)) continue;
                         if (parentDistance * factor < minDistance){
                             minDistance = parentDistance;

@@ -113,15 +113,26 @@ public class CombatUtils extends Utils{
 	}
 
     public static boolean sendGenericCombatLocation(RobotInfo[] visibleEnemies) throws GameActionException{
-			RobotInfo closestHostile = getClosestNonHQUnitWithCombatPriority(visibleEnemies);
-            if (closestHostile == null) return false;
-            currentDestination = closestHostile.getLocation();
-            if (rc.canWriteSharedArray(0, 0)){
-                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
-                return true;
-            }
+		RobotInfo closestHostile = getClosestNonHQUnitWithCombatPriority(visibleEnemies);
+        if (closestHostile == null) return false;
+        if (rc.canWriteSharedArray(0, 0)){
+            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
+            return true;
+        }
         return false;
     }
+
+    public static boolean sendGenericCombatLocation(RobotInfo[] visibleEnemies, RobotInfo enemyHQ) throws GameActionException{
+        RobotInfo closestHostile = getClosestNonHQUnitWithCombatPriority(visibleEnemies);
+        if (closestHostile == null) return false;
+        if (enemyHQ != null && enemyHQ.type == RobotType.HEADQUARTERS && enemyHQ.location.distanceSquaredTo(closestHostile.location) <= enemyHQ.type.actionRadiusSquared)
+            return false;
+        if (rc.canWriteSharedArray(0, 0)){
+            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
+            return true;
+        }
+        return false;
+    }    
 
     public static MapLocation tryToBackUpFromEnemyHQ(RobotInfo enemyHQ) throws GameActionException {
 		int closestHostileDistSq = Integer.MAX_VALUE;
