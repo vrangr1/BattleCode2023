@@ -435,19 +435,15 @@ public class BotLauncher extends CombatUtils{
 		RobotInfo[] visibleAllies = rc.senseNearbyRobots(closestHostile.location, UNIT_TYPE.visionRadiusSquared, MY_TEAM);
 		int numNearbyAllies = 1; // Counts ourself
 		for (int i = visibleAllies.length; --i >= 0;) {
-			if (isMilitaryUnit(visibleAllies[i])) {
+			if (isMilitaryUnit(visibleAllies[i].type)) {
 				numNearbyAllies += 1;
 			}
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health - UNIT_TYPE.damage) || rc.getHealth() <= 30) {
-			Movement.forwardCombatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), true);
             if (rc.isMovementReady()){
                 standOff = true;
-                return false;
             }
-            launcherState = Status.FLANKING;
-            return true;
 		}
 		return false;
 	}
@@ -565,10 +561,7 @@ public class BotLauncher extends CombatUtils{
                 launcherState = Status.FLANKING;
                 return true;
             }
-            if (!inHealingState && tryMoveToEngageOutnumberedEnemy(closestHostile)) {
-                destinationFlag += " out1";
-                return true;
-            }
+            tryMoveToEngageOutnumberedEnemy(closestHostile);
             if (!inHealingState && tryMoveToHelpAlly(closestHostile)) {
                 destinationFlag += " ally2";
                 return true; // Maybe add how many turns of attack cooldown here and how much damage being taken?
