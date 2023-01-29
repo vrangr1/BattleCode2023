@@ -73,7 +73,7 @@ public class BotCarrier extends Utils{
     private static int movesLeftBeforeDeath = -1;
     public static final boolean DEBUG_PRINT = false;
     private static final boolean DOING_EARLY_MANA_DEPOSITION = true;
-    private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 10;
+    private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 15;
     private static int GEFFNERS_EXPLORE_TRIGGER = 12;
     private static int persistance = 0;
     private static final int MAX_PERSISTANCE = 15;
