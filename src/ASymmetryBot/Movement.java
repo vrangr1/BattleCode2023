@@ -86,10 +86,6 @@ public class Movement extends Utils{
                 if (!canAttack){
                     continue;
                 }
-                Direction dirLocCurrentDir = rc.senseMapInfo(potDest).getCurrentDirection();
-                if (dirLocCurrentDir != Direction.CENTER && dirLocCurrentDir == possibleDirs[i].opposite()){
-                    maxDamage -= 5;
-                }
                 if (maxDamage < maxDamageTaken) {
                     maxDamageTaken = maxDamage;
                     bestDir = possibleDirs[i];
