@@ -72,7 +72,7 @@ public class BotLauncher extends CombatUtils{
             else{
                 boolean seekingIsland = false;
                 seekingIsland = seekEnemyIslandInVision(); // [CUR_STATE] -> [ISLAND_WORK|EXPLORE]
-                // closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
+                closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
                 // lowHealthCircle(); // [CUR_STATE] -> [CUR_STATE|MARCHING|CIRCLING]
                 if (!seekingIsland && MAP_SIZE >= 1200){
                     if (doIdling()){
@@ -678,7 +678,7 @@ public class BotLauncher extends CombatUtils{
         circleEnemyHQ();
         if (vNonHQEnemies == 0){
             if (currentDestination != null){
-                if (launcherState == Status.ISLAND_WORK || launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING) return false;
+                if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING) return false;
                 if (!rc.canSenseLocation(currentDestination)) return false;
                 int dist = rc.getLocation().distanceSquaredTo(currentDestination);
                 if (MAP_SIZE <= 900 && dist > UNIT_TYPE.actionRadiusSquared) return false;
@@ -706,12 +706,10 @@ public class BotLauncher extends CombatUtils{
     * This will try to update the destination of the soldier so as to not make it go away from closer fights
     */
     private static void closerCombatDestination() throws GameActionException{
-        circleEnemyHQ();
+        // circleEnemyHQ();
+        if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING || launcherState == Status.CIRCLING) return;
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-        if (currentDestination == null && nearestCombatLocation == null){
-            launcherState = Status.EXPLORE;
-        }
-        else if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
+        if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
             rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
                 currentDestination = nearestCombatLocation;
                 destinationFlag += " cCD";
