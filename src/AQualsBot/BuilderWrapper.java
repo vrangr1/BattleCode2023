@@ -246,7 +246,7 @@ public class BuilderWrapper extends Utils {
     }
 
     private static MapLocation findBestSpawnLocationForAmplifier() throws GameActionException{
-        return null;
+        return findNearestActReadyLocation(Comms.findNearestEnemyHeadquarterLocation(), RobotType.AMPLIFIER);
     }
 
     private static MapLocation findBestSpawnLocationForDestabilizer() throws GameActionException{

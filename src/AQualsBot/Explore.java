@@ -24,7 +24,9 @@ public class Explore extends Utils{
     private static final int exploreDist = 100;
     public static final BoundInfo lbX = new BoundInfo(0, true), lbY = new BoundInfo(0, true);
     public static final BoundInfo ubX = new BoundInfo(Globals.rc.getMapWidth(), true), ubY = new BoundInfo(Globals.rc.getMapHeight(), true);
-
+    public static int lastCallRound = -1;
+    private static int roundCount = 0;
+    private static int MAX_EXPLORE_ROUND_COUNT = -1;
 
     public static int eastCloser(){
         // return 
@@ -196,6 +198,7 @@ public class Explore extends Utils{
     }
 
     public static MapLocation explore(boolean randomExploration) throws GameActionException{
+        // if (roundCheckForCarriers()) return null;
         if (exploreDir == CENTER)
             getExploreDir(randomExploration);
         return getExplore3Target();
@@ -214,7 +217,28 @@ public class Explore extends Utils{
             assignExplore3Dir(directions[Globals.rng.nextInt(8)]);
     }
 
+    private static boolean roundCheckForCarriers(){
+        if (UNIT_TYPE != RobotType.CARRIER) return false;
+        if (MAX_EXPLORE_ROUND_COUNT == -1)
+            MAX_EXPLORE_ROUND_COUNT = Math.max(MAP_HEIGHT, MAP_WIDTH) + Math.min(MAP_HEIGHT, MAP_WIDTH) / 2;
+        int curRound = rc.getRoundNum();
+        if (curRound - lastCallRound > 2){
+            lastCallRound = curRound;
+            roundCount = 0;
+            return false;
+        }
+        lastCallRound = curRound;
+        roundCount++;
+        return (roundCount > MAX_EXPLORE_ROUND_COUNT);
+    }
+
+    public static void resetExploreRoundCount(){
+        roundCount = 0;
+        lastCallRound = rc.getRoundNum();
+    }
+
     public static MapLocation explore() throws GameActionException{
+        // if (roundCheckForCarriers()) return null;
         if (exploreDir == CENTER)
             getExploreDir();
         return getExplore3Target();

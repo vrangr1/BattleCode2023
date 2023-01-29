@@ -164,6 +164,33 @@ public class BotCarrier extends Utils{
         ignoredIslandLocationsCount = 0;
     }
 
+    private static boolean limitReachedFindInCommsNow() throws GameActionException{
+        Comms.SHAFlag flag = Comms.resourceFlag(getLocalPrioritizedResource());
+        movementDestination = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, flag);
+        if (movementDestination == null){
+            Explore.resetExploreRoundCount();
+            return false;
+        }
+        exploringForWells = false;
+        carrierStatus = Status.TRANSIT_TO_WELL;
+        setWellDestination(movementDestination);
+        Comms.writeOrSaveLocation(movementDestination, flag);
+        return true;
+    }
+
+    private static MapLocation ifExploreDestNullStuff(MapLocation loc) throws GameActionException{
+        if (loc == null && limitReachedFindInCommsNow()){
+            movementWrapper(movementDestination);
+            return null;
+        }
+        else if (loc == null){
+            loc = Explore.explore(randomExploration);
+            assert loc != null;
+            return loc;
+        }
+        return loc;
+    }
+
     private static void movementWrapper(MapLocation dest) throws GameActionException{
         if (rc.isMovementReady() && Clock.getBytecodesLeft() > 3000){
             pathing.setAndMoveToDestination(dest);
@@ -178,10 +205,14 @@ public class BotCarrier extends Utils{
 
     private static void movementWrapper() throws GameActionException{
         if (rc.isMovementReady()){
+            // exploreDest1 = ifExploreDestNullStuff(Explore.explore(randomExploration));
+            // if (exploreDest1 == null) return;
             exploreDest1 = Explore.explore(randomExploration);
             pathing.setAndMoveToDestination(exploreDest1);
         }
         if (rc.isMovementReady()){
+            // exploreDest2 = ifExploreDestNullStuff(Explore.explore(randomExploration));
+            // if (exploreDest2 == null) return;
             exploreDest2 = Explore.explore(randomExploration);
             Nav.goTo(exploreDest2);
         }
@@ -193,20 +224,33 @@ public class BotCarrier extends Utils{
             return;
         }
         if (rc.isMovementReady()){
+            // exploreDest1 = ifExploreDestNullStuff(CircularExplore.explore());
+            // if (exploreDest1 == null) return;
             exploreDest1 = CircularExplore.explore();
             pathing.setAndMoveToDestination(exploreDest1);
         }
         if (rc.isMovementReady()){
+            // exploreDest2 = ifExploreDestNullStuff(CircularExplore.explore());
+            // if (exploreDest2 == null) return;
             exploreDest2 = CircularExplore.explore();
             Nav.goTo(exploreDest2);
         }
     }
 
     private static void movementWrapper(boolean fleeing) throws GameActionException{
-        if (rc.isMovementReady())
-            pathing.setAndMoveToDestination(Explore.explore());
-        if (rc.isMovementReady())
-            Nav.goTo(Explore.explore());
+        if (rc.isMovementReady()){
+            // exploreDest1 = ifExploreDestNullStuff(Explore.explore());
+            // if (exploreDest1 == null) return;
+            exploreDest1 = Explore.explore(); 
+            pathing.setAndMoveToDestination(exploreDest1);
+        }
+            
+        if (rc.isMovementReady()){
+            // exploreDest2 = ifExploreDestNullStuff(Explore.explore());
+            // if (exploreDest2 == null) return;
+            exploreDest2 = Explore.explore();
+            Nav.goTo(exploreDest2);
+        }
     }
 
     /**
@@ -1287,6 +1331,7 @@ public class BotCarrier extends Utils{
             lastRetreatDirection = bestRetreatDir;
             if (!shouldIFlee()) return false;
             carrierStatus = Status.FLEEING;
+            Explore.lastCallRound = rc.getRoundNum();
             rc.move(bestRetreatDir);
             return true;
         }
@@ -1300,6 +1345,7 @@ public class BotCarrier extends Utils{
         carrierStatus = Status.FLEEING;
         Direction dir = getRetreatDirection(visibleEnemies);
         // if (dir != null) Explore.assignExplore3Dir(dir);
+        Explore.lastCallRound = rc.getRoundNum();
         if (dir != null)
             fleeTarget = extrapolateLocation(rc.getLocation(), dir, FLEE_EXTRAPOLATE_UNSQUARED_DISTANCE);
         else if (lastRetreatDirection != null)

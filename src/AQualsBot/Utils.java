@@ -324,6 +324,20 @@ public class Utils extends Globals{
         return null;
     }
 
+    private static boolean isMapLocationBlocked(MapLocation loc) throws GameActionException{
+        Direction dir;
+        MapLocation newLoc;
+        currentLocation = rc.getLocation();
+        for (int i = directions.length; --i>=0;){
+            dir = directions[i];
+            newLoc = loc.add(dir);
+            if (!rc.canSenseLocation(newLoc))
+                continue;
+            if (rc.senseMapInfo(newLoc).isPassable()) return false;
+        }
+        return true;
+    }
+
     public static MapLocation findNearestActReadyLocation(MapLocation targetLocation, RobotType type) throws GameActionException{
         currentLocation = rc.getLocation();
         MapLocation[] locations = rc.getAllLocationsWithinRadiusSquared(currentLocation, UNIT_TYPE.actionRadiusSquared);
