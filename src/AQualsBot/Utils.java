@@ -274,13 +274,13 @@ public class Utils extends Globals{
             WellInfo[] nearbyWells = rc.senseNearbyWells();
             MapLocation loc;
             Comms.SHAFlag flag;
-            for (int i = nearbyWells.length; --i >= 0;){
-                WellInfo well = nearbyWells[i];
+            if (nearbyWells.length > 0){
+                WellInfo well = nearbyWells[0];
                 loc = well.getMapLocation();
                 flag = Comms.resourceFlag(well.getResourceType());
                 if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, flag))
-                    continue;
-                Comms.writeAndOverwriteStrictlyLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, flag);
+                    return;
+                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, flag);
             }
         }
     }

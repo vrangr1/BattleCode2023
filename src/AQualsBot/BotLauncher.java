@@ -146,7 +146,7 @@ public class BotLauncher extends CombatUtils{
 
     private static boolean doIdling() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.getRoundNum() <= BIRTH_ROUND + 1){
-            updateVisibleAlliesVision();
+            militaryAlliesInVision();
             if (vNonHQCombatAllies == 0){
                 return true;
             }
@@ -258,12 +258,13 @@ public class BotLauncher extends CombatUtils{
         }
         if (nearestLoc != null){
             currentDestination = nearestLoc;
-            destinationFlag += " sEI";
+            destinationFlag += "sEI1";
             sendIslandLocation(nearestLoc);
             launcherState = Status.ISLAND_WORK;
             return true;
         }
         else {
+            destinationFlag += "sEI2";
             launcherState = Status.MARCHING;
             return false;
         }
@@ -302,13 +303,13 @@ public class BotLauncher extends CombatUtils{
         updateInRangeEnemiesVision();
     }
 
-    public static void updateVisibleAlliesVision() throws GameActionException{
-        vNonHQCombatAllies = 0;
+    public static void militaryAlliesInVision() throws GameActionException{
         visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
         vNonHQCombatAllies = 0;
         for (int i = visibleAllies.length; --i >= 0;) {
             if (isMilitaryUnit(visibleAllies[i].type)) {
                 vNonHQCombatAllies++;
+                return;
             }
         }
     }
@@ -584,7 +585,7 @@ public class BotLauncher extends CombatUtils{
             }
             else if (rc.isMovementReady() && vNonHQEnemies > 0) {
                 RobotInfo closestHostile = getClosestUnitWithCombatPriority(visibleEnemies);
-                if(tryMoveToHelpAlly(closestHostile)) {
+                if(rc.getHealth() >= 60 && tryMoveToHelpAlly(closestHostile)) {
                     destinationFlag += "ally1" + closestHostile.location.toString();
                     return true;
                 }
@@ -747,7 +748,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     private static void circleEnemyHQ() throws GameActionException{
-        if (launcherState == Status.ISLAND_WORK) return;
+        if (launcherState == Status.ISLAND_WORK) return; //TODO: Add healing
         if (enemyHQ == null) return;
         if (enemyHQInVision >= visibleEnemies.length && enemyHQInVision > 0  && (currentDestination == null || currentDestination.equals(enemyHQ.location))){
             if (circlingCount >= CIRCLE_CHECK && Comms.getHeadquartersCount() > 1 && rc.getID() % Comms.getHeadquartersCount() != 0){
@@ -838,7 +839,8 @@ public class BotLauncher extends CombatUtils{
 		}
 		
         // We don't want to get out of our max range, not in this function
-		if (minHosDist > rc.getType().actionRadiusSquared) return false;
+		if (rc.getHealth() >= 60)
+            if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
 		double leastAttack = Double.MAX_VALUE;
