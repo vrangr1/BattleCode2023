@@ -331,9 +331,34 @@ public class Movement extends Utils{
         return false;
     }
 
+    private static void hqOrient(MapLocation chosenWell) throws GameActionException{
+        Direction chosenNewDirection = null;
+        MapLocation enemyHQ = Comms.findNearestEnemyHeadquarterLocation(), allyHQ = Comms.findNearestHeadquarter();
+        int chosenDist = rc.getLocation().distanceSquaredTo(allyHQ);
+        for (int i = directions.length; --i >= 0; ) {
+            MapLocation newLocation = rc.getLocation().add(directions[i]);
+            if (chosenWell.distanceSquaredTo(newLocation) > 2) continue;
+            if (enemyHQ != null && newLocation.distanceSquaredTo(enemyHQ) <= RobotType.HEADQUARTERS.actionRadiusSquared)
+                continue;
+            int newLocationDist = newLocation.distanceSquaredTo(allyHQ);
+            if (rc.canMove(directions[i]) && rc.senseMapInfo(newLocation).getCurrentDirection() == Direction.CENTER) {
+                if (newLocationDist < chosenDist){
+                    chosenDist = newLocationDist;
+                    chosenNewDirection = directions[i];
+                }
+            }
+        }
+        if (chosenNewDirection != null){
+            rc.move(chosenNewDirection);
+        }
+    }
+
     public static void legionMining(MapLocation chosenWell) throws GameActionException{
         if (!rc.isMovementReady()) return;
-        if (rc.getWeight() >= 38) return;
+        if (rc.getWeight() >= 35){
+            hqOrient(chosenWell);
+            return;
+        } 
         int chosenDist = 0;
         int count = 0;
         Direction chosenNewDirection = null;
@@ -344,7 +369,7 @@ public class Movement extends Utils{
             if (enemyHQ != null && newLocation.distanceSquaredTo(enemyHQ) <= RobotType.HEADQUARTERS.actionRadiusSquared)
                 continue;
             int newLocationDist = newLocation.distanceSquaredTo(rc.getLocation());
-            if (rc.canMove(directions[i]) &&rc.senseMapInfo(newLocation).getCurrentDirection() == Direction.CENTER) {
+            if (rc.canMove(directions[i]) && rc.senseMapInfo(newLocation).getCurrentDirection() == Direction.CENTER) {
                 if (newLocationDist == chosenDist) count++;
                 else if (newLocationDist > chosenDist) {
                     count = 1;

@@ -705,6 +705,11 @@ public class BotCarrier extends Utils{
         return 0;
     }
 
+    private static void exitCollectionOfResources(MapLocation chosenWell) throws GameActionException{
+        if (returnToHQ || isFleeing || chosenWell == null) return;
+        Movement.legionMining(chosenWell);
+    }
+
     private static void collectResources() throws GameActionException{
         if (!rc.isActionReady() || returnToHQ) return;
         WellInfo[] adjacentWells = rc.senseNearbyWells(2);
@@ -713,9 +718,14 @@ public class BotCarrier extends Utils{
         MapLocation chosenWell = null;
         // First mine for priority resource.
         for (int i = adjacentWells.length; i-- > 0;){
-            if (!rc.isActionReady() || returnToHQ) return;
-            if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
-                continue;
+            if (!rc.isActionReady() || returnToHQ){
+                exitCollectionOfResources(chosenWell);
+                return;
+            }
+            // if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA)
+            //     continue;
+            ResourceType rType = adjacentWells[i].getResourceType();
+            if (rType != ResourceType.ELIXIR && rType != getLocalPrioritizedResource()) continue;
             WellInfo curWell = adjacentWells[i];
             Comms.writeOrSaveLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));    
             collectionWrapper(curWell);
@@ -724,7 +734,10 @@ public class BotCarrier extends Utils{
         if (returnToHQ) return;
         // Then for the other resource
         for (int i = adjacentWells.length; i-- > 0;){
-            if (!rc.isActionReady() || returnToHQ) return;
+            if (!rc.isActionReady() || returnToHQ){
+                exitCollectionOfResources(chosenWell);
+                return;
+            }
             if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
                 continue;
             WellInfo curWell = adjacentWells[i];  
@@ -1143,7 +1156,10 @@ public class BotCarrier extends Utils{
             carrierStatus = Status.TOO_MUCH_BYTECODES_RET_EARLY;
             return;
         }
-        if (isFleeing && shouldIFlee()) return;
+        if (isFleeing && shouldIFlee()){
+            collectResources();
+            return;
+        }
         if (movingToIsland) resetIslandVariables();
         updateCarrier();
         if (rc.getAnchor() != null){
