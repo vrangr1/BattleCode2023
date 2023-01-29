@@ -75,6 +75,10 @@ public class BotCarrier extends Utils{
     private static final boolean DOING_EARLY_MANA_DEPOSITION = true;
     private static final int EARLY_MANA_DEPOSTION_THRESHOLD = 20;
     private static int GEFFNERS_EXPLORE_TRIGGER = 12;
+    private static int persistance = 0;
+    private static final int MAX_PERSISTANCE = 15;
+    private static final int MIN_EXPLORE_ROUND_COUNT = 3;
+    private static int exploreRoundCount = 0;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -415,7 +419,7 @@ public class BotCarrier extends Utils{
     private static void exploreForWells(boolean skip) throws GameActionException{
         ResourceType rType = getLocalPrioritizedResource();
         otherTypeWell = null;
-        if (!skip) movementDestination = findNearestWellInVision(rType);
+        if (!skip && exploreRoundCount == 0) movementDestination = findNearestWellInVision(rType);
         carrierStatus = Status.EXPLORE_FOR_WELLS;
         if (movementDestination != null){
             exploringForWells = false;
@@ -435,6 +439,7 @@ public class BotCarrier extends Utils{
                 }
             }
             else movementWrapper();
+            exploreRoundCount = Math.max(0, exploreRoundCount - 1);
         }
     }
 
@@ -742,6 +747,7 @@ public class BotCarrier extends Utils{
         }      
         if (rc.canCollectResource(curWell.getMapLocation(), amount)){
             rc.collectResource(curWell.getMapLocation(), amount);
+            persistance = 0;
             currentInventoryWeight += amount;
             switch(curWell.getResourceType()){
                 case ADAMANTIUM: collectedAdamantium += amount; break;
@@ -1002,6 +1008,49 @@ public class BotCarrier extends Utils{
         }
     }
 
+    private static boolean morePreciseOvercrowdingCheck(MapLocation wellLoc) throws GameActionException{
+        int count = rc.senseNearbyRobots(wellLoc, 2, MY_TEAM).length;
+        MapInfo[] mapInfos = rc.senseNearbyMapInfos(wellLoc, 2);
+        int blockedCount = 0;
+        for (int i = mapInfos.length; --i >= 0;)
+            if (!mapInfos[i].isPassable()) blockedCount++;
+        if (count + blockedCount >= 8) {
+            persistance++;
+            return persistance > MAX_PERSISTANCE;
+        }
+        return false;
+    }
+
+    private static boolean doOvercrowdingCheck(MapLocation wellLoc) throws GameActionException{
+        int curDist = rc.getLocation().distanceSquaredTo(wellLoc);
+        if (curDist <= UNIT_TYPE.visionRadiusSquared && curDist > 8){
+            int count = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM).length;
+            if (count > GEFFNERS_EXPLORE_TRIGGER){
+                exploringForWells = true;
+                desperationIndex = 0;
+                movementDestination = null;
+                carrierStatus = Status.EXPLORE_FOR_WELLS;
+                movementWrapper(true);
+                CircularExplore.resetCenterLocation();
+                exploreRoundCount = MIN_EXPLORE_ROUND_COUNT;
+                return true;
+            }
+        }
+        else if (curDist <= UNIT_TYPE.visionRadiusSquared && morePreciseOvercrowdingCheck(movementDestination)){
+            persistance++;
+            if (persistance < MAX_PERSISTANCE) return false;
+            exploringForWells = true;
+            desperationIndex = 0;
+            movementDestination = null;
+            carrierStatus = Status.EXPLORE_FOR_WELLS;
+            movementWrapper(true);
+            CircularExplore.resetCenterLocation();
+            exploreRoundCount = MIN_EXPLORE_ROUND_COUNT;
+            return true;
+        }
+        return false;
+    }
+
     private static void goToWell() throws GameActionException{
         if (!rc.isMovementReady()) return;
         if (movementDestination == null){
@@ -1021,18 +1070,7 @@ public class BotCarrier extends Utils{
             return;
         }
 
-        if (curDist <= UNIT_TYPE.visionRadiusSquared && curDist > 8){
-            int count = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM).length;
-            if (count > GEFFNERS_EXPLORE_TRIGGER){
-                exploringForWells = true;
-                desperationIndex = 0;
-                movementDestination = null;
-                carrierStatus = Status.EXPLORE_FOR_WELLS;
-                movementWrapper(true);
-                CircularExplore.resetCenterLocation();
-                return;
-            }
-        }
+        if (doOvercrowdingCheck(movementDestination)) return;
         else if (curDist > UNIT_TYPE.actionRadiusSquared){
             // If outside of action radius
             otherTypeWell = null;
