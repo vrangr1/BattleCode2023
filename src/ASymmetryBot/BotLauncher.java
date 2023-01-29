@@ -47,10 +47,12 @@ public class BotLauncher extends CombatUtils{
     private static MapLocation closestHealingIsland = null;
     private static MapLocation storedEnemyHQLoc = null;
     private static boolean symDestinationCall = false;
+    private static MapLocation[] seenEnemyHQ;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
         inHealingState = false;
+        seenEnemyHQ = new MapLocation[Comms.getHeadquartersCount()];
         setBaseDestination();
     }
 
@@ -124,7 +126,7 @@ public class BotLauncher extends CombatUtils{
                 for (int j = Comms.getHeadquartersCount(); --j >= 0;){
                     MapLocation symmetricEnemyHQ = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[i], alliedHQLocs[j]);
                     if (symmetricEnemyHQ == null) continue;
-                    if(symmetricEnemyHQ.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared &&
+                    if (symmetricEnemyHQ.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.visionRadiusSquared &&
                         rc.canSenseLocation(symmetricEnemyHQ)){
                         rememberedEnemyHQLocations[i] = null;
                         mapSymmetry[i] = false;
@@ -176,6 +178,7 @@ public class BotLauncher extends CombatUtils{
             return;
         }
     }
+
 
     private static void midLineSymmetryCheck() throws GameActionException{
         for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
@@ -440,7 +443,15 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		
-		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health - UNIT_TYPE.damage) || rc.getHealth() <= 30) {
+		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health - UNIT_TYPE.damage)) {
+            if ((closestHostile.health <= UNIT_TYPE.damage) && rc.isActionReady()){
+                Direction bestDir = Movement.forwardCombatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), false);
+                if (bestDir != null) {
+                    rc.move(bestDir);
+                    launcherState = Status.FLANKING;
+                    return true;
+                }
+            }
             if (rc.isMovementReady()){
                 standOff = true;
             }
@@ -739,18 +750,6 @@ public class BotLauncher extends CombatUtils{
         maxCircleDistance = maxDist;
     }
 
-    private static void decideRotationDirection(Direction centerLocationDir){
-        MapLocation loc1, loc2;
-        Direction dir1 = centerLocationDir.rotateLeft().rotateLeft();
-        Direction dir2 = centerLocationDir.rotateRight().rotateRight();
-        loc1 = CircularExplore.extrapolateAndReturn(dir1);
-        loc2 = CircularExplore.extrapolateAndReturn(dir2);
-        if (loc1.distanceSquaredTo(CENTER_OF_THE_MAP) < loc2.distanceSquaredTo(CENTER_OF_THE_MAP))
-            isClockwise = true;
-        else
-            isClockwise = false;
-    }
-
     private static void circleWorks() throws GameActionException{
         Direction dirToCenter = rc.getLocation().directionTo(circleLocation);
         if (!rc.isMovementReady()) return;
@@ -812,7 +811,7 @@ public class BotLauncher extends CombatUtils{
 		for (Direction dir : carDirections) {
 			if (!rc.canMove(dir)) continue;
 			MapLocation dirLoc = lCR.add(dir);
-            // MapInfo dirLocMapInfo = rc.senseMapInfo(dirLoc);
+            Direction dirLocCurrentDir = rc.senseMapInfo(dirLoc).getCurrentDirection();
             double unitsAttacking = 0;
             for (int i = visibleHostiles.length; --i >= 0;){
                 if (isMilitaryUnit(visibleHostiles[i].type)){
@@ -824,6 +823,9 @@ public class BotLauncher extends CombatUtils{
                         unitsAttacking+= visibleHostiles[i].type.damage/2;
                     }
                 }
+            }
+            if (dirLocCurrentDir != Direction.CENTER && dirLocCurrentDir == dir.opposite()){
+                unitsAttacking -= 5;
             }
             if (unitsAttacking < leastAttack){
                 leastAttack = unitsAttacking;

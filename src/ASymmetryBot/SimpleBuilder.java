@@ -258,7 +258,7 @@ public class SimpleBuilder extends Utils{
         if (isTimeForEarlyAnchors()) return buildOurAnchor();
         if (rc.getRobotCount() > MAP_SIZE / 8) return buildOurAnchor();
         if (BuilderWrapper.hasResourcesToBuild(Anchor.STANDARD, 5)) return buildOurAnchor();
-        if (rc.getRobotCount() > 70 + Math.round(rc.getRobotCount()/500) * 20) return buildOurAnchor();
+        if (rc.getRobotCount() > 50 + Math.round(rc.getRobotCount()/500) * 20) return buildOurAnchor();
         if (launcherScore < standardAnchorScore) return false;
         return buildOurAnchor();
     }
