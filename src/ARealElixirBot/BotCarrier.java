@@ -636,10 +636,8 @@ public class BotCarrier extends Utils{
         MapLocation commsLoc = findNearestIslandInComms();
         if (commsLoc != null && rc.canSenseLocation(commsLoc)) return commsLoc;
         MapLocation senseLoc = findNearestIslandInVision();
-        if (senseLoc != null && rc.canWriteSharedArray(0, 0) 
-        // && !Comms.findIfLocationAlreadyPresent(senseLoc, Comms.COMM_TYPE.ISLAND, Comms.SHAFlag.UNOCCUPIED_ISLAND)
-        )
-            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.NEUTRAL_ISLANDS, senseLoc, Comms.SHAFlag.UNOCCUPIED_ISLAND);
+        if (senseLoc != null)
+            Comms.writeOrSaveLocation(senseLoc, Comms.SHAFlag.UNOCCUPIED_ISLAND);
         if (senseLoc != null && commsLoc != null){
             if (rc.getLocation().distanceSquaredTo(commsLoc) <= rc.getLocation().distanceSquaredTo(senseLoc))
                 return commsLoc;
@@ -1054,10 +1052,8 @@ public class BotCarrier extends Utils{
         Comms.SHAFlag flag = Comms.resourceFlag(rType);
         MapLocation senseLoc = findNearestWellInVision(rType);
         carrierStatus = Status.SEARCHING_FOR_WELL;
-        if (senseLoc != null && rc.canWriteSharedArray(0, 0) 
-        // && !Comms.findIfLocationAlreadyPresent(senseLoc, Comms.COMM_TYPE.WELLS, flag)
-        ){
-            Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, senseLoc, flag);
+        if (senseLoc != null){
+            Comms.writeOrSaveLocation(senseLoc, flag);
             setWellDestination(senseLoc);
             return;
         }
