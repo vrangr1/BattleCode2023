@@ -28,6 +28,7 @@ public class BotCarrier extends Utils{
         TRANSIT_TO_MANA_WELL_FOR_ELIXIR,
         NORMAL,
         TOO_MUCH_BYTECODES_RET_EARLY,
+        THROWING_RESOURCES
     }
 
     private static boolean movingToIsland = false;
@@ -79,6 +80,7 @@ public class BotCarrier extends Utils{
     private static final int MAX_PERSISTANCE = 15;
     private static final int MIN_EXPLORE_ROUND_COUNT = 3;
     private static int exploreRoundCount = 0;
+    private static final int FLEE_ATTACK_HEALTH_THRESHOLD = 40;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -1194,6 +1196,10 @@ public class BotCarrier extends Utils{
         }
     }
 
+    private static boolean shouldThrowResources(){
+        return rc.getWeight() > 2 && rc.getHealth() < FLEE_ATTACK_HEALTH_THRESHOLD;
+    }
+
     private static void gatherResources() throws GameActionException{
         // TODO: Add conditions and actions for behavior under attack here too.
         if (returnEarly) {
@@ -1203,7 +1209,8 @@ public class BotCarrier extends Utils{
         if (movingToIsland) resetIslandVariables();
         updateCarrier();
         if (isFleeing && shouldIFlee()){
-            collectResources();
+            if (!shouldThrowResources())
+                collectResources();
             return;
         }
         if (rc.getAnchor() != null){
@@ -1262,6 +1269,8 @@ public class BotCarrier extends Utils{
             CircularExplore.printStatus(exploreDest1, exploreDest2);
             else rc.setIndicatorString(carrierStatus.toString() + " " + exploreDest1 + " " + exploreDest2);
         }
+        else if (carrierStatus == Status.FLEEING)
+            rc.setIndicatorString(carrierStatus.toString() + " " + fleeTarget);
         else
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
         if (Clock.getBytecodesLeft() > 700){
@@ -1338,11 +1347,40 @@ public class BotCarrier extends Utils{
         return false;
     }
 
+    private static void throwResourcesToIncreaseSpeed() throws GameActionException{
+        if (!shouldThrowResources() || !rc.isActionReady()) return;
+        double possibleDamage = Math.round(rc.getWeight()/5.0);
+        double bestScore = -1.0;
+        MapLocation attackLocation = null;
+        currentLocation = rc.getLocation();
+        for (int i = visibleEnemies.length; --i >= 0;){
+            RobotInfo curEnemy = visibleEnemies[i];
+            if (curEnemy.getType() == RobotType.HEADQUARTERS) continue;
+            if (!curEnemy.getLocation().isWithinDistanceSquared(currentLocation, UNIT_TYPE.actionRadiusSquared)) continue;
+            if (!rc.canAttack(curEnemy.getLocation())) continue;
+            double curScore = curEnemy.health - possibleDamage;
+            if (curScore <=0)   
+                curScore += 1000;
+            if (curScore > bestScore){
+                bestScore = curScore;
+                attackLocation = curEnemy.location;
+            }
+        }
+        if (attackLocation != null){
+            rc.attack(attackLocation);
+            carrierStatus = Status.ATTACKING;
+            return;
+        }
+        rc.attack(currentLocation);
+        carrierStatus = Status.THROWING_RESOURCES;
+    }
+
     private static void fleeIfNeedTo() throws GameActionException{
         if (!TRY_TO_FLEE || !isFleeing) return;
         if (!rc.isMovementReady() || !shouldIFlee()) // Can't do anything...
             return;
         carrierStatus = Status.FLEEING;
+        throwResourcesToIncreaseSpeed();
         Direction dir = getRetreatDirection(visibleEnemies);
         // if (dir != null) Explore.assignExplore3Dir(dir);
         Explore.lastCallRound = rc.getRoundNum();
@@ -1359,7 +1397,7 @@ public class BotCarrier extends Utils{
 
     public static void runCarrier() throws GameActionException{
         updateOverall();
-        attackIfAboutToDie();
+        // attackIfAboutToDie();
         if (rc.getAnchor() != null)
             carrierAnchorMode();
         else
