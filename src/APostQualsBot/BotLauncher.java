@@ -4,7 +4,7 @@ import battlecode.common.*;
 import APostQualsBot.path.Nav;
 public class BotLauncher extends CombatUtils{
 
-    private enum Status {
+    public enum Status {
         BORN, // State at start of first turn
         EXPLORE, // No directions given
         MARCHING, // Going to a location given by comms
@@ -21,30 +21,30 @@ public class BotLauncher extends CombatUtils{
         CIRCLING,
     }
 
-    private static Status launcherState;
+    public static Status launcherState;
 
     public static RobotInfo[] visibleEnemies;
     public static RobotInfo[] inRangeEnemies;
     public static RobotInfo[] visibleAllies;
-    private static MapLocation[] cloudLocations;
+    public static MapLocation[] cloudLocations;
     public static int vNonHQEnemies = 0;
     public static int inRNonHQEnemies = 0;
     public static int enemyHQInVision = 0;
     public static int vNonHQCombatAllies = 0;
-    private static RobotInfo enemyHQ = null;
-    private static boolean standOff = false;
-    private static RobotInfo prevTurnHostile = null;
-    private static MapLocation circleLocation = null;
-    private static int minCircleDistance = 10000;
-    private static int maxCircleDistance = 10000;
-    private static boolean isClockwise = true;
-    private static int LOW_HEALTH_MARK = 30;
-    private static int circlingCount;
-    private static int CIRCLE_CHECK = 30;
-    private static boolean inHealingState;
-    private static MapLocation closestHealingIsland = null;
-    private static MapLocation storedEnemyHQLoc = null;
-    private static RobotInfo[] seenEnemyHQs;
+    public static RobotInfo enemyHQ = null;
+    public static boolean standOff = false;
+    public static RobotInfo prevTurnHostile = null;
+    public static MapLocation circleLocation = null;
+    public static int minCircleDistance = 10000;
+    public static int maxCircleDistance = 10000;
+    public static boolean isClockwise = true;
+    public static int LOW_HEALTH_MARK = 30;
+    public static int circlingCount;
+    public static int CIRCLE_CHECK = 30;
+    public static boolean inHealingState;
+    public static MapLocation closestHealingIsland = null;
+    public static MapLocation storedEnemyHQLoc = null;
+    public static RobotInfo[] seenEnemyHQs;
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -111,7 +111,7 @@ public class BotLauncher extends CombatUtils{
             " |Move" + rc.isMovementReady());
     }
 
-    private static void setBaseDestination() throws GameActionException {
+    public static void setBaseDestination() throws GameActionException {
         currentDestination = Comms.findNearestEnemyHeadquarterLocation();
         if (currentDestination.equals(visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()])){
             currentDestination = CENTER_OF_THE_MAP;
@@ -146,7 +146,7 @@ public class BotLauncher extends CombatUtils{
         launcherState = Status.MARCHING;
     }
 
-    private static boolean doIdling() throws GameActionException {
+    public static boolean doIdling() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.getRoundNum() <= BIRTH_ROUND + 1){
             militaryAlliesInVision();
             if (vNonHQCombatAllies == 0){
@@ -156,7 +156,7 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
-    private static void previousTurnResolution() throws GameActionException {
+    public static void previousTurnResolution() throws GameActionException {
         standOff = false;
         destinationFlag = "";
         cloudLocations = null;
@@ -166,7 +166,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void midLineSymmetryCheck() throws GameActionException{
+    public static void midLineSymmetryCheck() throws GameActionException{
         for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
             
             if (Clock.getBytecodesLeft() > 2100 && mapSymmetry[i] && !Symmetry.checkThisSymmetry(Symmetry.SYMMETRY.values()[i])){
@@ -183,7 +183,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     // Minimal use
-    private static void simplePursuit() throws GameActionException{
+    public static void simplePursuit() throws GameActionException{
         if (launcherState == Status.ATTACKING && vNonHQEnemies == 0 && prevTurnHostile != null) {
             launcherState = Status.GUARDING;
             boolean willDieIfPursuit = CombatUtils.isMilitaryUnit(prevTurnHostile.getType()) && rc.getHealth() <= prevTurnHostile.getType().damage;
@@ -195,14 +195,14 @@ public class BotLauncher extends CombatUtils{
     }
 
     // Unused
-    private static void lowHealthCircle() throws GameActionException {
+    public static void lowHealthCircle() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.getHealth() <= LOW_HEALTH_MARK && rc.isMovementReady() && rc.getRoundNum() > 150){
             setCircleDestination(parentHQLocation, 10, 100);
         }
     }
 
     // Unused
-    private static void setCircleDestination(MapLocation circleDestination, int minDist, int maxDist) throws GameActionException {
+    public static void setCircleDestination(MapLocation circleDestination, int minDist, int maxDist) throws GameActionException {
         if (rc.getLocation().distanceSquaredTo(circleDestination) <= maxDist && launcherState != Status.ISLAND_WORK){
             if (launcherState != Status.CIRCLING && circleLocation != circleDestination)
                 setCircle(circleDestination, minDist, maxDist);
@@ -217,7 +217,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     // Find enemy islands in vision and move towards them for anchor removal
-    private static boolean seekEnemyIslandInVision() throws GameActionException {
+    public static boolean seekEnemyIslandInVision() throws GameActionException {
         if (launcherState == Status.ISLAND_WORK) {
             int islandId = rc.senseIsland(rc.getLocation());
             if (islandId != -1 && rc.senseTeamOccupyingIsland(islandId) == ENEMY_TEAM){
@@ -259,7 +259,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void moveAfterNonMovingCombat() throws GameActionException {
+    public static void moveAfterNonMovingCombat() throws GameActionException {
         if (vNonHQEnemies != 0) return;
         if ((rc.getRoundNum() + 1)% 2 == 0 && rc.getHealth() == UNIT_TYPE.getMaxHealth()) return;
         if (rc.isMovementReady()) {
@@ -287,16 +287,6 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    public static void updateVision() throws GameActionException {
-        updateVisibleEnemiesVision();
-        if (visibleEnemies.length > 0)
-            updateInRangeEnemiesVision();
-        else{
-            inRangeEnemies = null;
-            inRNonHQEnemies = 0;
-        }
-    }
-
     public static void militaryAlliesInVision() throws GameActionException{
         visibleAllies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
         vNonHQCombatAllies = 0;
@@ -308,6 +298,17 @@ public class BotLauncher extends CombatUtils{
         }
     }
     
+
+    public static void updateVision() throws GameActionException {
+        updateVisibleEnemiesVision();
+        if (visibleEnemies.length > 0)
+            updateInRangeEnemiesVision();
+        else{
+            inRangeEnemies = null;
+            inRNonHQEnemies = 0;
+        }
+    }
+
     public static void updateVisibleEnemiesVision() throws GameActionException{
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
         vNonHQEnemies = 0;
@@ -328,6 +329,16 @@ public class BotLauncher extends CombatUtils{
             }
         }
         seenEnemyHQInNonCloudVision();
+    }
+
+    public static void updateInRangeEnemiesVision() throws GameActionException{
+        inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
+        inRNonHQEnemies = 0;
+        for (int i = inRangeEnemies.length; --i >= 0;) {
+            if (inRangeEnemies[i].type != RobotType.HEADQUARTERS) {
+                inRNonHQEnemies++;
+            }
+        }
     }
 
     public static void updateSeenEnemyHQs(RobotInfo giveEnemyHQ) throws GameActionException{
@@ -354,19 +365,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    // public static nearbyHQInClouds() throws Game
-
-    public static void updateInRangeEnemiesVision() throws GameActionException{
-        inRangeEnemies = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
-        inRNonHQEnemies = 0;
-        for (int i = inRangeEnemies.length; --i >= 0;) {
-            if (inRangeEnemies[i].type != RobotType.HEADQUARTERS) {
-                inRNonHQEnemies++;
-            }
-        }
-    }
-
-    private static double getEnemyScore(RobotInfo enemyUnit) throws GameActionException{
+    public static double getEnemyScore(RobotInfo enemyUnit) throws GameActionException{
         RobotType enemyType = enemyUnit.type;
         int enemyHealth = enemyUnit.getHealth();
         if (enemyHealth <= UNIT_TYPE.damage && enemyType != RobotType.HEADQUARTERS) 
@@ -389,7 +388,7 @@ public class BotLauncher extends CombatUtils{
 		}
 	}
 
-    private static void chooseTargetAndAttack(RobotInfo[] targets) throws GameActionException {
+    public static void chooseTargetAndAttack(RobotInfo[] targets) throws GameActionException {
 		RobotInfo bestTarget = null;
 		double bestValue = -1;
         double value = -1;
@@ -401,14 +400,14 @@ public class BotLauncher extends CombatUtils{
 			}
 		}
 		if (bestTarget != null && rc.canAttack(bestTarget.location)) {
-            updateInRangeEnemiesVision();
             rc.attack(bestTarget.location);
+            updateInRangeEnemiesVision();
             prevTurnHostile = bestTarget;
             launcherState = Status.ATTACKING;
 		}
 	}
 
-    private static boolean tryMoveToHelpAlly(RobotInfo closestHostile) throws GameActionException {
+    public static boolean tryMoveToHelpAlly(RobotInfo closestHostile) throws GameActionException {
         if(closestHostile == null) return false;
         //# if (inRNonHQEnemies > 0) return false;
 		MapLocation closestHostileLocation = closestHostile.location;
@@ -437,7 +436,7 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static boolean tryMoveToAttackProductionUnit(RobotInfo closestHostile) throws GameActionException {
+    public static boolean tryMoveToAttackProductionUnit(RobotInfo closestHostile) throws GameActionException {
         if (closestHostile == null) return false;
 		if (CombatUtils.isMilitaryUnit(closestHostile.type) || closestHostile.type == RobotType.HEADQUARTERS) 
             return false;
@@ -449,7 +448,7 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static boolean tryMoveToEngageOutnumberedEnemy(RobotInfo closestHostile) throws GameActionException {
+    public static boolean tryMoveToEngageOutnumberedEnemy(RobotInfo closestHostile) throws GameActionException {
         if (closestHostile == null) return false;
         if (isMilitaryUnit(closestHostile.type) && closestHostile.location.distanceSquaredTo(rc.getLocation()) <= UNIT_TYPE.actionRadiusSquared) return false;
         int numNearbyHostiles = 0;
@@ -483,7 +482,7 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static boolean retreatIfOutnumbered() throws GameActionException {
+    public static boolean retreatIfOutnumbered() throws GameActionException {
 		RobotInfo closestHosAttack = null;
 		int closestDistSq = Integer.MAX_VALUE;
 		int numHostilesThatAttackUs = 0;
@@ -562,7 +561,7 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static boolean tryToMicro() throws GameActionException {
+    public static boolean tryToMicro() throws GameActionException {
         if (vNonHQEnemies == 0) { // TODO: Either wait or get out of any possible Destabilizer range
             return false;
         }
@@ -609,7 +608,7 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
-    private static void manageHealingState() {
+    public static void manageHealingState() {
         if (rc.getHealth() <= rc.getType().getMaxHealth() * 3.0/10.0) {
             inHealingState = true;
             return;
@@ -624,7 +623,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static boolean tryToHealAtIsland() throws GameActionException {		
+    public static boolean tryToHealAtIsland() throws GameActionException {		
 		closestHealingIsland = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.OUR_ISLANDS, Comms.SHAFlag.OUR_ISLAND);
         int islandId = rc.senseIsland(rc.getLocation());
         if (islandId != -1 && rc.senseTeamOccupyingIsland(islandId) == MY_TEAM){
@@ -698,7 +697,7 @@ public class BotLauncher extends CombatUtils{
     }
     
     // If our current destination has no enemies left, move to the nearest new location with combat
-    private static boolean findNewCombatLocation() throws GameActionException{
+    public static boolean findNewCombatLocation() throws GameActionException{
         if (vNonHQEnemies == 0){
             if (currentDestination != null){
                 if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING) return false;
@@ -729,7 +728,7 @@ public class BotLauncher extends CombatUtils{
     /**
     * This will try to update the destination of the soldier so as to not make it go away from closer fights
     */
-    private static void closerCombatDestination() throws GameActionException{
+    public static void closerCombatDestination() throws GameActionException{
         if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING || launcherState == Status.CIRCLING) return;
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
@@ -740,7 +739,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void circleEnemyHQ() throws GameActionException{
+    public static void circleEnemyHQ() throws GameActionException{
         if (launcherState == Status.ISLAND_WORK) return; //TODO: Add healing
         if (enemyHQ == null) return;
         if (enemyHQInVision >= visibleEnemies.length && enemyHQInVision > 0  && (currentDestination == null || currentDestination.equals(enemyHQ.location))){
@@ -768,7 +767,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    private static void setCircle(MapLocation cirCenter, int minDist, int maxDist) throws GameActionException{
+    public static void setCircle(MapLocation cirCenter, int minDist, int maxDist) throws GameActionException{
         circleLocation = cirCenter;
         isClockwise = true;
         // decideRotationDirection(rc.getLocation().directionTo(circleLocation));
@@ -776,7 +775,7 @@ public class BotLauncher extends CombatUtils{
         maxCircleDistance = maxDist;
     }
 
-    private static void circleWorks() throws GameActionException{
+    public static void circleWorks() throws GameActionException{
         Direction dirToCenter = rc.getLocation().directionTo(circleLocation);
         if (!rc.isMovementReady()) {
             launcherState = Status.CIRCLING;
@@ -809,7 +808,7 @@ public class BotLauncher extends CombatUtils{
     }
 
 
-    private static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
+    public static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
 		int minHosDist = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
         for (RobotInfo hostile : visibleHostiles) {
@@ -866,7 +865,7 @@ public class BotLauncher extends CombatUtils{
 		return false;
 	}
 
-    private static void attackCloud() throws GameActionException{
+    public static void attackCloud() throws GameActionException{
         if (!rc.isActionReady()) return;
         cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
         MapLocation cloudAttackLocation = null;
@@ -894,7 +893,7 @@ public class BotLauncher extends CombatUtils{
         }
     }
 
-    // private static Direction safestDirTowards(MapLocation destination) throws GameActionException{
+    // public static Direction safestDirTowards(MapLocation destination) throws GameActionException{
         
     // }
 }
