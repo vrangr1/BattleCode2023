@@ -80,11 +80,14 @@ public class Movement extends Utils{
                         maxDamage += visibleEnemies[j].getType().damage / 2;
                     }
                 }
+                if (!canAttack){
+                    continue;
+                }
                 if (rc.isActionReady() && canAttack){
                     maxDamage -= (UNIT_TYPE.damage + 1);
                 }
-                if (!canAttack){
-                    continue;
+                if (rc.senseCloud(potDest)){
+                    maxDamage += 4;
                 }
                 if (maxDamage < maxDamageTaken) {
                     maxDamageTaken = maxDamage;
@@ -125,6 +128,9 @@ public class Movement extends Utils{
                 }
                 if (rc.isActionReady() && canAttack){
                     maxDamage -= (UNIT_TYPE.damage + 1);
+                }
+                if (rc.senseCloud(potDest)){
+                    maxDamage += 4;
                 }
                 Direction dirLocCurrentDir = rc.senseMapInfo(potDest).getCurrentDirection();
                 if (dirLocCurrentDir != Direction.CENTER && dirLocCurrentDir == possibleDirs[i].opposite()){
@@ -258,61 +264,7 @@ public class Movement extends Utils{
     //     return null;
     // }
     
-    public static boolean retreatIfNecessary(RobotInfo[] visibleFriends, RobotInfo[] visibleHostiles) throws GameActionException {
-        if (visibleHostiles.length == 0 //|| visibleFriends.length >= visibleHostiles.length
-        ) return false;
-        
-        boolean mustRetreat = false;
-        int bestClosestDistSq = Integer.MAX_VALUE;
-        MapLocation lCR = rc.getLocation();
-        for (RobotInfo hostile : visibleHostiles) {         
-            //Sage killing one miner is worth for sage action cooldown
-            if (hostile.type.canAttack()) {
-                int distSq = lCR.distanceSquaredTo(hostile.location);
-                if (distSq <= hostile.type.actionRadiusSquared) {
-                    mustRetreat = true;
-                    if (distSq < bestClosestDistSq) {
-                        bestClosestDistSq = distSq;
-                    }
-                }
-            }
-        }
-        if (!mustRetreat) return false;
-        
-        Direction bestDir = null;
-        Direction[] dirs = Direction.values();
-        for (int i = dirs.length; i--> 0;) {
-            Direction dir = dirs[i];
-            if (!rc.canMove(dir)) continue;
-            MapLocation dirLoc = lCR.add(dir);
-            int dirClosestDistSq = Integer.MAX_VALUE;
-            for (RobotInfo hostile : visibleHostiles) {
-                if (hostile.type.canAttack()) {
-                    int distSq = dirLoc.distanceSquaredTo(hostile.location);
-                    if (distSq < dirClosestDistSq) {
-                        dirClosestDistSq = distSq;                      
-                        if (dirClosestDistSq <= bestClosestDistSq) break;
-                    }
-                }
-            }
-            if (dirClosestDistSq > bestClosestDistSq) {
-                bestClosestDistSq = dirClosestDistSq;
-                bestDir = dir;
-            }
-        }
-        
-        if (bestDir != null) {
-            rc.move(bestDir);
-            currentLocation = rc.getLocation();
-            return true;
-        }
-        return false;
-    }
 
-    
-    /**
-     * Moves away from closest archon when passed null.
-     */
     public static boolean moveAwayFromLocation(MapLocation loc){
         try{
             if (loc == null) loc = Comms.findNearestHeadquarter();

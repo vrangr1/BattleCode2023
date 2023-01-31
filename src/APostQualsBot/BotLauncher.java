@@ -815,17 +815,6 @@ public class BotLauncher extends CombatUtils{
         isClockwise = !isClockwise;
     }
 
-    public static void coverInCloud() throws GameActionException{
-        if (rc.senseCloud(rc.getLocation())) return;
-        for (int i = 0; i < 8; i++){
-            Direction dir = directions[i];
-            if (rc.senseCloud(rc.getLocation().add(dir))){
-                if (rc.isMovementReady()){
-                    rc.move(dir);
-                }
-            }
-        }
-    }
 
     private static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
 		int minHosDist = Integer.MAX_VALUE;
@@ -864,6 +853,9 @@ public class BotLauncher extends CombatUtils{
                     }
                 }
             }
+            if (rc.senseCloud(dirLoc)){
+                unitsAttacking += 4;
+            }
             if (dirLocCurrentDir != Direction.CENTER && dirLocCurrentDir == dir.opposite()){
                 unitsAttacking -= 5;
             }
@@ -886,10 +878,10 @@ public class BotLauncher extends CombatUtils{
         cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
         MapLocation cloudAttackLocation = null;
         if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1.2){
-            int bestDistance = 4;
+            double bestDistance = 4;
             int count = 0;
             for (int i = cloudLocations.length; --i >= 0;){
-                int curDistance = rc.getLocation().distanceSquaredTo(cloudLocations[i]);
+                double curDistance = rc.getLocation().distanceSquaredTo(cloudLocations[i]);
                 if (curDistance == bestDistance) count++;
                 else if (curDistance > bestDistance){
                     count = 1;
