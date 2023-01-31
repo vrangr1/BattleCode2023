@@ -80,9 +80,11 @@ public class BotLauncher extends CombatUtils{
         }
         bytecodeCheck(); //1
         tryToMicro();
-        updateVision();
+        if (!rc.isActionReady() || !rc.isMovementReady()) // No need to update vision if you haven't moved or attacked
+            updateVision();
         bytecodeCheck(); //2
         circleEnemyHQ();
+
         if (sendCombatLocation());
         else {
             findNewCombatLocation();
@@ -100,7 +102,7 @@ public class BotLauncher extends CombatUtils{
             if (inRNonHQEnemies > 0) {
                 chooseTargetAndAttack(inRangeEnemies);
             }
-            else {
+            else if (Clock.getBytecodesLeft() > 750) {
                 attackCloud();
             }
         }
@@ -158,24 +160,11 @@ public class BotLauncher extends CombatUtils{
         standOff = false;
         destinationFlag = "";
         cloudLocations = null;
-        // healingOff = false;
-        cloudCentral();
         simplePursuit();
         if (launcherState != Status.PURSUING){
             prevTurnHostile = null;
         }
     }
-
-    private static void cloudCentral() throws GameActionException {
-        boolean currentlyInCloud = rc.senseCloud(rc.getLocation());
-        if (!currentlyInCloud || launcherState != Status.CLOUD_WORK) return;
-        if (currentlyInCloud && (launcherState == Status.MARCHING || launcherState == Status.EXPLORE)) {
-            destinationFlag += " cW";
-            launcherState = Status.CLOUD_WORK;
-            return;
-        }
-    }
-
 
     private static void midLineSymmetryCheck() throws GameActionException{
         for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
@@ -300,7 +289,12 @@ public class BotLauncher extends CombatUtils{
 
     public static void updateVision() throws GameActionException {
         updateVisibleEnemiesVision();
-        updateInRangeEnemiesVision();
+        if (visibleEnemies.length > 0)
+            updateInRangeEnemiesVision();
+        else{
+            inRangeEnemies = null;
+            inRNonHQEnemies = 0;
+        }
     }
 
     public static void militaryAlliesInVision() throws GameActionException{
@@ -447,7 +441,6 @@ public class BotLauncher extends CombatUtils{
         if (closestHostile == null) return false;
 		if (CombatUtils.isMilitaryUnit(closestHostile.type) || closestHostile.type == RobotType.HEADQUARTERS) 
             return false;
-	    pathing.setAndMoveToDestination(closestHostile.location);
         if (!rc.isMovementReady() || Movement.tryFlagMoveInDirection(closestHostile.location, true)) {
             destinationFlag += "|tM2APU";
             launcherState = Status.PURSUING;
@@ -688,7 +681,7 @@ public class BotLauncher extends CombatUtils{
             if (closestHostile == null) return false;
 			if (!standOff){ // The idea is to prevent standoffs from flooding comms with local info
                 currentDestination = closestHostile.getLocation();
-                if (rc.canWriteSharedArray(0, 0))
+                if (rc.canWriteSharedArray(0, 0) && !Comms.findIfLocationAlreadyPresent(closestHostile.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION))
 				    Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.COMBAT, closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
             }
             return true;
@@ -712,9 +705,9 @@ public class BotLauncher extends CombatUtils{
                 if (!rc.canSenseLocation(currentDestination)) return false;
                 int dist = rc.getLocation().distanceSquaredTo(currentDestination);
                 if (MAP_SIZE <= 900 && dist > UNIT_TYPE.actionRadiusSquared) return false;
-                if (dist > UNIT_TYPE.visionRadiusSquared) return false;
+                if (dist > UNIT_TYPE.visionRadiusSquared) return false; //TODO: Remove this line
+                Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             }
-            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
             if (combatLocation != null){
                 currentDestination = combatLocation;

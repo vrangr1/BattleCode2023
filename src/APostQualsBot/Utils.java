@@ -287,13 +287,13 @@ public class Utils extends Globals{
 
     public static void bytecodeCheck(){
         int bytecodesLeft = Clock.getBytecodesLeft();
-        rc.setIndicatorString("BC " + bytecodesLeft +"|SNo. " + bytecodeCounter);
+        rc.setIndicatorString("BC " + bytecodesLeft +"|SNo. " + bytecodeCounter + " " + destinationFlag);
         bytecodeCounter++;
     }
 
     public static void bytecodeCheck(String flag){
         int bytecodesLeft = Clock.getBytecodesLeft();
-        rc.setIndicatorString("BC " + bytecodesLeft +"| " + flag);
+        rc.setIndicatorString("BC " + bytecodesLeft +"| " + flag + " " + destinationFlag);
     }
 
 

@@ -76,6 +76,9 @@ public class Movement extends Utils{
                         maxDamage += visibleEnemies[j].getType().damage;
                         canAttack = true;
                     }
+                    else if (visibleEnemies[j].type == RobotType.CARRIER){ // Impetus to move after carriers
+                        maxDamage -= 1;
+                    }
                     else {
                         maxDamage += visibleEnemies[j].getType().damage / 2;
                     }
@@ -121,6 +124,9 @@ public class Movement extends Utils{
                         visibleEnemies[j].location.distanceSquaredTo(potDest) <= visibleEnemies[j].getType().actionRadiusSquared) {
                         maxDamage += visibleEnemies[j].getType().damage;
                         canAttack = true;
+                    }
+                    else if (visibleEnemies[j].type == RobotType.CARRIER){ // Impetus to move after carriers
+                        maxDamage -= 1;
                     }
                     else {
                         maxDamage += visibleEnemies[j].getType().damage / 2;
