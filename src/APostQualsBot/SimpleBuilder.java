@@ -282,7 +282,7 @@ public class SimpleBuilder extends Utils{
 
     private static boolean tryBuildDestabilizer() throws GameActionException{
         if (!BuilderWrapper.hasResourcesToBuild(RobotType.DESTABILIZER, 1)) return false;
-        if (tryConstructEnvelope(RobotType.DESTABILIZER, BuilderWrapper.findBestSpawnLocation(RobotType.LAUNCHER)))
+        if (tryConstructEnvelope(RobotType.DESTABILIZER, BuilderWrapper.findBestSpawnLocation(RobotType.DESTABILIZER)))
             return true;
         return false;
     }

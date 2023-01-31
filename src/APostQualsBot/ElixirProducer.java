@@ -6,9 +6,10 @@ public class ElixirProducer extends Utils {
     private static final boolean DOING_ELIXIR_PRODUCTION = false;
     private static MapLocation elixirTarget = null;
     private static boolean isElixirWellMade = false;
-    public static final int ADAMANTIUM_DEPOSITION_FOR_ELIXIR_WELL_CREATION = 20;
+    public static final int ADAMANTIUM_DEPOSITION_FOR_ELIXIR_WELL_CREATION = 40;
     public static boolean goingToElixirWell = false;
     public static final int ELIXIR_TO_MANA_RATIO = 1;
+    public static final int ADAMANTIUM_CARRIERS_RATIO_TO_MAKE_ELIXIR_WELL = 4;
 
 
     ////////////////////////////////////////
@@ -16,7 +17,7 @@ public class ElixirProducer extends Utils {
     ////////////////////////////////////////
 
     public static boolean shouldProduceElixir() {
-        return DOING_ELIXIR_PRODUCTION && MAP_SIZE > 1300 && rc.getRoundNum() > 100 && rc.getRobotCount() > MAP_SIZE / 100;
+        return DOING_ELIXIR_PRODUCTION && MAP_SIZE > 1300 && rc.getRoundNum() > 400;
     }
 
 
@@ -78,7 +79,14 @@ public class ElixirProducer extends Utils {
         return elixirTarget;
     }
 
-    public static boolean rollTheDice() throws GameActionException{
-        return (rc.getID() % (ELIXIR_TO_MANA_RATIO + 1)) < ELIXIR_TO_MANA_RATIO;
+    public static boolean rollTheDice(int chance) throws GameActionException{
+        return (rc.getID() % (chance + 1)) < chance;
+    }
+
+    public static boolean shouldGoToWellForDeposit(MapLocation loc) throws GameActionException{
+        if (loc == null) return false;
+        MapLocation hqLoc = Comms.findNearestHeadquarter();
+        currentLocation = rc.getLocation();
+        return (currentLocation.distanceSquaredTo(hqLoc) > currentLocation.distanceSquaredTo(loc) + 36);
     }
 }

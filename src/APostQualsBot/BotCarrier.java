@@ -348,6 +348,15 @@ public class BotCarrier extends Utils{
         }
     }
 
+    private static boolean resetAdamantiumDepositionForElixirIfWellMade() throws GameActionException{
+        if (!ElixirProducer.goingToElixirWell) return false;
+        if (!ElixirProducer.checkIfElixirWellMade()) return false;
+        ElixirProducer.goingToElixirWell = false;
+        setReturnToHQTrue();
+        movementWrapper(movementDestination);
+        return true;
+    }
+
     private static void updateOverall() throws GameActionException{
         carrierStatus = Status.NORMAL;
         if (returnEarly){
@@ -493,10 +502,18 @@ public class BotCarrier extends Utils{
         if (!ElixirProducer.shouldProduceElixir() || ElixirProducer.checkIfElixirWellMade()) return false;
         if (rc.getResourceAmount(ResourceType.ADAMANTIUM) != amountToCollect()) return false;
         movementDestination = ElixirProducer.getManaWellToConvert();
+        if (!ElixirProducer.shouldGoToWellForDeposit(movementDestination)) return false;
+        if (!ElixirProducer.rollTheDice(ElixirProducer.ADAMANTIUM_CARRIERS_RATIO_TO_MAKE_ELIXIR_WELL)) return false;
         if (movementDestination == null) return false;
         carrierStatus = Status.TRANSIT_TO_MANA_WELL_FOR_ELIXIR;
         ElixirProducer.goingToElixirWell = true;
         return true;
+    }
+
+    private static void setReturnToHQTrue(boolean doAdamantiumStuff) throws GameActionException{
+        if (doAdamantiumStuff && adamantiumDepositionForElixirStuff()) return;
+        returnToHQ = true;
+        movementDestination = Comms.findNearestHeadquarter();
     }
 
     private static void setReturnToHQTrue() throws GameActionException{
@@ -1015,7 +1032,7 @@ public class BotCarrier extends Utils{
     private static boolean possibilityOfElixirWell() throws GameActionException{
         MapLocation senseLoc = findNearestWellInVisionOfOnlyThisType(ResourceType.ELIXIR);
         if (senseLoc == null && !ElixirProducer.checkIfElixirWellMade()) return false;
-        else if (senseLoc == null && ElixirProducer.rollTheDice()){
+        else if (senseLoc == null && ElixirProducer.rollTheDice(ElixirProducer.ELIXIR_TO_MANA_RATIO)){
             senseLoc = Comms.getElixirWellTarget();
             assert senseLoc != null;
         }
@@ -1164,7 +1181,7 @@ public class BotCarrier extends Utils{
         carrierStatus = Status.TRANSIT_TO_WELL;
         if (desperationIndex < 5) return;
         if (rc.canWriteSharedArray(0, 0))
-            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.resourceFlag(prioritizedResource), movementDestination);
+            Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.WELLS, Comms.resourceFlag(getLocalPrioritizedResource()), movementDestination);
         // desperationIndex = 12;
         exploringForWells = true;
         desperationIndex = 0;
@@ -1175,23 +1192,39 @@ public class BotCarrier extends Utils{
     private static void goToManaWellForElixir() throws GameActionException{
         assert movementDestination != null;
         currentLocation = rc.getLocation();
+        if (resetAdamantiumDepositionForElixirIfWellMade()) return;
         if (currentLocation.distanceSquaredTo(movementDestination) > 2){
             carrierStatus = Status.TRANSIT_TO_MANA_WELL_FOR_ELIXIR;
+            // System.out.println("Moving to mana well to deposit adamantium to make elixir well; curLoc: " + rc.getLocation() + "; dest: " + movementDestination);
             movementWrapper(movementDestination);
             return;
         }
         WellInfo well = rc.senseWell(movementDestination);
+        if (well.getResourceType() == ResourceType.ELIXIR){
+            ElixirProducer.setElixirWellMade();
+            if (resetAdamantiumDepositionForElixirIfWellMade()) return;
+            assert false;
+            return;
+        }
         assert well != null : "where did the well go?";
-        assert well.getResourceType() == ResourceType.MANA : "I was targeting mana wells right?";
+        // assert well.getResourceType() == ResourceType.MANA : "I was targeting mana wells right? rNum: " + rc.getRoundNum() + "; curLoc: " + rc.getLocation() + "; id: " + rc.getID() + "; rLoc: " + movementDestination + "; rType: " + well.getResourceType();
+        if (well.getResourceType() != ResourceType.MANA){
+            setReturnToHQTrue(false);
+            ElixirProducer.goingToElixirWell = false;
+            movementWrapper(movementDestination);
+            return;
+        }
         int depositedAmount = well.getResource(ResourceType.ADAMANTIUM);
-        int amountToTransfer = Math.min(depositedAmount, ElixirProducer.ADAMANTIUM_DEPOSITION_FOR_ELIXIR_WELL_CREATION);
+        int amountToTransfer = Math.min(rc.getResourceAmount(ResourceType.ADAMANTIUM), ElixirProducer.ADAMANTIUM_DEPOSITION_FOR_ELIXIR_WELL_CREATION);
         if (rc.canTransferResource(movementDestination, ResourceType.ADAMANTIUM, amountToTransfer)){
             rc.transferResource(movementDestination, ResourceType.ADAMANTIUM, amountToTransfer);
             depositedAmount += amountToTransfer;
-            if (depositedAmount == GameConstants.UPGRADE_TO_ELIXIR)
+            System.out.println("Deposited " + amountToTransfer + " Adamantium to make an elixir well.");
+            if (depositedAmount == GameConstants.UPGRADE_TO_ELIXIR){
                 ElixirProducer.setElixirWellMade();
-            collectResources();
-            Comms.writeOrSaveLocation(movementDestination, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
+                collectResources();
+                Comms.writeOrSaveLocation(movementDestination, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
+            }
             ElixirProducer.goingToElixirWell = false;
         }
     }

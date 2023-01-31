@@ -250,7 +250,7 @@ public class BuilderWrapper extends Utils {
     }
 
     private static MapLocation findBestSpawnLocationForDestabilizer() throws GameActionException{
-        return null;
+        return findNearestActReadyLocation(Symmetry.returnEnemyHQGuess(), RobotType.DESTABILIZER);
     }
 
     public static MapLocation findBestSpawnLocation(RobotType robotType) throws GameActionException{
