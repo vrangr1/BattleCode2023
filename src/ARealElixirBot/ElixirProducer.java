@@ -87,6 +87,6 @@ public class ElixirProducer extends Utils {
         if (loc == null) return false;
         MapLocation hqLoc = Comms.findNearestHeadquarter();
         currentLocation = rc.getLocation();
-        return (currentLocation.distanceSquaredTo(hqLoc) > currentLocation.distanceSquaredTo(loc) + 36);
+        return (currentLocation.distanceSquaredTo(hqLoc) + 16 > currentLocation.distanceSquaredTo(loc));
     }
 }

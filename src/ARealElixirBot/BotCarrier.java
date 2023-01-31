@@ -406,7 +406,7 @@ public class BotCarrier extends Utils{
         if (!anchorProduced) return false;
         returnToHQ = true;
         goingToCollectAnchor = true;
-        System.out.println("Heeding anchor call from HQ");
+        // System.out.println("Heeding anchor call from HQ");
         carrierStatus = Status.TRANSIT_ANCHOR_COLLECTION;
         return true;
     }
@@ -431,7 +431,7 @@ public class BotCarrier extends Utils{
             rc.takeAnchor(movementDestination, Anchor.STANDARD);
             assert rc.canWriteSharedArray(0, 0) : "canWriteSharedArray";
             Comms.writeSHAFlagMessage(count - 1, Comms.SHAFlag.COLLECT_ANCHOR, collectAnchorHQidx);
-            System.out.println("Collected anchor from HQ!");
+            // System.out.println("Collected anchor from HQ!");
             resetCollectAnchorVariables();
             return false;
         }
@@ -502,7 +502,10 @@ public class BotCarrier extends Utils{
         if (!ElixirProducer.shouldProduceElixir() || ElixirProducer.checkIfElixirWellMade()) return false;
         if (rc.getResourceAmount(ResourceType.ADAMANTIUM) != amountToCollect()) return false;
         movementDestination = ElixirProducer.getManaWellToConvert();
-        if (!ElixirProducer.shouldGoToWellForDeposit(movementDestination)) return false;
+        if (!ElixirProducer.shouldGoToWellForDeposit(movementDestination)){
+            // System.out.println("Simon says I should not go to well for deposit. CurLoc: " + rc.getLocation() + "; well: " + movementDestination);
+            return false;
+        }
         if (!ElixirProducer.rollTheDice(ElixirProducer.ADAMANTIUM_CARRIERS_RATIO_TO_MAKE_ELIXIR_WELL)) return false;
         if (movementDestination == null) return false;
         carrierStatus = Status.TRANSIT_TO_MANA_WELL_FOR_ELIXIR;
@@ -818,7 +821,7 @@ public class BotCarrier extends Utils{
             carrierStatus = Status.TRANSIT_RES_DEP;
             movementWrapper(movementDestination);
             return;
-        }      
+        }
         if (rc.canCollectResource(curWell.getMapLocation(), amount)){
             rc.collectResource(curWell.getMapLocation(), amount);
             persistance = 0;

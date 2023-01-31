@@ -240,9 +240,9 @@ public class SimpleBuilder extends Utils{
     }
 
     private static boolean buildOurAnchor() throws GameActionException{
-        System.out.println("Trying to build standard anchor");
+        // System.out.println("Trying to build standard anchor");
         if (!rc.canBuildAnchor(Anchor.STANDARD)) return false;
-        System.out.println("Built standard anchor");
+        // System.out.println("Built standard anchor");
         rc.buildAnchor(Anchor.STANDARD);
         anchorCountDown = (40 - rc.getRoundNum()/200) * Comms.getHeadquartersCount();
         Comms.writeScore(Anchor.STANDARD, updateScore(Anchor.STANDARD, standardAnchorScore));

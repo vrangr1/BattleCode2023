@@ -265,7 +265,7 @@ task run(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   args = ['-c=-']
   jvmArgs = [
-    '-Dbc.server.websocket=false',
+    // '-Dbc.server.websocket=false',
     '-Dbc.server.wait-for-client=' + (project.findProperty('waitForClient') ?: 'false'),
     '-Dbc.server.mode=headless',
     '-Dbc.server.map-path=maps',
