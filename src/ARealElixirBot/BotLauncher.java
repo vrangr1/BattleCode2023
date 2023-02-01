@@ -146,6 +146,52 @@ public class BotLauncher extends CombatUtils{
         launcherState = Status.MARCHING;
     }
 
+    public static boolean mineHarasser() throws GameActionException{
+        MapLocation potentialEnemyWell = findNearestEnemyWellInComms();
+        if (potentialEnemyWell != null){
+            currentDestination = potentialEnemyWell;
+            pathing.setNewDestination(currentDestination);
+            destinationFlag += "mH" + currentDestination;
+            launcherState = Status.MARCHING;
+        }
+        return false;
+    }
+
+    private static MapLocation findNearestEnemyWellInComms() throws GameActionException{
+        MapLocation nearestLoc = null;
+        int nearestDist , curDist;
+        // if (currentDestination != null){
+        //     nearestDist = rc.getLocation().distanceSquaredTo(currentDestination);
+        // }
+        // else{
+            nearestDist = Integer.MAX_VALUE;
+        // }
+
+        int[] store; 
+        if (MAP_SIZE < 1000)
+            store = new int[] {2,0,1};
+        else
+            store = new int[] {0,2,1};
+        for (int i = Comms.COMM_TYPE.WELLS.channelStart; i < Comms.COMM_TYPE.WELLS.channelStop; i++){
+            int message = rc.readSharedArray(i);
+            if (message == 0) continue;
+            Comms.SHAFlag flag = Comms.readSHAFlagFromMessage(message);
+            if (flag != Comms.SHAFlag.MANA_WELL_LOCATION) continue;
+            MapLocation well = Comms.readLocationFromMessage(message);
+            MapLocation enemyWell = null;
+            for (int j : store){
+                enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], well);
+                if (enemyWell != null) break;
+            }
+            curDist = rc.getLocation().distanceSquaredTo(enemyWell);
+            if (curDist <= nearestDist){
+                nearestLoc = enemyWell;
+                nearestDist = curDist;
+            }
+        }
+        return nearestLoc;
+    }
+
     public static boolean doIdling() throws GameActionException {
         if (vNonHQEnemies == 0 && rc.getRoundNum() <= BIRTH_ROUND + 1){
             militaryAlliesInVision();
@@ -467,7 +513,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health - UNIT_TYPE.damage)) {
-            if ((closestHostile.health <= UNIT_TYPE.damage) && rc.isActionReady()){
+            if ((closestHostile.health <= (UNIT_TYPE.damage * numNearbyAllies) / 2.0) && rc.isActionReady()){
                 Direction bestDir = Movement.forwardCombatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), false);
                 if (bestDir != null) {
                     rc.move(bestDir);
