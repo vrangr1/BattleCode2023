@@ -160,12 +160,12 @@ public class BotLauncher extends CombatUtils{
     private static MapLocation findNearestEnemyWellInComms() throws GameActionException{
         MapLocation nearestLoc = null;
         int nearestDist , curDist;
-        // if (currentDestination != null){
-        //     nearestDist = rc.getLocation().distanceSquaredTo(currentDestination);
-        // }
-        // else{
+        if (currentDestination != null){
+            nearestDist = rc.getLocation().distanceSquaredTo(currentDestination);
+        }
+        else{
             nearestDist = Integer.MAX_VALUE;
-        // }
+        }
 
         int[] store; 
         if (MAP_SIZE < 1000)
@@ -703,7 +703,12 @@ public class BotLauncher extends CombatUtils{
 		destinationFlag += "|trHAl "+closestHealingIsland+"|";
 		if (closestHealingIsland == null){
             if (launcherState != Status.MARCHING && launcherState != Status.CIRCLING){
-                currentDestination = null;
+                if (MAP_SIZE >= 2500){
+                    mineHarasser();
+                }
+                else{
+                    currentDestination = null;
+                }
                 launcherState = Status.MARCHING;
             }
             inHealingState = false;
@@ -866,7 +871,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
         // We don't want to get out of our max range, not in this function
-		if (rc.getHealth() >= 60)
+		if (rc.getHealth() >= 60 && UNIT_TYPE != RobotType.DESTABILIZER)
             if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
