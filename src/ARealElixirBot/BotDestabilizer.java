@@ -136,11 +136,11 @@ public class BotDestabilizer extends BotLauncher{
                         value += target.health;
                     }
                 }
-                if (rc.canSenseLocation(targetLoc)){
-                    int timesDestabilized = rc.senseMapInfo(targetLoc).getNumDestabilizers(ENEMY_TEAM);
-                    if (timesDestabilized >=2)
-                        value -= 100;
-                }
+                // if (rc.canSenseLocation(targetLoc)){
+                //     int timesDestabilized = rc.senseMapInfo(targetLoc).getNumDestabilizers(ENEMY_TEAM);
+                //     if (timesDestabilized >=2)
+                //         value -= 100;
+                // }
                 if (currentDestination!=null && rc.getLocation().distanceSquaredTo(currentDestination) > 
                     targetLoc.distanceSquaredTo(currentDestination))
                     value += 5;
