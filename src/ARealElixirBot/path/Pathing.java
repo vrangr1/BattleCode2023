@@ -77,6 +77,9 @@ public class Pathing extends Utils {
         }
         Utils.bytecodeCheck("PreBugNavCheck");
         int nearbyRobotcount = rc.senseNearbyRobots().length;
+        if (rc.getRoundNum() - BIRTH_ROUND == 3){
+            Nav.goTo(rc.getLocation());
+        }
         if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15 || Clock.getBytecodesLeft() < BYTECODE_REMAINING || Nav.bugState == Nav.BugState.BUG) {
             Nav.goTo(target);
             Utils.bytecodeCheck("PBN1 T:" + target+ "|Side "+ Nav.bugWallSide + "|StartDir " + Nav.bugLookStartDir);
