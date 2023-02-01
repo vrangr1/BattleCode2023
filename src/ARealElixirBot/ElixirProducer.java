@@ -17,7 +17,7 @@ public class ElixirProducer extends Utils {
     ////////////////////////////////////////
 
     public static boolean shouldProduceElixir() {
-        return DOING_ELIXIR_PRODUCTION && MAP_SIZE > 1000 && rc.getRoundNum() > 400;
+        return DOING_ELIXIR_PRODUCTION && MAP_SIZE > 1000 && rc.getRoundNum() > 1000;
     }
 
 
