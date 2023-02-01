@@ -665,7 +665,7 @@ public class BotLauncher extends CombatUtils{
         }
         else if(!rc.getLocation().equals(closestHealingIsland)){
             currentDestination = closestHealingIsland;
-            launcherState = Status.HEALING; //TODO: Change this to healing
+            launcherState = Status.HEALING;
             pathing.setAndMoveToDestination(currentDestination);
         }
         else{
@@ -704,7 +704,7 @@ public class BotLauncher extends CombatUtils{
                 if (!rc.canSenseLocation(currentDestination)) return false;
                 int dist = rc.getLocation().distanceSquaredTo(currentDestination);
                 if (MAP_SIZE <= 900 && dist > UNIT_TYPE.actionRadiusSquared) return false;
-                if (dist > UNIT_TYPE.visionRadiusSquared) return false; //TODO: Remove this line
+                else if (dist > UNIT_TYPE.visionRadiusSquared) return false;
                 Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             }
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
@@ -740,7 +740,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     public static void circleEnemyHQ() throws GameActionException{
-        if (launcherState == Status.ISLAND_WORK) return; //TODO: Add healing
+        if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING) return;
         if (enemyHQ == null) return;
         if (enemyHQInVision >= visibleEnemies.length && enemyHQInVision > 0  && (currentDestination == null || currentDestination.equals(enemyHQ.location))){
             if (circlingCount >= CIRCLE_CHECK && Comms.getHeadquartersCount() > 1 && rc.getID() % Comms.getHeadquartersCount() != 0){
