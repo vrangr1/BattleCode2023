@@ -5,7 +5,7 @@ import battlecode.common.*;
 
 public class Nav extends Utils {
 
-    private static MapLocation dest;
+    public static MapLocation dest;
 
     public enum BugState {
         DIRECT, BUG
