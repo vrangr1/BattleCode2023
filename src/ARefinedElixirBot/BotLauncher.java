@@ -45,6 +45,8 @@ public class BotLauncher extends CombatUtils{
     public static MapLocation closestHealingIsland = null;
     public static MapLocation storedEnemyHQLoc = null;
     public static RobotInfo[] seenEnemyHQs;
+    private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
+    private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
 
     public static void initLauncher() throws GameActionException{
         launcherState = Status.BORN;
@@ -918,13 +920,45 @@ public class BotLauncher extends CombatUtils{
 
     public static void attackCloud() throws GameActionException{
         if (!rc.isActionReady()) return;
-        cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
         MapLocation cloudAttackLocation = null;
-        if (cloudLocations.length > 0 && rc.senseMapInfo(rc.getLocation()).getCooldownMultiplier(MY_TEAM) <= 1.2){
+        if (!rc.senseCloud(rc.getLocation())){ // If not in cloud
+            cloudLocations = rc.senseNearbyCloudLocations(UNIT_TYPE.actionRadiusSquared);
+            if (cloudLocations.length > 0){
+                double bestDistance = 4;
+                int count = 0;
+                for (int i = cloudLocations.length; --i >= 0;){
+                    double curDistance = rc.getLocation().distanceSquaredTo(cloudLocations[i]);
+                    if (currentDestination != null && currentDestination.distanceSquaredTo(cloudLocations[i]) < 
+                        rc.getLocation().distanceSquaredTo(currentDestination)){
+                            curDistance += 3;    
+                    }
+                    if (curDistance == bestDistance) count++;
+                    else if (curDistance > bestDistance){
+                        count = 1;
+                        bestDistance = curDistance;
+                    }
+                    else{
+                        continue;
+                    }
+                    if (rng.nextInt(count) == 0){
+                        cloudAttackLocation = cloudLocations[i];
+                    }
+                }
+            }
+        }
+        else {
             double bestDistance = 4;
             int count = 0;
-            for (int i = cloudLocations.length; --i >= 0;){
-                double curDistance = rc.getLocation().distanceSquaredTo(cloudLocations[i]);
+            for (int i = actionEdges_x.length; --i >= 0;) {
+                MapLocation targetLoc = rc.getLocation().translate(actionEdges_x[i], actionEdges_y[i]);
+                if (!rc.onTheMap(targetLoc)) continue;
+                double curDistance = rc.getLocation().distanceSquaredTo(targetLoc);
+                if (currentDestination != null){
+                    double locToCurDest = currentDestination.distanceSquaredTo(targetLoc);
+                    double curToDest = rc.getLocation().distanceSquaredTo(currentDestination);
+                    if (locToCurDest + curDistance + Math.sqrt(locToCurDest) * Math.sqrt(curDistance) <= curToDest) // x^2 + y^2 + x*y <= z^2
+                        curDistance += 3;    
+                }
                 if (curDistance == bestDistance) count++;
                 else if (curDistance > bestDistance){
                     count = 1;
@@ -934,7 +968,7 @@ public class BotLauncher extends CombatUtils{
                     continue;
                 }
                 if (rng.nextInt(count) == 0){
-                    cloudAttackLocation = cloudLocations[i];
+                    cloudAttackLocation = targetLoc;
                 }
             }
         }
@@ -943,8 +977,4 @@ public class BotLauncher extends CombatUtils{
             rc.attack(cloudAttackLocation);
         }
     }
-
-    // public static Direction safestDirTowards(MapLocation destination) throws GameActionException{
-        
-    // }
 }
