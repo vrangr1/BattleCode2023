@@ -227,6 +227,13 @@ public class BuilderWrapper extends Utils {
         return Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(pResourceType));
     }
 
+    private static MapLocation findNearestWellForBooster(ResourceType pResourceType) throws GameActionException{
+        currentLocation = rc.getLocation();
+        MapLocation senseLoc = BotBooster.findNearestWellInVision(pResourceType);
+        if (senseLoc != null) return senseLoc;
+        return Comms.findNearestLocationOfThisType(currentLocation, Comms.COMM_TYPE.WELLS, Comms.resourceFlag(pResourceType));
+    }
+
     private static MapLocation findBestSpawnLocationForCarrier(ResourceType pResourceType) throws GameActionException{
         MapLocation targetLoc = findNearestWellForCarrier(pResourceType);
         if (targetLoc == null){
@@ -235,6 +242,15 @@ public class BuilderWrapper extends Utils {
         }
         if (rc.canBuildRobot(RobotType.CARRIER, targetLoc)) return targetLoc;
         return findNearestActReadyLocation(targetLoc, RobotType.CARRIER);
+    }
+
+    private static MapLocation findBestSpawnLocationForBooster(ResourceType pResourceType) throws GameActionException{
+        MapLocation targetLoc = findNearestWellForBooster(pResourceType);
+        if (targetLoc == null){
+            return null;
+        }
+        if (rc.canBuildRobot(RobotType.BOOSTER, targetLoc)) return targetLoc;
+        return findNearestActReadyLocation(targetLoc, RobotType.BOOSTER);
     }
 
     private static MapLocation findBestSpawnLocationForLauncher() throws GameActionException{
@@ -269,6 +285,7 @@ public class BuilderWrapper extends Utils {
     public static MapLocation findBestSpawnLocation(RobotType robotType, ResourceType pResourceType) throws GameActionException{
         switch(robotType){
             case CARRIER: return findBestSpawnLocationForCarrier(pResourceType);
+            case BOOSTER: return findBestSpawnLocationForBooster(pResourceType);
             default: break;
         }
         assert false;

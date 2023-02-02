@@ -26,6 +26,7 @@ public class SimpleBuilder extends Utils{
     public static final int INIT_ANCHOR_SCORE = 50;
     public static int anchorCountDown = 20;
     public static final int AMPLIFIER_MULTIPLIER = 30;
+    public static int boosterCount = 3;
 
     static class BuildRobotLoc {
         MapLocation loc;
@@ -287,6 +288,15 @@ public class SimpleBuilder extends Utils{
         return false;
     }
 
+    private static boolean tryBuildBooster() throws GameActionException{
+        if (!BuilderWrapper.hasResourcesToBuild(RobotType.BOOSTER, 1)) return false;
+        if (boosterCount > 0 && tryConstructEnvelope(RobotType.BOOSTER, BuilderWrapper.findBestSpawnLocation(RobotType.BOOSTER, ResourceType.MANA))){
+            boosterCount--;
+            return true;
+        }
+        return false;
+    }
+
     public static void buildUnits(boolean endangered) throws GameActionException{
         boolean builtUnit = true;
         if (endangered){
@@ -306,6 +316,10 @@ public class SimpleBuilder extends Utils{
                     builtUnit = true;
                     continue;
                 }
+            }
+            if (tryBuildBooster()){
+                builtUnit = true;
+                continue;
             }
             if (tryBuildDestabilizer()){
                 builtUnit = true;

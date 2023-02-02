@@ -527,6 +527,7 @@ public class BotCarrier extends Utils{
         if (adamantiumDepositionForElixirStuff()) return;
         returnToHQ = true;
         movementDestination = Comms.findNearestHeadquarter();
+        ElixirProducer.goingToElixirWell = false;
     }
 
     private static void setReturnToHQTrue(MapLocation hqLoc){
@@ -536,7 +537,7 @@ public class BotCarrier extends Utils{
 
     private static void doIReturnToHQ() throws GameActionException{
         currentInventoryWeight = rc.getWeight();
-        if (!returnToHQ && currentInventoryWeight >= amountToCollect())
+        if (!returnToHQ && !ElixirProducer.goingToElixirWell && currentInventoryWeight >= amountToCollect())
             setReturnToHQTrue();
         else if (DOING_EARLY_MANA_DEPOSITION && !returnToHQ && isFleeing){
             MapLocation hqLoc = Comms.findNearestHeadquarter();

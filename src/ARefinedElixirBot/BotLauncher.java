@@ -662,7 +662,7 @@ public class BotLauncher extends CombatUtils{
             inHealingState = true;
             return;
         }
-        else if (rc.getHealth() > 3.0/4.0 * rc.getType().getMaxHealth()) {
+        else if ((UNIT_TYPE == RobotType.DESTABILIZER && rc.getHealth() > 2.0/4.0) || rc.getHealth() > 3.0/4.0 * rc.getType().getMaxHealth()) {
             if (launcherState == Status.HEALING){
                 currentDestination = null;  
                 launcherState = Status.MARCHING;
@@ -874,7 +874,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
         // We don't want to get out of our max range, not in this function
-		if (rc.getHealth() >= 60 && UNIT_TYPE != RobotType.DESTABILIZER)
+		if (rc.getHealth() >= 60  && UNIT_TYPE != RobotType.DESTABILIZER)
             if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
