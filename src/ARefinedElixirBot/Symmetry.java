@@ -77,8 +77,8 @@ public class Symmetry extends Utils{
 
     private static boolean areEqualInProperties(MapLocation first, MapLocation second) throws GameActionException{
         // walls, currents, clouds, wells, islands
-        boolean isCloud = rc.senseCloud(first);
-        if (isCloud != rc.senseCloud(second)) return false;
+        boolean isCloud = !rc.canSenseLocation(first);
+        if (isCloud != !rc.canSenseLocation(second)) return false;
         if (isCloud){
             boolean firstSense = first.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED), secondSense = second.isWithinDistanceSquared(currentLocation, GameConstants.CLOUD_VISION_RADIUS_SQUARED);
             if (isCloud && firstSense && secondSense) return areEqualInPropertiesNoClouds(first, second);
