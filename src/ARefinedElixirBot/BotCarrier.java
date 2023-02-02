@@ -203,6 +203,9 @@ public class BotCarrier extends Utils{
         if (rc.isMovementReady()){
             Nav.goTo(dest);
         }
+        if (rc.isMovementReady()){
+            Nav.goTo(dest);
+        }
     }
 
     private static void movementWrapper() throws GameActionException{

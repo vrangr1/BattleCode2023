@@ -40,6 +40,11 @@ public class BotDestabilizer extends BotLauncher{
             bytecodeCheck(); //6
             chooseTargetAndAttack(visibleEnemies);
         }
+        if (rc.isActionReady()) {
+            updateInRangeEnemiesVision();
+            bytecodeCheck(); //6
+            chooseTargetAndAttack(visibleEnemies);
+        }
         rc.setIndicatorString(launcherState + "|Dest " + currentDestination + " " + destinationFlag + "|Move " + rc.isMovementReady());
     }
 

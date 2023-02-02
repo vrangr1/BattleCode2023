@@ -541,7 +541,7 @@ public class BotCarrierPathing implements UnitPathing {
                         return 99999;
                 }
             default:
-                return (int) (mapLoc.getCooldownMultiplier(rc.getTeam()) * 10);
+                return 10;
         }
     }
 
