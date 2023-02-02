@@ -45,8 +45,7 @@ public class BotLauncher extends CombatUtils{
     public static MapLocation closestHealingIsland = null;
     public static MapLocation storedEnemyHQLoc = null;
     public static RobotInfo[] seenEnemyHQs;
-    public static MapLocation[] savedWellLocations = new MapLocation[10];
-    public static int savedWellCount = 0;
+    public static MapLocation savedWellLocation;
     private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
     private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
 
@@ -96,6 +95,14 @@ public class BotLauncher extends CombatUtils{
 
         if (!rc.isMovementReady() && rc.getRoundNum() < 120 + BIRTH_ROUND){
             midLineSymmetryCheck();
+        }
+
+        if (!rc.isMovementReady()){
+            MapLocation newEnemyWellLoc = findNearestEnemyWell();
+            if (newEnemyWellLoc != null){
+                destinationFlag+= "|fNEW";
+                currentDestination = newEnemyWellLoc;
+            }
         }
 
         bytecodeCheck(); //3
@@ -151,7 +158,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     public static boolean mineHarasser() throws GameActionException{
-        MapLocation potentialEnemyWell = findNearestEnemyWellInComms();
+        MapLocation potentialEnemyWell = findNearestEnemyWell();
         if (potentialEnemyWell != null){
             currentDestination = potentialEnemyWell;
             pathing.setNewDestination(currentDestination);
@@ -159,42 +166,6 @@ public class BotLauncher extends CombatUtils{
             launcherState = Status.MARCHING;
         }
         return false;
-    }
-
-    private static MapLocation findNearestEnemyWellInComms() throws GameActionException{
-        MapLocation nearestLoc = null;
-        int nearestDist , curDist;
-        if (currentDestination != null){
-            nearestDist = rc.getLocation().distanceSquaredTo(currentDestination);
-        }
-        else{
-            nearestDist = Integer.MAX_VALUE;
-        }
-
-        int[] store; 
-        if (MAP_SIZE < 1000)
-            store = new int[] {2,0,1};
-        else
-            store = new int[] {0,2,1};
-        for (int i = Comms.COMM_TYPE.WELLS.channelStart; i < Comms.COMM_TYPE.WELLS.channelStop; i++){
-            int message = rc.readSharedArray(i);
-            if (message == 0) continue;
-            Comms.SHAFlag flag = Comms.readSHAFlagFromMessage(message);
-            if (flag != Comms.SHAFlag.MANA_WELL_LOCATION) continue;
-            MapLocation well = Comms.readLocationFromMessage(message);
-            MapLocation enemyWell = null;
-            for (int j= store.length; --j >= 0;){
-                if (!mapSymmetry[j] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[j])) continue;
-                enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], well);
-                if (enemyWell != null) break;
-            }
-            curDist = rc.getLocation().distanceSquaredTo(enemyWell);
-            if (curDist <= nearestDist){
-                nearestLoc = enemyWell;
-                nearestDist = curDist;
-            }
-        }
-        return nearestLoc;
     }
 
     public static boolean doIdling() throws GameActionException {
@@ -759,9 +730,7 @@ public class BotLauncher extends CombatUtils{
             MapLocation loc;
             Comms.SHAFlag flag;
             if (nearbyWells.length > 0){
-                for (int i = nearbyWells.length; --i >= 0;){
-                    savedWellLocations[savedWellCount++ % 10] = nearbyWells[i].getMapLocation();
-                }
+                savedWellLocation = nearbyWells[0].getMapLocation();
                 WellInfo well = nearbyWells[0];
                 loc = well.getMapLocation();
                 flag = Comms.resourceFlag(well.getResourceType());
@@ -999,5 +968,58 @@ public class BotLauncher extends CombatUtils{
             destinationFlag += "|aC";
             rc.attack(cloudAttackLocation);
         }
+    }
+
+    private static MapLocation findNearestEnemyWell() throws GameActionException{
+        MapLocation nearestLoc = null;
+        if (currentDestination == null || !currentDestination.equals(storedEnemyHQLoc)){
+            return null;
+        }
+        int nearestDist = rc.getLocation().distanceSquaredTo(currentDestination), curDist;
+        if (savedWellLocation != null && !isFriendlyLocation(savedWellLocation, storedEnemyHQLoc)){
+            curDist = rc.getLocation().distanceSquaredTo(savedWellLocation);
+            if (curDist < nearestDist){
+                nearestDist = curDist;
+                nearestLoc = savedWellLocation;
+            }
+        }
+        int[] store; 
+        if (MAP_SIZE < 1000)
+            store = new int[] {2,0,1};
+        else
+            store = new int[] {0,2,1};
+        for (int i = Comms.COMM_TYPE.WELLS.channelStart; i < Comms.COMM_TYPE.WELLS.channelStop; i++){
+            int message = rc.readSharedArray(i);
+            if (message == 0) continue;
+            Comms.SHAFlag flag = Comms.readSHAFlagFromMessage(message);
+            MapLocation well = Comms.readLocationFromMessage(message);
+            MapLocation enemyWell = null;
+            for (int j= store.length; --j >= 0;){
+                if (!mapSymmetry[j] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[j])) continue;
+                enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], well);
+                if (isFriendlyLocation(enemyWell, currentDestination)){
+                    enemyWell = null;
+                    continue;
+                }
+                if (enemyWell != null) break;
+            }
+            if (enemyWell == null) continue;
+            curDist = rc.getLocation().distanceSquaredTo(enemyWell);
+            if (curDist <= nearestDist){
+                nearestLoc = enemyWell;
+                nearestDist = curDist;
+            }
+        }
+        return nearestLoc;
+    }
+
+    public static boolean isFriendlyLocation(MapLocation givenLoc, MapLocation enemyLoc){
+        if (enemyLoc == null || givenLoc == null) return false;
+        for (int k = alliedHQLocs.length; --k >= 0;){
+            if (alliedHQLocs[k].distanceSquaredTo(givenLoc) < enemyLoc.distanceSquaredTo(givenLoc)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
