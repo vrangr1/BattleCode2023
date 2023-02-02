@@ -515,7 +515,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
 		if (numNearbyAllies >= numNearbyHostiles || (numNearbyHostiles == 1 && rc.getHealth() >= closestHostile.health - UNIT_TYPE.damage)) {
-            if (((closestHostile.health <= (UNIT_TYPE.damage * numNearbyAllies) / 2.0) || rc.getRoundNum() % 2 != 0) && rc.isActionReady()){
+            if (((closestHostile.health <= (UNIT_TYPE.damage * numNearbyAllies) / 2.0) || rc.getRoundNum() % 2 == 0) && rc.isActionReady()){
                 Direction bestDir = Movement.forwardCombatMovement(visibleEnemies, rc.getLocation().directionTo(closestHostile.location), false);
                 if (bestDir != null) {
                     rc.move(bestDir);
