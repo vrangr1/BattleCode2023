@@ -819,7 +819,7 @@ public class BotLauncher extends CombatUtils{
         if (launcherState == Status.ISLAND_WORK || launcherState == Status.HEALING) return;
         if (enemyHQ == null) return;
         if (enemyHQInVision >= visibleEnemies.length && enemyHQInVision > 0  && (currentDestination == null || currentDestination.equals(enemyHQ.location))){
-            if (circlingCount >= CIRCLE_CHECK && Comms.getHeadquartersCount() > 1 && rc.getID() % Comms.getHeadquartersCount() != 0){
+            if (circlingCount % CIRCLE_CHECK == 0 && Comms.getHeadquartersCount() > 1 && rng.nextInt(Comms.getHeadquartersCount()) != 0){
                 visitedHQList[++visitedHQIndex % Comms.getHeadquartersCount()] = circleLocation;
                 circlingCount = 0;
                 circleLocation = null;
