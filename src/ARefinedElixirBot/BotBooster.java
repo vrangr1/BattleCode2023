@@ -30,15 +30,12 @@ public class BotBooster extends Utils{
     }
 
     public static void findWell() throws GameActionException{
-        // if (currentDestination == null){
-        //     currentDestination = findNearestWellInVision(ResourceType.ELIXIR);
-        // }
+        if (currentDestination == null){
+            currentDestination = findNearestWellInVision(ResourceType.ELIXIR);
+        }
         if (currentDestination == null){
             currentDestination = findNearestWellInVision(ResourceType.MANA);
         }
-        // if (currentDestination == null){
-        //     currentDestination = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
-        // }
         if (currentDestination == null){
             currentDestination = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.WELLS, Comms.SHAFlag.MANA_WELL_LOCATION);
         }

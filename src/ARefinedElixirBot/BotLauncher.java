@@ -45,6 +45,8 @@ public class BotLauncher extends CombatUtils{
     public static MapLocation closestHealingIsland = null;
     public static MapLocation storedEnemyHQLoc = null;
     public static RobotInfo[] seenEnemyHQs;
+    public static MapLocation[] savedWellLocations = new MapLocation[10];
+    public static int savedWellCount = 0;
     private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
     private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
 
@@ -61,7 +63,7 @@ public class BotLauncher extends CombatUtils{
         
         updateVision();
         previousTurnResolution();
-        findAndWriteWellLocationsToComms();
+        findAndWriteWellLocationsToCommsLauncher();
         bytecodeCheck(); //0
         if (vNonHQEnemies == 0) {
             manageHealingState();
@@ -181,7 +183,8 @@ public class BotLauncher extends CombatUtils{
             if (flag != Comms.SHAFlag.MANA_WELL_LOCATION) continue;
             MapLocation well = Comms.readLocationFromMessage(message);
             MapLocation enemyWell = null;
-            for (int j : store){
+            for (int j= store.length; --j >= 0;){
+                if (!mapSymmetry[j] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[j])) continue;
                 enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], well);
                 if (enemyWell != null) break;
             }
@@ -748,6 +751,25 @@ public class BotLauncher extends CombatUtils{
             return true;
         }
         return false;
+    }
+
+    public static void findAndWriteWellLocationsToCommsLauncher() throws GameActionException{
+        if (rc.canWriteSharedArray(0, 0)){
+            WellInfo[] nearbyWells = rc.senseNearbyWells();
+            MapLocation loc;
+            Comms.SHAFlag flag;
+            if (nearbyWells.length > 0){
+                for (int i = nearbyWells.length; --i >= 0;){
+                    savedWellLocations[savedWellCount++ % 10] = nearbyWells[i].getMapLocation();
+                }
+                WellInfo well = nearbyWells[0];
+                loc = well.getMapLocation();
+                flag = Comms.resourceFlag(well.getResourceType());
+                if (Comms.findIfLocationAlreadyPresent(loc, Comms.COMM_TYPE.WELLS, flag))
+                    return;
+                Comms.writeAndOverwriteLesserPriorityMessage(Comms.COMM_TYPE.WELLS, loc, flag);
+            }
+        }
     }
     
     // If our current destination has no enemies left, move to the nearest new location with combat
