@@ -145,7 +145,7 @@ public class Symmetry extends Utils{
         }
         if (!down.isWithinDistanceSquared(currentLocation, visionRadiusSquared) || !up.isWithinDistanceSquared(currentLocation, visionRadiusSquared))
             return true;
-        return symmetryIteration(up.x, up.y, 1, 0, 0, sdy) && symmetryIteration(down.x, down.y, -1, 0, 0, sdy);
+        return symmetryIteration(down.x, down.y, 1, 0, 0, sdy) && symmetryIteration(down.x, down.y, -1, 0, 0, sdy);
     }
 
     /**

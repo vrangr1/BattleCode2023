@@ -3,13 +3,14 @@ package ARefinedElixirBot;
 import battlecode.common.*;
 
 public class ElixirProducer extends Utils {
-    private static final boolean DOING_ELIXIR_PRODUCTION = false;
-    private static MapLocation elixirTarget = null;
+    private static final boolean DOING_ELIXIR_PRODUCTION = true;
+    private static MapLocation elixirTarget = null, potentialElixirTarget = null;
+    private static int potentialElixirTargetDistance = -1;
     private static boolean isElixirWellMade = false;
     public static final int ADAMANTIUM_DEPOSITION_FOR_ELIXIR_WELL_CREATION = 40;
     public static boolean goingToElixirWell = false;
     public static final int ELIXIR_TO_MANA_RATIO = 1;
-    public static final int ADAMANTIUM_CARRIERS_RATIO_TO_MAKE_ELIXIR_WELL = 4;
+    public static final int ADAMANTIUM_CARRIERS_RATIO_TO_MAKE_ELIXIR_WELL = 15;
 
 
     ////////////////////////////////////////
@@ -26,8 +27,38 @@ public class ElixirProducer extends Utils {
     // METHODS FOR HEADQUARTERS ////////////
     ////////////////////////////////////////
 
+    private static int getMinDistance(MapLocation loc, MapLocation[] locations, int count){
+        int minDist = -1;
+        for (int i = 0; i < count; ++i){
+            if (minDist == -1 || loc.distanceSquaredTo(locations[i]) < minDist){
+                minDist = loc.distanceSquaredTo(locations[i]);
+            }
+        }
+        return minDist;
+    }
+
+    private static void surveyForPotentialElixirWellTargets() throws GameActionException{
+        if (rc.getRoundNum() == 1) return;
+        MapLocation[] alliedHQLocations = Comms.getAlliedHeadquartersLocationsList();
+        int message, hqCount = Comms.getHeadquartersCount(), curDist;
+        MapLocation loc;
+        for (int i = Comms.COMM_TYPE.WELLS.channelStart; i < Comms.COMM_TYPE.WELLS.channelStop; ++i){
+            message = rc.readSharedArray(i);
+            if (Comms.readSHAFlagFromMessage(message) != Comms.SHAFlag.MANA_WELL_LOCATION) continue;
+            loc = Comms.readLocationFromMessage(message);
+            curDist = getMinDistance(loc, alliedHQLocations, hqCount);
+            if (potentialElixirTarget == null || curDist < potentialElixirTargetDistance){
+                potentialElixirTarget = loc;
+                potentialElixirTargetDistance = getMinDistance(loc, alliedHQLocations, hqCount);
+            }
+        }
+    }
+
     public static void updateElixirStuff() throws GameActionException{
-        if (!shouldProduceElixir()) return;
+        if (!shouldProduceElixir()){
+            surveyForPotentialElixirWellTargets();
+            return;
+        }
         if (elixirTarget == null) setManaWellToConvert();
     }
 
@@ -36,7 +67,9 @@ public class ElixirProducer extends Utils {
         if (elixirTarget != null) return;
         elixirTarget = Comms.getElixirWellTarget();
         if (elixirTarget != null) return;
-        elixirTarget = findNearestWellForCarrier(ResourceType.MANA);
+        elixirTarget = potentialElixirTarget;
+        if (elixirTarget == null)
+            elixirTarget = findNearestWellForCarrier(ResourceType.MANA);
         if (elixirTarget != null) Comms.writeElixirWellLocation(elixirTarget);
     }
 
@@ -86,7 +119,9 @@ public class ElixirProducer extends Utils {
     public static boolean shouldGoToWellForDeposit(MapLocation loc) throws GameActionException{
         if (loc == null) return false;
         MapLocation hqLoc = Comms.findNearestHeadquarter();
-        currentLocation = rc.getLocation();
-        return (currentLocation.distanceSquaredTo(hqLoc) + 16 > currentLocation.distanceSquaredTo(loc));
+        return Comms.findNearestHeadquarter(loc).equals(hqLoc);
+        // if (true) return true;
+        // currentLocation = rc.getLocation();
+        // return (currentLocation.distanceSquaredTo(hqLoc) + 16 > currentLocation.distanceSquaredTo(loc));
     }
 }

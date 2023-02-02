@@ -935,6 +935,21 @@ public class Comms extends Utils{
         return optLoc;
     }
 
+    public static MapLocation findNearestHeadquarter(MapLocation loc) throws GameActionException{
+        if (rc.getRoundNum() == 1) assert false;
+        MapLocation[] headquarters = getAlliedHeadquartersLocationsList();
+        MapLocation optLoc = headquarters[0];
+        int optDist = loc.distanceSquaredTo(optLoc), headquarterCount = getHeadquartersCount(), dist;
+        for (int i = 1; i < headquarterCount; ++i){
+            dist = loc.distanceSquaredTo(headquarters[i]);
+            if (dist < optDist){
+                optLoc = headquarters[i];
+                optDist = dist;
+            }
+        }
+        return optLoc;
+    }
+
     /**
      * Finds the kth (1 indexed) nearest headquarter to the current robot.
      * @param k : 1 indexed kth nearest headquarter. That is k = 1 is the nearest headquarter.

@@ -344,6 +344,10 @@ public class BotCarrier extends Utils{
                 setIslandDestination(islandLoc);
                 // moveToIslandAndPlaceAnchor();
             }
+            else if (ElixirProducer.goingToElixirWell){
+                setReturnToHQTrue();
+                movementWrapper(movementDestination);
+            }
             else movementDestination = null;
         }
     }
@@ -788,10 +792,11 @@ public class BotCarrier extends Utils{
             }
             // if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA)
             //     continue;
-            ResourceType rType = adjacentWells[i].getResourceType();
-            if (rType != ResourceType.ELIXIR && rType != getLocalPrioritizedResource()) continue;
+            ResourceType rType = getResourceType(adjacentWells[i]);
+            // if (rType != ResourceType.ELIXIR && rType != getLocalPrioritizedResource()) continue;
+            if (rType != getLocalPrioritizedResource()) continue;
             WellInfo curWell = adjacentWells[i];
-            Comms.writeOrSaveLocation(curWell.getMapLocation(), Comms.resourceFlag(curWell.getResourceType()));    
+            Comms.writeOrSaveLocation(curWell.getMapLocation(), Comms.resourceFlag(rType));
             collectionWrapper(curWell);
             chosenWell = curWell.getMapLocation();
         }
@@ -802,7 +807,7 @@ public class BotCarrier extends Utils{
                 exitCollectionOfResources(chosenWell);
                 return;
             }
-            if (adjacentWells[i].getResourceType() == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
+            if (getResourceType(adjacentWells[i]) == ResourceType.ADAMANTIUM && getLocalPrioritizedResource() == ResourceType.MANA) 
                 continue;
             WellInfo curWell = adjacentWells[i];  
             collectionWrapper(curWell);
@@ -925,6 +930,11 @@ public class BotCarrier extends Utils{
         return nearestLoc;
     }
 
+    private static ResourceType getResourceType(WellInfo well){
+        if (well.getResourceType() == ResourceType.ELIXIR) return ResourceType.MANA;
+        return well.getResourceType();
+    }
+
     /**
      * Finds nearest well of the given type in vision.
      * @return nearest well in vision if one exists. Returns null otherwise
@@ -943,8 +953,8 @@ public class BotCarrier extends Utils{
         for (int i = nearbyWells.length; --i >= 0;){
             well = nearbyWells[i];
             MapLocation loc = well.getMapLocation();
-            if (well.getResourceType() == ResourceType.ELIXIR) return loc;
-            if (well.getResourceType() != resourceType){
+            // if (well.getResourceType() == ResourceType.ELIXIR && ElixirProducer.rollTheDice(ElixirProducer.ELIXIR_TO_MANA_RATIO)) return loc;
+            if (getResourceType(well) != resourceType){
                 curDist = rc.getLocation().distanceSquaredTo(loc);
                 if (otherTypeWell == null || curDist < otherTypeDist){
                     otherTypeWell = loc;
@@ -979,9 +989,10 @@ public class BotCarrier extends Utils{
         return nearestLoc;
     }
 
-    public static ResourceType getLocalPrioritizedResource(){
+    public static ResourceType getLocalPrioritizedResource() throws GameActionException{
         if (INITIAL_MINE_ONLY_MANA_STRAT && rc.getRoundNum() <= MINE_ONLY_MANA_TILL_ROUND)
             return ResourceType.MANA;
+        // if (prioritizedResource == ResourceType.ADAMANTIUM && ElixirProducer.checkIfElixirWellMade() && ElixirProducer.rollTheDice(1)) return ResourceType.MANA;
         return prioritizedResource;
     }
 
@@ -1038,6 +1049,9 @@ public class BotCarrier extends Utils{
             assert senseLoc != null;
         }
         else if (senseLoc == null) return false;
+        else if (senseLoc != null && ElixirProducer.checkIfElixirWellMade() && senseLoc.equals(Comms.getElixirWellTarget()) && !ElixirProducer.rollTheDice(ElixirProducer.ELIXIR_TO_MANA_RATIO)){
+            return false;
+        }
         setWellDestination(senseLoc);
         Comms.writeOrSaveLocation(senseLoc, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
         return true;
@@ -1050,7 +1064,7 @@ public class BotCarrier extends Utils{
      */
     private static void getAndSetWellLocation() throws GameActionException{
         otherTypeWell = null;
-        if (possibilityOfElixirWell()) return;
+        // if (possibilityOfElixirWell()) return;
         ResourceType rType = getLocalPrioritizedResource();
         Comms.SHAFlag flag = Comms.resourceFlag(rType);
         MapLocation senseLoc = findNearestWellInVision(rType);
@@ -1222,7 +1236,7 @@ public class BotCarrier extends Utils{
             if (depositedAmount == GameConstants.UPGRADE_TO_ELIXIR){
                 ElixirProducer.setElixirWellMade();
                 collectResources();
-                Comms.writeOrSaveLocation(movementDestination, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
+                // Comms.writeOrSaveLocation(movementDestination, Comms.SHAFlag.ELIXIR_WELL_LOCATION);
             }
             ElixirProducer.goingToElixirWell = false;
         }
@@ -1362,21 +1376,6 @@ public class BotCarrier extends Utils{
         if (movementDestination == null) return true;
         int dist = rc.getLocation().distanceSquaredTo(movementDestination);
         return dist > (movesLeftBeforeDeath*movesLeftBeforeDeath);
-    }
-
-    private static boolean tryToFlee(RobotInfo[] visibleHostiles) throws GameActionException {
-        
-        Direction bestRetreatDir = getRetreatDirection(visibleHostiles);
-        if (bestRetreatDir != null) {
-            // rc.setIndicatorString("Backing: " + bestRetreatDir);
-            lastRetreatDirection = bestRetreatDir;
-            if (!shouldIFlee()) return false;
-            carrierStatus = Status.FLEEING;
-            Explore.lastCallRound = rc.getRoundNum();
-            rc.move(bestRetreatDir);
-            return true;
-        }
-        return false;
     }
 
     private static void throwResourcesToIncreaseSpeed() throws GameActionException{
