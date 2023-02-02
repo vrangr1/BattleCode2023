@@ -456,7 +456,8 @@ public class BotLauncher extends CombatUtils{
 	}
 
     public static boolean tryMoveToHelpAlly(RobotInfo closestHostile) throws GameActionException {
-        if(closestHostile == null) return false;
+        if (closestHostile == null) return false;
+        if (rc.getRoundNum() % 2 != 0) return false;
         //# if (inRNonHQEnemies > 0) return false;
 		MapLocation closestHostileLocation = closestHostile.location;
 		
