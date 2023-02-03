@@ -21,9 +21,9 @@ public class BotDestabilizer extends BotLauncher{
             if (inHealingState){
                 tryToHealAtIsland();
             }
-            else{
-                closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
-            }
+            // else{
+            //     closerCombatDestination(); // [CUR_STATE] -> [CUR_STATE|MARCHING|EXPLORE]
+            // }
         }
         bytecodeCheck();
         tryToMicro();
@@ -179,15 +179,13 @@ public class BotDestabilizer extends BotLauncher{
             if (currentDestination != null) {
                 pathing.setNewDestination(currentDestination);
             }
-            if (launcherState == Status.MARCHING || launcherState == Status.ISLAND_WORK) {
-                pathing.moveToDestination();
-                if (rc.isMovementReady()){
-                    destinationFlag += "| dmove1";
-                    Nav.goTo(currentDestination);
-                }
-                else{
-                    destinationFlag += "| dmove2";
-                }
+            pathing.moveToDestination();
+            if (rc.isMovementReady()){
+                destinationFlag += "| dmove1";
+                Nav.goTo(currentDestination);
+            }
+            else{
+                destinationFlag += "| dmove2";
             }
         }
     }

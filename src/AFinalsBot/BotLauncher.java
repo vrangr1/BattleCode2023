@@ -194,7 +194,7 @@ public class BotLauncher extends CombatUtils{
     }
 
     public static void midLineSymmetryCheck() throws GameActionException{
-        for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
+        for (int i = 0; i < Symmetry.SYMMETRY.values().length; i++) {
             
             if (Clock.getBytecodesLeft() > 2100 && mapSymmetry[i] && !Symmetry.checkThisSymmetry(Symmetry.SYMMETRY.values()[i])){
                 Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
@@ -690,9 +690,6 @@ public class BotLauncher extends CombatUtils{
                     mineHarasser();
                 }
                 else {
-                    if (MAP_SIZE < 1500 && vNonHQEnemies == 0){
-                        waitAsDamaged = true;
-                    }
                     currentDestination = null;
                 }
                 launcherState = Status.MARCHING;
@@ -1008,9 +1005,9 @@ public class BotLauncher extends CombatUtils{
         }
         int[] store; 
         if (MAP_SIZE < 1000)
-            store = new int[] {2,0,1};
+            store = new int[] {0,1,2};
         else
-            store = new int[] {0,2,1};
+            store = new int[] {0,1,2};
         for (int i = Comms.COMM_TYPE.WELLS.channelStart; i < Comms.COMM_TYPE.WELLS.channelStop; i++){
             int message = rc.readSharedArray(i);
             if (message == 0) continue;

@@ -282,9 +282,9 @@ public class Symmetry extends Utils{
         double factor = 1;
         int[] store; 
         if (MAP_SIZE < 1000)
-            store = new int[] {1,0,2};
+            store = new int[] {0,1,2};
         else
-            store = new int[] {1,2,0};
+            store = new int[] {0,1,2};
 
         if (UNIT_TYPE == RobotType.HEADQUARTERS && rc.getRoundNum() == 1){
             for (int i : store) {
@@ -316,7 +316,7 @@ public class Symmetry extends Utils{
                         if (alliedHQEnemyHQ == null) continue;
                         double parentDistance = (double) parentHQLocation.distanceSquaredTo(alliedHQEnemyHQ);
                         // double currDistance = (double) rc.getLocation().distanceSquaredTo(alliedHQEnemyHQ); // As distance will be updated
-                        if (parentDistance > alliedHQLocs[j].distanceSquaredTo(alliedHQEnemyHQ)) continue; // Don't have all launchers go to the same place
+                        // if (parentDistance > alliedHQLocs[j].distanceSquaredTo(alliedHQEnemyHQ)) continue; // Don't have all launchers go to the same place
                         if (parentDistance <= 1.0) continue;
                         if (UNIT_TYPE == RobotType.LAUNCHER && alreadyVisitedHQ != null && alreadyVisitedHQ.equals(alliedHQEnemyHQ)) continue;
                         if (parentDistance * factor < minDistance){
