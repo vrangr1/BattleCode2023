@@ -864,8 +864,10 @@ public class BotLauncher extends CombatUtils{
     public static boolean tryToBackUpToMaintainMaxRangeLauncher(RobotInfo[] visibleHostiles) throws GameActionException {
 		int minHosDist = Integer.MAX_VALUE;
         MapLocation lCR = rc.getLocation();
+        boolean onlyNoncombat = true;
         for (RobotInfo hostile : visibleHostiles) {
 			if (!CombatUtils.isMilitaryUnit(hostile.type) && hostile.type != RobotType.HEADQUARTERS) continue;
+            onlyNoncombat = false;
 			int distSq = lCR.distanceSquaredTo(hostile.location);
 			if (distSq < minHosDist) {
 				minHosDist = distSq;
@@ -873,7 +875,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
         // We don't want to get out of our max range, not in this function
-		if (rc.getHealth() >= 60  || (UNIT_TYPE == RobotType.DESTABILIZER && rc.getHealth() >= 80))
+		if (rc.getHealth() >= 60  || (UNIT_TYPE == RobotType.DESTABILIZER && rc.getHealth() >= 80) || onlyNoncombat)
             if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
