@@ -867,7 +867,7 @@ public class BotLauncher extends CombatUtils{
 		}
 		
         // We don't want to get out of our max range, not in this function
-		if (rc.getHealth() >= 60  && UNIT_TYPE != RobotType.DESTABILIZER)
+		if (rc.getHealth() >= 60  || (UNIT_TYPE == RobotType.DESTABILIZER && rc.getHealth() >= 80))
             if (minHosDist > rc.getType().actionRadiusSquared) return false;
 		
 		Direction bestRetreatDir = null;
