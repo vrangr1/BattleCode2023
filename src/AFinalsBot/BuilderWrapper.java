@@ -128,14 +128,14 @@ public class BuilderWrapper extends Utils {
 
     public static boolean hasResourcesToBuild(RobotType type, int count){
         switch(type){
-            case CARRIER: return adamantium >= count * RobotType.CARRIER.getBuildCost(ResourceType.ADAMANTIUM);
-            case LAUNCHER: return mana >= count * RobotType.LAUNCHER.getBuildCost(ResourceType.MANA);
-            case BOOSTER: return elixir >= count * RobotType.BOOSTER.getBuildCost(ResourceType.ELIXIR);
-            case DESTABILIZER: return elixir >= count * RobotType.DESTABILIZER.getBuildCost(ResourceType.ELIXIR);
+            case CARRIER: return rc.getResourceAmount(ResourceType.ADAMANTIUM) >= count * RobotType.CARRIER.getBuildCost(ResourceType.ADAMANTIUM);
+            case LAUNCHER: return rc.getResourceAmount(ResourceType.MANA) >= count * RobotType.LAUNCHER.getBuildCost(ResourceType.MANA);
+            case BOOSTER: return rc.getResourceAmount(ResourceType.ELIXIR) >= count * RobotType.BOOSTER.getBuildCost(ResourceType.ELIXIR);
+            case DESTABILIZER: return rc.getResourceAmount(ResourceType.ELIXIR) >= count * RobotType.DESTABILIZER.getBuildCost(ResourceType.ELIXIR);
             case AMPLIFIER: return (
-                adamantium >= count * RobotType.CARRIER.getBuildCost(ResourceType.ADAMANTIUM)
+                rc.getResourceAmount(ResourceType.ADAMANTIUM) >= count * RobotType.AMPLIFIER.getBuildCost(ResourceType.ADAMANTIUM)
                 && 
-                mana >= count * RobotType.AMPLIFIER.getBuildCost(ResourceType.MANA)
+                rc.getResourceAmount(ResourceType.MANA) >= count * RobotType.AMPLIFIER.getBuildCost(ResourceType.MANA)
             );
             default: break;
         }
@@ -146,11 +146,11 @@ public class BuilderWrapper extends Utils {
     public static boolean hasResourcesToBuild(Anchor anchor, int count){
         switch(anchor){
             case STANDARD: return (
-                adamantium >= count * Anchor.STANDARD.adamantiumCost
+                rc.getResourceAmount(ResourceType.ADAMANTIUM) >= count * Anchor.STANDARD.adamantiumCost
                 && 
-                mana >= count * Anchor.STANDARD.manaCost
+                rc.getResourceAmount(ResourceType.MANA) >= count * Anchor.STANDARD.manaCost
             );
-            case ACCELERATING: return elixir >= count * Anchor.ACCELERATING.elixirCost;
+            case ACCELERATING: return rc.getResourceAmount(ResourceType.ELIXIR) >= count * Anchor.ACCELERATING.elixirCost;
             default: break;
         }
         assert false;
@@ -208,16 +208,6 @@ public class BuilderWrapper extends Utils {
         return prioritizedResource;
     }
 
-    public static ResourceType mostNeedOfResource() throws GameActionException{
-        // if ()
-        if (Math.abs(adamantium - mana) > 500){
-            if (adamantium > mana) return ResourceType.MANA;
-            return ResourceType.ADAMANTIUM;
-        }
-        if(elixirWellFound && elixir < 100) return ResourceType.ELIXIR;
-        return null;
-    }
-
     private static MapLocation findNearestWellForCarrier(ResourceType pResourceType) throws GameActionException{
         currentLocation = rc.getLocation();
         BotCarrier.otherTypeWell = null;
@@ -239,6 +229,7 @@ public class BuilderWrapper extends Utils {
         if (targetLoc == null){
             // TODO: Do something
             return null;
+            // return findNearestActReadyLocation(CENTER_OF_THE_MAP, RobotType.CARRIER);
         }
         if (rc.canBuildRobot(RobotType.CARRIER, targetLoc)) return targetLoc;
         return findNearestActReadyLocation(targetLoc, RobotType.CARRIER);
