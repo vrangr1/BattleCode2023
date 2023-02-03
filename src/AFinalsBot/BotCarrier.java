@@ -1334,7 +1334,7 @@ public class BotCarrier extends Utils{
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
         if (Clock.getBytecodesLeft() > 700){
             RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
-            sendGenericCombatLocation(visibleEnemies);
+            CombatUtils.sendGenericCombatLocation(visibleEnemies);
         }
         if (Clock.getBytecodesLeft() > 700)
             Comms.surveyForIslands();
