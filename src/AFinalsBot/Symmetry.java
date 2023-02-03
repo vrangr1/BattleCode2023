@@ -279,35 +279,36 @@ public class Symmetry extends Utils{
     }
 
     public static MapLocation defaultEnemyLocation() throws GameActionException{
-        if (UNIT_TYPE == RobotType.HEADQUARTERS){
-            for (int i = rememberedEnemyHQLocations.length; --i >= 0;) {
-                if (rememberedEnemyHQLocations[i] != null){
-                    if (checkIfSymmetry(Symmetry.SYMMETRY.values()[i])){
-                        return rememberedEnemyHQLocations[i];
+        double factor = 1;
+        int[] store; 
+        if (MAP_SIZE < 1000)
+            store = new int[] {1,0,2};
+        else
+            store = new int[] {1,2,0};
+
+        if (UNIT_TYPE == RobotType.HEADQUARTERS && rc.getRoundNum() == 1){
+            for (int i : store) {
+               if (checkIfSymmetry(Symmetry.SYMMETRY.values()[i]) && mapSymmetry[i]){
+                    MapLocation closestEnemyHQ = returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[i],parentHQLocation); // Default go to location
+                    if (closestEnemyHQ != null){
+                        return closestEnemyHQ;
                     }
-                    else{
-                        rememberedEnemyHQLocations[i] = null;
-                        mapSymmetry[i] = false;
-                    }
-                }
+               }
             }
         }
         else {
-            double factor = 1;
-            int[] store; 
-            if (MAP_SIZE < 1000)
-                store = new int[] {1,0,2};
-            else
-                store = new int[] {1,2,0};
             for (int i : store) {
                 if (checkIfSymmetry(Symmetry.SYMMETRY.values()[i]) && mapSymmetry[i]){
                     MapLocation closestEnemyHQ = returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[i],parentHQLocation); // Default go to location
                     if (closestEnemyHQ == null) continue;
                     double minDistance = (double) parentHQLocation.distanceSquaredTo(closestEnemyHQ);
-                    MapLocation alreadyVisitedHQ = visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()];
-                    if (alreadyVisitedHQ != null && alreadyVisitedHQ.equals(closestEnemyHQ)){
-                        closestEnemyHQ = null;
-                        minDistance = Double.MAX_VALUE;
+                    MapLocation alreadyVisitedHQ = null; 
+                    if (UNIT_TYPE == RobotType.LAUNCHER){
+                        alreadyVisitedHQ = visitedHQList[visitedHQIndex % Comms.getHeadquartersCount()];
+                        if (alreadyVisitedHQ != null && alreadyVisitedHQ.equals(closestEnemyHQ)){
+                            closestEnemyHQ = null;
+                            minDistance = Double.MAX_VALUE;
+                        }
                     }
                     for (int j = alliedHQLocs.length; --j >= 0;) {
                         if (alliedHQLocs[j] == null) continue;
@@ -317,7 +318,7 @@ public class Symmetry extends Utils{
                         // double currDistance = (double) rc.getLocation().distanceSquaredTo(alliedHQEnemyHQ); // As distance will be updated
                         if (parentDistance > alliedHQLocs[j].distanceSquaredTo(alliedHQEnemyHQ)) continue; // Don't have all launchers go to the same place
                         if (parentDistance <= 1.0) continue;
-                        if (alreadyVisitedHQ != null && alreadyVisitedHQ.equals(alliedHQEnemyHQ)) continue;
+                        if (UNIT_TYPE == RobotType.LAUNCHER && alreadyVisitedHQ != null && alreadyVisitedHQ.equals(alliedHQEnemyHQ)) continue;
                         if (parentDistance * factor < minDistance){
                             minDistance = parentDistance;
                             closestEnemyHQ = alliedHQEnemyHQ;

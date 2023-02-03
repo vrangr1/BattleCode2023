@@ -18,6 +18,12 @@ public class BotHeadquarters extends Utils{
         if (TRACKING_AMPLIFIER_COUNT) Comms.resetRobotCount(RobotType.AMPLIFIER);
         rc.writeSharedArray(Comms.SYMMETRY_CHANNEL, 0b111);
         setCanSeeEnemyHQ();
+        for (int i = Symmetry.SYMMETRY.values().length; --i >= 0;) {
+            if (Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[i]) && !Symmetry.checkThisSymmetry(Symmetry.SYMMETRY.values()[i])){
+                Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
+                mapSymmetry[i] = false;
+            }
+        }
     }
 
     private static void setCanSeeEnemyHQ() throws GameActionException{
