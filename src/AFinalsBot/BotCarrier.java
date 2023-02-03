@@ -81,6 +81,7 @@ public class BotCarrier extends Utils{
     private static final int MIN_EXPLORE_ROUND_COUNT = 3;
     private static int exploreRoundCount = 0;
     private static final int FLEE_ATTACK_HEALTH_THRESHOLD = 40;
+    private static RobotInfo[] alliedInfos;
 
     public static int initSpawningHeadquarterIndex(int index) throws GameActionException{
         MapLocation loc = Comms.findKthNearestHeadquarter(index + 1);
@@ -265,6 +266,7 @@ public class BotCarrier extends Utils{
      */
     private static void updateVision() throws GameActionException {
         visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
+        alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
     }
 
     private static void assertNotHeadquarterLocation(MapLocation givenLoc) throws GameActionException{
@@ -319,7 +321,7 @@ public class BotCarrier extends Utils{
     private static void fleeUpdate() throws GameActionException{
         if (!TRY_TO_FLEE) return;
         if (!isFleeing && canSeeMilitaryUnit()){
-            RobotInfo[] alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
+            // RobotInfo[] alliedInfos = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, MY_TEAM);
             int allyCount = vicinityMilitaryCount(alliedInfos);
             int enemyCount = vicinityMilitaryCount(visibleEnemies);
             // if (allyCount <= 3 || allyCount < enemyCount + Math.max(2,(allyCount/3))){ 
@@ -1437,9 +1439,47 @@ public class BotCarrier extends Utils{
         movementWrapper(fleeTarget);
     }
 
+    private static int computeAttackDamage(){
+        return (5 * rc.getWeight())/4;
+    }
+
+    private static void attackIfCanOneShot() throws GameActionException{
+        if (!rc.isActionReady()) return;
+        int damage = computeAttackDamage();
+        if (damage == 0) return;
+        if (vicinityMilitaryCount(alliedInfos) > 0) return;
+        RobotInfo[] enemyBotsInAction = rc.senseNearbyRobots(UNIT_TYPE.actionRadiusSquared, ENEMY_TEAM);
+        RobotInfo bestTarget = null, curBot;
+        for (int i = enemyBotsInAction.length; --i >= 0;){
+            curBot = enemyBotsInAction[i];
+            if (!isMilitaryUnit(curBot)) continue;
+            if (curBot.type == RobotType.HEADQUARTERS) continue;
+            if (curBot.health <= damage){
+                bestTarget = curBot;
+                break;
+            }
+        }
+        if (bestTarget != null){
+            System.out.println("Attacking; damage: " + damage + "; health: " + bestTarget.health + "; curLoc: " + rc.getLocation() + "; target: " + bestTarget.location);
+            rc.attack(bestTarget.location);
+            visibleEnemies = rc.senseNearbyRobots(UNIT_TYPE.visionRadiusSquared, ENEMY_TEAM);
+        }
+        // else if (rc.getHealth() < 20){
+        //     for (int i = enemyBotsInAction.length; --i >= 0;){
+        //         curBot = enemyBotsInAction[i];
+        //         if (!isMilitaryUnit(curBot)) continue;
+        //         if (curBot.type == RobotType.HEADQUARTERS) continue;
+        //         System.out.println("2222 Attacking; damage: " + damage + "; health: " + curBot.health + "; curLoc: " + rc.getLocation() + "; target: " + curBot.location);
+        //         rc.attack(curBot.location);
+        //         return;
+        //     }
+        // }
+    }
+
     public static void runCarrier() throws GameActionException{
         updateOverall();
         // attackIfAboutToDie();
+        attackIfCanOneShot();
         if (rc.getAnchor() != null)
             carrierAnchorMode();
         else
