@@ -18,7 +18,7 @@ public class ElixirProducer extends Utils {
     ////////////////////////////////////////
 
     public static boolean shouldProduceElixir() throws GameActionException {
-        return DOING_ELIXIR_PRODUCTION && MAP_SIZE > 1000 && (rc.getRoundNum() > 300 && rc.getRobotCount() > 20) && Comms.getHeadquartersCount() > 1;
+        return DOING_ELIXIR_PRODUCTION && MAP_SIZE > 1000 && (rc.getRoundNum() > 500 && rc.getRobotCount() > 30) && Comms.getHeadquartersCount() > 1;
     }
 
 
