@@ -467,7 +467,7 @@ public class BotLauncher extends CombatUtils{
         if (closestHostile == null) return false;
 		if (CombatUtils.isMilitaryUnit(closestHostile.type) || closestHostile.type == RobotType.HEADQUARTERS) 
             return false;
-        if (!rc.isMovementReady() || Movement.tryFlagMoveInDirection(closestHostile.location, true)) {
+        if ((rc.getLocation().distanceSquaredTo(closestHostile.location) > UNIT_TYPE.actionRadiusSquared && rc.getHealth() >= 1.0/2.0 * UNIT_TYPE.health) && (!rc.isMovementReady() || Movement.tryFlagMoveInDirection(closestHostile.location, true))) {
             destinationFlag += "|tM2APU";
             launcherState = Status.PURSUING;
             return true;
