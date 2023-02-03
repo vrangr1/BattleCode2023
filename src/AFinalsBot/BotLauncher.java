@@ -47,6 +47,7 @@ public class BotLauncher extends CombatUtils{
     public static RobotInfo[] seenEnemyHQs;
     public static MapLocation savedWellLocation;
     public static MapLocation savedEnemyWellLocation;
+    public static boolean waitAsDamaged = false;
     private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
     private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
 
@@ -285,6 +286,7 @@ public class BotLauncher extends CombatUtils{
 
     public static void moveAfterNonMovingCombat() throws GameActionException {
         if (vNonHQEnemies != 0) return;
+        if (waitAsDamaged) return;
         if ((rc.getRoundNum() + 1)% 2 == 0 && rc.getHealth() == UNIT_TYPE.getMaxHealth()) return;
         if (rc.isMovementReady()) {
             if (currentDestination != null) {
@@ -679,13 +681,16 @@ public class BotLauncher extends CombatUtils{
             closestHealingIsland = nearestLoc;
         }
 
-		destinationFlag += "|trHAl "+closestHealingIsland+"|";
+		destinationFlag += "|trHAl"+closestHealingIsland+"|";
 		if (closestHealingIsland == null){
             if (launcherState != Status.MARCHING && launcherState != Status.CIRCLING){
                 if (MAP_SIZE >= 2500){
                     mineHarasser();
                 }
-                else{
+                else {
+                    if (MAP_SIZE < 1500){
+                        waitAsDamaged = true;
+                    }
                     currentDestination = null;
                 }
                 launcherState = Status.MARCHING;
@@ -701,6 +706,7 @@ public class BotLauncher extends CombatUtils{
         else{
             launcherState = Status.HEALING;
         }    
+        waitAsDamaged = false;
 		return true;
 	}
 
