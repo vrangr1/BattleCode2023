@@ -640,7 +640,7 @@ public class BotLauncher extends CombatUtils{
             inHealingState = true;
             return;
         }
-        else if ((UNIT_TYPE == RobotType.DESTABILIZER && rc.getHealth() > 2.0/4.0) || rc.getHealth() > 3.0/4.0 * rc.getType().getMaxHealth()) {
+        else if (rc.getHealth() > 3.0/4.0 * rc.getType().getMaxHealth()) {
             if (launcherState == Status.HEALING){
                 currentDestination = null;  
                 launcherState = Status.MARCHING;
@@ -688,7 +688,7 @@ public class BotLauncher extends CombatUtils{
                     mineHarasser();
                 }
                 else {
-                    if (MAP_SIZE < 1500){
+                    if (MAP_SIZE < 1500 && vNonHQEnemies == 0){
                         waitAsDamaged = true;
                     }
                     currentDestination = null;

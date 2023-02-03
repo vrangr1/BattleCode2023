@@ -48,6 +48,73 @@ public class BotDestabilizer extends BotLauncher{
         rc.setIndicatorString(launcherState + "|Dest " + currentDestination + " " + destinationFlag + "|Move " + rc.isMovementReady());
     }
 
+    public static void manageHealingState() {
+        if (rc.getHealth() <= rc.getType().getMaxHealth() * 2.0/10.0) {
+            inHealingState = true;
+            return;
+        }
+        else if (UNIT_TYPE == RobotType.DESTABILIZER && rc.getHealth() > 2.0/4.0) {
+            if (launcherState == Status.HEALING){
+                currentDestination = null;  
+                launcherState = Status.MARCHING;
+            }
+            inHealingState = false;
+            return;
+        }
+    }
+
+    public static boolean tryToHealAtIsland() throws GameActionException {		
+		closestHealingIsland = Comms.findNearestLocationOfThisType(rc.getLocation(), Comms.COMM_TYPE.OUR_ISLANDS, Comms.SHAFlag.OUR_ISLAND);
+        int islandId = rc.senseIsland(rc.getLocation());
+        if (islandId != -1 && rc.senseTeamOccupyingIsland(islandId) == MY_TEAM){
+            launcherState = Status.HEALING;
+            return true;
+        }
+        int[] nearbyIslands = rc.senseNearbyIslands();
+        MapLocation nearestLoc = null;
+        int nearestDist = -1, curDist;
+        for (int i = nearbyIslands.length; --i >= 0;){
+            islandId = nearbyIslands[i];
+            // Skip neutral/enemy islands
+            if (rc.senseTeamOccupyingIsland(islandId) != MY_TEAM){
+                continue;
+            }
+            MapLocation[] locations = rc.senseNearbyIslandLocations(islandId);
+            for (int j = locations.length; --j >= 0;){
+                MapLocation loc = locations[j];
+                if (rc.isLocationOccupied(loc)) continue;
+                curDist = currentLocation.distanceSquaredTo(loc);
+                if (nearestLoc == null || curDist < nearestDist){
+                    nearestLoc = loc;
+                    nearestDist = curDist;
+                }
+            }
+        }
+        if (nearestDist != -1 && (closestHealingIsland == null || nearestDist <= rc.getLocation().distanceSquaredTo(closestHealingIsland))){
+            closestHealingIsland = nearestLoc;
+        }
+
+		destinationFlag += "|trHAl"+closestHealingIsland+"|";
+		if (closestHealingIsland == null){
+            if (launcherState != Status.MARCHING && launcherState != Status.CIRCLING){
+                currentDestination = null;
+                launcherState = Status.MARCHING;
+            }
+            inHealingState = false;
+            return false;
+        }
+        else if(!rc.getLocation().equals(closestHealingIsland)){
+            currentDestination = closestHealingIsland;
+            launcherState = Status.HEALING;
+            pathing.setAndMoveToDestination(currentDestination);
+        }
+        else{
+            launcherState = Status.HEALING;
+        }    
+        waitAsDamaged = false;
+		return true;
+	}
+
     public static boolean tryToMicro() throws GameActionException {
         if (vNonHQEnemies == 0) {
             return false;
@@ -60,7 +127,7 @@ public class BotDestabilizer extends BotLauncher{
 
         if (rc.isActionReady()){
             if (vNonHQEnemies > 0) {
-                chooseTargetAndAttack(inRangeEnemies);
+                chooseTargetAndAttack(visibleEnemies);
             }
         }
         if (rc.isMovementReady()){
@@ -72,10 +139,6 @@ public class BotDestabilizer extends BotLauncher{
                 return true;
             }
             tryMoveToEngageOutnumberedEnemy(closestHostile);
-            if (!inHealingState && tryMoveToAttackProductionUnit(closestHostile)) {
-                destinationFlag += " prod2";
-                return true;
-            }
         }
         return false;
     }
