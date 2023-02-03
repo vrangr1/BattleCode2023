@@ -1042,7 +1042,8 @@ public class BotCarrier extends Utils{
         if (otherTypeWell == null) return  true;
         if (STORING_EXPLORED_LOCATIONS && isLocationExplored(obtainedLoc) && !Comms.checkIfLocationSaved(obtainedLoc)) return false;
         double wellDist = Math.sqrt(rc.getLocation().distanceSquaredTo(otherTypeWell));
-        double potentialDist = Math.min(Math.sqrt(GameConstants.MAX_DISTANCE_BETWEEN_WELLS), Math.min(MAP_HEIGHT, MAP_WIDTH)/4);
+        // double potentialDist = Math.min(Math.sqrt(GameConstants.MAX_DISTANCE_BETWEEN_WELLS), Math.min(MAP_HEIGHT, MAP_WIDTH)/3);
+        double potentialDist = Math.sqrt(GameConstants.MAX_DISTANCE_BETWEEN_WELLS);
         double expectedDist = wellDist + potentialDist;
         return rc.getLocation().distanceSquaredTo(obtainedLoc) < expectedDist * expectedDist;
     }
