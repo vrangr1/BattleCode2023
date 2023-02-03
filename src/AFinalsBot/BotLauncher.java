@@ -50,6 +50,7 @@ public class BotLauncher extends CombatUtils{
     public static MapLocation[] visitedTravelLocations = new MapLocation[3];
     public static int visitedTravelIndex = 0;
     public static boolean waitAsDamaged = false;
+    public static boolean oneTimeFlag = true;
     private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
     private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
 
@@ -101,15 +102,15 @@ public class BotLauncher extends CombatUtils{
             midLineSymmetryCheck();
         }
 
-        if (!rc.isMovementReady() && rc.getRoundNum() - BIRTH_ROUND > 30){
+        if (!rc.isMovementReady() && rc.getRoundNum() - BIRTH_ROUND > 30 && oneTimeFlag){
             MapLocation newEnemyWellLoc = findNearestEnemyWell();
             if (newEnemyWellLoc != null){
+                oneTimeFlag = false;
                 destinationFlag+= "|fNEW";
                 currentDestination = newEnemyWellLoc;
                 savedEnemyWellLocation = newEnemyWellLoc;
             }
         }
-
         bytecodeCheck(); //3
         moveAfterNonMovingCombat(); // [CUR_STATE] -> [CUR_STATE] (Only works with [MARCHING|ISLAND_WORK|EXPLORE])
         if (rc.isActionReady()) {
@@ -992,28 +993,38 @@ public class BotLauncher extends CombatUtils{
 
     private static MapLocation findNearestEnemyWell() throws GameActionException{
         MapLocation nearestLoc = null;
-        if (currentDestination == null || !currentDestination.equals(storedEnemyHQLoc)){
-            return null;
-        }
-        int nearestDist = rc.getLocation().distanceSquaredTo(storedEnemyHQLoc), curDist;
-        if (savedWellLocation != null && !isFriendlyLocation(savedWellLocation, storedEnemyHQLoc)){
-            curDist = rc.getLocation().distanceSquaredTo(savedWellLocation);
-            if (curDist < nearestDist){
-                nearestDist = curDist;
-                nearestLoc = savedWellLocation;
-            }
-        }
         int[] store; 
         if (MAP_SIZE < 1000)
             store = new int[] {0,1,2};
         else
             store = new int[] {0,1,2};
+        MapLocation enemyWell = null;
+        if (currentDestination == null || !currentDestination.equals(storedEnemyHQLoc)){
+            return null;
+        }
+        int nearestDist = rc.getLocation().distanceSquaredTo(storedEnemyHQLoc), curDist = 10000;
+        if (savedWellLocation != null && !isFriendlyLocation(savedWellLocation, storedEnemyHQLoc)){
+            for (int j = store.length; --j >= 0;){
+                if (!mapSymmetry[j] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[j])) continue;
+                enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], savedWellLocation);
+                curDist = rc.getLocation().distanceSquaredTo(enemyWell);
+                if (isFriendlyLocation(enemyWell, currentDestination)){
+                    enemyWell = null;
+                    continue;
+                }
+                if (enemyWell != null) break;
+            }
+            if (curDist < nearestDist){
+                nearestDist = curDist;
+                nearestLoc = enemyWell;
+            }
+        }
         for (int i = Comms.COMM_TYPE.WELLS.channelStart; i < Comms.COMM_TYPE.WELLS.channelStop; i++){
             int message = rc.readSharedArray(i);
             if (message == 0) continue;
             Comms.SHAFlag flag = Comms.readSHAFlagFromMessage(message);
             MapLocation well = Comms.readLocationFromMessage(message);
-            MapLocation enemyWell = null;
+            enemyWell = null;
             for (int j = store.length; --j >= 0;){
                 if (!mapSymmetry[j] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[j])) continue;
                 enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], well);
