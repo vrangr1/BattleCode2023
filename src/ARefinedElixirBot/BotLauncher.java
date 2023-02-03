@@ -46,6 +46,7 @@ public class BotLauncher extends CombatUtils{
     public static MapLocation storedEnemyHQLoc = null;
     public static RobotInfo[] seenEnemyHQs;
     public static MapLocation savedWellLocation;
+    public static MapLocation savedEnemyWellLocation;
     private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
     private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
 
@@ -97,11 +98,12 @@ public class BotLauncher extends CombatUtils{
             midLineSymmetryCheck();
         }
 
-        if (!rc.isMovementReady()){
+        if (!rc.isMovementReady() && rc.getRoundNum() - BIRTH_ROUND > 30){
             MapLocation newEnemyWellLoc = findNearestEnemyWell();
             if (newEnemyWellLoc != null){
                 destinationFlag+= "|fNEW";
                 currentDestination = newEnemyWellLoc;
+                savedEnemyWellLocation = newEnemyWellLoc;
             }
         }
 
@@ -195,7 +197,7 @@ public class BotLauncher extends CombatUtils{
                 Symmetry.removeSymmetry(Symmetry.SYMMETRY.values()[i], "3");
                 mapSymmetry[i] = false;
                 rememberedEnemyHQLocations[i] = null;
-                if (currentDestination == null || currentDestination.equals(storedEnemyHQLoc)){
+                if (currentDestination == null || currentDestination.equals(storedEnemyHQLoc) || currentDestination.equals(savedEnemyWellLocation)){
                     destinationFlag += "mLSC";
                     setBaseDestination();
                     break;
@@ -975,7 +977,7 @@ public class BotLauncher extends CombatUtils{
         if (currentDestination == null || !currentDestination.equals(storedEnemyHQLoc)){
             return null;
         }
-        int nearestDist = rc.getLocation().distanceSquaredTo(currentDestination), curDist;
+        int nearestDist = rc.getLocation().distanceSquaredTo(storedEnemyHQLoc), curDist;
         if (savedWellLocation != null && !isFriendlyLocation(savedWellLocation, storedEnemyHQLoc)){
             curDist = rc.getLocation().distanceSquaredTo(savedWellLocation);
             if (curDist < nearestDist){
@@ -994,7 +996,7 @@ public class BotLauncher extends CombatUtils{
             Comms.SHAFlag flag = Comms.readSHAFlagFromMessage(message);
             MapLocation well = Comms.readLocationFromMessage(message);
             MapLocation enemyWell = null;
-            for (int j= store.length; --j >= 0;){
+            for (int j = store.length; --j >= 0;){
                 if (!mapSymmetry[j] || !Symmetry.checkIfSymmetry(Symmetry.SYMMETRY.values()[j])) continue;
                 enemyWell = Symmetry.returnEnemyOnSymmetry(Symmetry.SYMMETRY.values()[j], well);
                 if (isFriendlyLocation(enemyWell, currentDestination)){
@@ -1005,7 +1007,7 @@ public class BotLauncher extends CombatUtils{
             }
             if (enemyWell == null) continue;
             curDist = rc.getLocation().distanceSquaredTo(enemyWell);
-            if (curDist <= nearestDist){
+            if (curDist < nearestDist){
                 nearestLoc = enemyWell;
                 nearestDist = curDist;
             }
@@ -1016,6 +1018,7 @@ public class BotLauncher extends CombatUtils{
     public static boolean isFriendlyLocation(MapLocation givenLoc, MapLocation enemyLoc){
         if (enemyLoc == null || givenLoc == null) return false;
         for (int k = alliedHQLocs.length; --k >= 0;){
+            if (alliedHQLocs[k] == null) continue;
             if (alliedHQLocs[k].distanceSquaredTo(givenLoc) < enemyLoc.distanceSquaredTo(givenLoc)) {
                 return true;
             }
