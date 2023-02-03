@@ -102,13 +102,16 @@ public class BotLauncher extends CombatUtils{
             midLineSymmetryCheck();
         }
 
-        if (!rc.isMovementReady() && rc.getRoundNum() - BIRTH_ROUND > 30 && oneTimeFlag){
+        if (!rc.isMovementReady() && rc.getRoundNum() > 30){
             MapLocation newEnemyWellLoc = findNearestEnemyWell();
             if (newEnemyWellLoc != null){
-                oneTimeFlag = false;
-                destinationFlag+= "|fNEW";
-                currentDestination = newEnemyWellLoc;
-                savedEnemyWellLocation = newEnemyWellLoc;
+                if (!hasBeenTraveledTo(newEnemyWellLoc)){
+                    visitedTravelLocations[visitedTravelIndex++%visitedTravelLocations.length] = newEnemyWellLoc;
+                    oneTimeFlag = false;
+                    destinationFlag+= "|fNEW";
+                    currentDestination = newEnemyWellLoc;
+                    savedEnemyWellLocation = newEnemyWellLoc;
+                }
             }
         }
         bytecodeCheck(); //3
