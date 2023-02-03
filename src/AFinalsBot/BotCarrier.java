@@ -1310,6 +1310,13 @@ public class BotCarrier extends Utils{
         else desperationIndex = 0;
     }
 
+    public static boolean sendGenericCombatLocation(RobotInfo[] visibleEnemies) throws GameActionException{
+		RobotInfo closestHostile = CombatUtils.getClosestNonHQUnitWithCombatPriority(visibleEnemies);
+        if (closestHostile == null) return false;
+        Comms.writeOrSaveLocation(closestHostile.getLocation(), Comms.SHAFlag.COMBAT_LOCATION);
+        return false;
+    }
+
     private static void endOfTurnUpdate() throws GameActionException{
         returnEarly = false;
         if (carrierStatus == Status.TRANSIT_TO_WELL || carrierStatus == Status.TRANSIT_TO_ISLAND)
@@ -1325,7 +1332,7 @@ public class BotCarrier extends Utils{
             rc.setIndicatorString(carrierStatus.toString() + " " + movementDestination);
         if (Clock.getBytecodesLeft() > 700){
             RobotInfo[] visibleEnemies = rc.senseNearbyRobots(-1, ENEMY_TEAM);
-            CombatUtils.sendGenericCombatLocation(visibleEnemies);
+            sendGenericCombatLocation(visibleEnemies);
         }
         if (Clock.getBytecodesLeft() > 700)
             Comms.surveyForIslands();
