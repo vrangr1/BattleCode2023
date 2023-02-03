@@ -47,6 +47,8 @@ public class BotLauncher extends CombatUtils{
     public static RobotInfo[] seenEnemyHQs;
     public static MapLocation savedWellLocation;
     public static MapLocation savedEnemyWellLocation;
+    public static MapLocation[] visitedTravelLocations = new MapLocation[3];
+    public static int visitedTravelIndex = 0;
     public static boolean waitAsDamaged = false;
     private static int[] actionEdges_x =  new int[] {-3, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 3};
     private static int[] actionEdges_y =  new int[] {-2, -1, 0, 1, 2, -3, 3, -3, 3, -3, 3, -3, 3, -3, 3, -2, -1, 0, 1, 2};
@@ -761,7 +763,8 @@ public class BotLauncher extends CombatUtils{
                 Comms.wipeThisLocationFromChannels(Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION, currentDestination);
             }
             MapLocation combatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
-            if (combatLocation != null){
+            if (combatLocation != null && !hasBeenTraveledTo(combatLocation)){
+                visitedTravelLocations[visitedTravelIndex++%visitedTravelLocations.length] = combatLocation;
                 currentDestination = combatLocation;
                 destinationFlag += "|fNCL1";
                 pathing.setNewDestination(currentDestination);
@@ -778,6 +781,13 @@ public class BotLauncher extends CombatUtils{
         return false;
     }
 
+    public static boolean hasBeenTraveledTo(MapLocation loc){
+        for (int i = 0; i < visitedTravelLocations.length; i++){
+            if (visitedTravelLocations[i] != null && visitedTravelLocations[i].equals(loc)) return true;
+        }
+        return false;
+    }
+
     /**
     * This will try to update the destination of the soldier so as to not make it go away from closer fights
     */
@@ -786,9 +796,12 @@ public class BotLauncher extends CombatUtils{
         MapLocation nearestCombatLocation = Comms.findNearestLocationOfThisTypeOutOfVision(rc.getLocation(), Comms.COMM_TYPE.COMBAT, Comms.SHAFlag.COMBAT_LOCATION);
         if (currentDestination == null || (nearestCombatLocation!= null && !rc.canSenseLocation(currentDestination) && 
             rc.getLocation().distanceSquaredTo(currentDestination) > rc.getLocation().distanceSquaredTo(nearestCombatLocation))){
-                currentDestination = nearestCombatLocation;
-                destinationFlag += "cCD";
-                launcherState = Status.MARCHING;
+                if (!hasBeenTraveledTo(nearestCombatLocation)){
+                    visitedTravelLocations[visitedTravelIndex++%visitedTravelLocations.length] = nearestCombatLocation;
+                    currentDestination = nearestCombatLocation;
+                    destinationFlag += "cCD";
+                    launcherState = Status.MARCHING;
+                }
         }
     }
 

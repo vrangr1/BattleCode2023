@@ -82,6 +82,7 @@ public class Pathing extends Utils {
         }
         if (rc.getRoundNum() - BIRTH_ROUND < 3 || nearbyRobotcount > 15 || Clock.getBytecodesLeft() < BYTECODE_REMAINING || (Nav.bugState == Nav.BugState.BUG && target.equals(Nav.dest))) {
             Nav.goTo(target);
+            destinationFlag+="$Bu1$";
             Utils.bytecodeCheck("PBN1 T:" + target+ "|Side "+ Nav.bugWallSide + "|StartDir " + Nav.bugLookStartDir);
             return;
         }
@@ -91,10 +92,12 @@ public class Pathing extends Utils {
         if (dir == null || !rc.canMove(dir) || isVisited(rc.getLocation().add(dir)) || !rc.sensePassability(rc.getLocation().add(dir)) || 
             rc.isLocationOccupied(rc.getLocation().add(dir))) {
             Nav.goTo(target);
+            destinationFlag+="$Bu2$";
             Utils.bytecodeCheck("PBN2 T:" + target + "|Side "+ Nav.bugWallSide + "|StartDir " + Nav.bugLookStartDir);
             addVisited(rc.getLocation());
         } else {
             moveTo(dir);
+            destinationFlag+="$BF1$";
         }
     }
     
